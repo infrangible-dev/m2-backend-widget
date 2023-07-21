@@ -1,0 +1,43 @@
+<?php
+
+use Magento\Framework\View\TemplateEngine\Php;
+use Infrangible\BackendWidget\Block\Grid\Fields;
+
+/**
+ * @author      Andreas Knollmann
+ * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+?>
+
+<?php /** @var Php $this */ ?>
+<?php /** @var Fields $block */ ?>
+
+<div class="data-grid-columns form-inline">
+    <div class="modal-body-content">
+        <?php foreach ($block->getFieldList() as $name => $label): ?>
+            <div class="data-grid-column admin__field-checkbox">
+                <div class="admin__field-control">
+                    <input type="checkbox" id="data-grid-column-<?php echo $name; ?>" name="columns[]" value="<?php echo $name; ?>" class="data-grid-column-checkbox">
+                    <label for="data-grid-column-<?php echo $name; ?>" class="data-grid-column-label"><?php echo $label; ?></label>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+    {
+        "table.data-grid": {
+            "infrangible/data-grid-fields": {
+                "formKey": "<?= $block->getFormKey(); ?>",
+                "ajaxUrl": "<?= $block->getAjaxUrl(); ?>",
+                "dataGridId": "<?= $block->getDataGridId(); ?>",
+                "jsObjectName": "<?= $block->getJsObjectName(); ?>",
+                "fieldList": <?= json_encode(array_keys($block->getFieldList())); ?>,
+                "groupByFieldList": <?= json_encode(array_keys($block->getGroupByFieldList())); ?>,
+                "activeGroupByFieldList": <?= json_encode($block->getActiveGroupByFieldList()); ?>
+            }
+        }
+    }
+</script>

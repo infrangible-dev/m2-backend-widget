@@ -1,0 +1,26 @@
+{
+    "require": [
+        "webserver_php_magento-module-demo.json",
+        "database_magento2-module-demo.json",
+        "elasticsearch_magento-module-demo.json",
+        "mailcatcher_magento.json",
+        "magento2-module-demo.json"
+    ],
+    "global": {
+        "systemName": "infrangible_m2_backend_widget",
+        "webServerType": "apache_php",
+        "webServerVersion": "2.4",
+        "phpVersion": "8.1",
+        "databaseType": "mysql",
+        "databaseVersion": "5.7",
+        "elasticsearchVersion": "7.9",
+        "mailCatcherVersion": "0.6",
+        "magentoVersion": "2.4.5",
+        "magentoEdition": "community"
+    },
+    "ws": {
+        "containerVolumes": [
+            "../src:/var/www/magento/htdocs/app/code/Infrangible/BackendWidget:www-data"
+        ]
+    }
+}

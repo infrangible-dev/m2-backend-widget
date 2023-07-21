@@ -1,0 +1,206 @@
+//noinspection LessUnresolvedVariable
+& when (@media-common = true) {
+    body.infrangible-backend-widget {
+        .admin__data-grid-header {
+            .admin__data-grid-header-row {
+                .admin__filter-actions {
+                    .action-reset, .action-filters, .action-columns {
+                        text-decoration: none;
+
+                        > span {
+                            color: #41362f;
+                        }
+
+                        //noinspection CssNoGenericFontName
+                        > span:before {
+                            margin-right: 0.7rem;
+                            font-family: 'Admin Icons';
+                            font-size: 1.8rem;
+                            font-weight: normal;
+                            font-style: normal;
+                            -webkit-font-smoothing: antialiased;
+                            line-height: 1;
+                            vertical-align: top;
+                            speak: none;
+                        }
+                    }
+
+                    .action-reset {
+                        > span:before {
+                            content: '\e642';
+                        }
+                    }
+
+                    .action-filters {
+                        > span:before {
+                            content: '\e605';
+                        }
+                    }
+
+                    .action-columns {
+                        > span:before {
+                            content: '\e610';
+                        }
+                    }
+
+                    .data-grid-columns {
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        .data-grid-fields-popup {
+            .modal-inner-wrap {
+                .modal-header {
+                    h1 {
+                        margin-right: 0;
+                        padding-bottom: 4px;
+                        border-bottom: 1px solid #41362f;
+                    }
+                }
+
+                .modal-content {
+                    .data-grid-columns {
+                        overflow: hidden;
+
+                        .data-grid-column {
+                            width: 180px;
+                            float: left;
+
+                            .admin__field-control {
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+
+                                .data-grid-column-label {
+                                    margin-left: 4px;
+                                    cursor: pointer;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .admin__data-grid-wrap {
+            .data-grid {
+                .data-grid-th, .data-grid-td, .data-grid-checkbox-cell {
+                    white-space: nowrap;
+                    vertical-align: middle !important;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .data-grid-th {
+                    i:before {
+                        margin-left: 0.7rem;
+                        //noinspection CssNoGenericFontName
+                        font-family: 'Admin Icons';
+                        font-size: 1.3rem;
+                        font-weight: normal;
+                        font-style: normal;
+                        -webkit-font-smoothing: antialiased;
+                        vertical-align: top;
+                        speak: none;
+                        content: '\e608';
+                        color: #aeb6bc;
+                    }
+
+                    i.active:before {
+                        color: #fff;
+                    }
+                }
+
+                .data-grid-filters:not(.active) {
+                    display: none;
+                }
+            }
+        }
+
+        .form-inline {
+            .admin__fieldset {
+                .admin__field.read-only {
+                    .admin__field-control {
+                        input {
+                            border-color: transparent;
+                            padding-right: inherit;
+                        }
+
+                        input + button {
+                            display: none;
+                        }
+
+                        textarea {
+                            border-color: transparent;
+                        }
+
+                        select {
+                            appearance: none;
+                            background-image: none;
+                            border-color: transparent;
+                            cursor: text;
+                        }
+                    }
+                }
+            }
+
+            .admin__field.read-only._required {
+                > .admin__field-label {
+                    span:after {
+                        display: none;
+                    }
+                }
+            }
+
+            .admin__field-checkbox, .admin__field-button, .admin__field-file {
+                .admin__field-control {
+                    line-height: 3.2rem;
+                }
+            }
+
+            .admin__field-checkbox {
+                .admin__field-control {
+                    //noinspection CssNoGenericFontName
+                    input:before {
+                        content: '';
+                        width: 1.6rem;
+                        height: 1.6rem;
+                        float: left;
+                        background-color: #ffffff;
+                        border-radius: 1px;
+                        border: 1px solid #adadad;
+                        vertical-align: top;
+                        text-align: center;
+                        font-family: 'Admin Icons';
+                        font-size: 0;
+                        line-height: 1;
+                        font-style: normal;
+                        font-weight: normal;
+                        color: transparent;
+                        transition: font-size 0.1s ease-out, color 0.1s ease-out, border-color 0.1s linear;
+                        -webkit-font-smoothing: antialiased;
+                        speak: none;
+                        cursor: pointer;
+                    }
+
+                    input:checked:before {
+                        content: '\e62d';
+                        font-size: 1.1rem;
+                        line-height: 125%;
+                        color: #514943;
+                    }
+                }
+            }
+
+            .admin__field-button {
+                .admin__field-control {
+                    input {
+                        margin-left: 1rem;
+                    }
+                }
+            }
+        }
+    }
+}
