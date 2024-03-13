@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
+use Infrangible\BackendWidget\Block\Grid\Container;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Result\Page;
-use Infrangible\BackendWidget\Block\Grid\Container;
 
 /**
  * @author      Andreas Knollmann
@@ -44,33 +44,35 @@ abstract class Index
         /** @var AbstractBlock $block */
         $block = $this->_view->getLayout()->createBlock($this->getGridBlockType(), '', [
             'data' => [
-                'module_key'             => $this->getModuleKey(),
-                'object_name'            => $this->getObjectName(),
-                'object_field'           => $this->getObjectField(),
-                'object_registry_key'    => $this->getObjectRegistryKey(),
-                'title'                  => $this->getTitle(),
-                'allow_add'              => $this->allowAdd(),
-                'allow_edit'             => $this->allowEdit(),
-                'allow_view'             => $this->allowView(),
-                'allow_delete'           => $this->allowDelete(),
-                'allow_export'           => $this->allowExport(),
-                'model_class'            => $this->getModelClass(),
-                'add_url_route'          => $this->getAddUrlRoute(),
-                'add_url_params'         => $this->getAddUrlParams(),
-                'grid_url_route'         => $this->getGridUrlRoute(),
-                'grid_url_params'        => $this->getGridUrlParams(),
-                'edit_url_route'         => $this->getEditUrlRoute(),
-                'edit_url_params'        => $this->getEditUrlParams(),
-                'view_url_route'         => $this->getViewUrlRoute(),
-                'view_url_params'        => $this->getViewUrlParams(),
-                'delete_url_route'       => $this->getDeleteUrlRoute(),
-                'delete_url_params'      => $this->getDeleteUrlParams(),
-                'mass_delete_url_route'  => $this->getMassDeleteUrlRoute(),
-                'mass_delete_url_params' => $this->getMassDeleteUrlParams(),
-                'mass_export_url_route'  => $this->getMassExportUrlRoute(),
-                'mass_export_url_params' => $this->getMassExportUrlParams(),
-                'back_url_route'         => $this->getBackUrlRoute(),
-                'back_url_params'        => $this->getBackUrlParams()
+                'grid_content_block_class_name' => $this->getGridContentBlockClass(),
+                'module_key'                    => $this->getModuleKey(),
+                'object_name'                   => $this->getObjectName(),
+                'object_field'                  => $this->getObjectField(),
+                'object_registry_key'           => $this->getObjectRegistryKey(),
+                'title'                         => $this->getTitle(),
+                'allow_add'                     => $this->allowAdd(),
+                'allow_edit'                    => $this->allowEdit(),
+                'allow_view'                    => $this->allowView(),
+                'allow_delete'                  => $this->allowDelete(),
+                'allow_export'                  => $this->allowExport(),
+                'model_class'                   => $this->getModelClass(),
+                'collection_class'              => $this->getCollectionClass(),
+                'add_url_route'                 => $this->getAddUrlRoute(),
+                'add_url_params'                => $this->getAddUrlParams(),
+                'grid_url_route'                => $this->getGridUrlRoute(),
+                'grid_url_params'               => $this->getGridUrlParams(),
+                'edit_url_route'                => $this->getEditUrlRoute(),
+                'edit_url_params'               => $this->getEditUrlParams(),
+                'view_url_route'                => $this->getViewUrlRoute(),
+                'view_url_params'               => $this->getViewUrlParams(),
+                'delete_url_route'              => $this->getDeleteUrlRoute(),
+                'delete_url_params'             => $this->getDeleteUrlParams(),
+                'mass_delete_url_route'         => $this->getMassDeleteUrlRoute(),
+                'mass_delete_url_params'        => $this->getMassDeleteUrlParams(),
+                'mass_export_url_route'         => $this->getMassExportUrlRoute(),
+                'mass_export_url_params'        => $this->getMassExportUrlParams(),
+                'back_url_route'                => $this->getBackUrlRoute(),
+                'back_url_params'               => $this->getBackUrlParams()
             ]
         ]);
 
@@ -223,5 +225,19 @@ abstract class Index
     protected function getBackUrlParams(): array
     {
         return [];
+    }
+
+    protected function getGridContentBlockClass(): string
+    {
+        return sprintf(
+            '%s\Block\Adminhtml\%s\Grid',
+            str_replace('_', '\\', $this->getModuleKey()),
+            str_replace('_', '\\', $this->getObjectName())
+        );
+    }
+
+    protected function getCollectionClass(): ?string
+    {
+        return null;
     }
 }

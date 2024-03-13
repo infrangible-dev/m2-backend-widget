@@ -91,6 +91,9 @@ abstract class Grid
     protected $modelClass;
 
     /** @var string */
+    protected $collectionClass;
+
+    /** @var string */
     protected $gridUrlRoute;
 
     /** @var array */
@@ -179,6 +182,7 @@ abstract class Grid
         $this->allowDelete = $arrays->getValue($data, 'allow_delete', true);
         $this->allowExport = $arrays->getValue($data, 'allow_export', true);
         $this->modelClass = $arrays->getValue($data, 'model_class');
+        $this->collectionClass = $arrays->getValue($data, 'collection_class');
         $this->gridUrlRoute = $arrays->getValue($data, 'grid_url_route', '*/*/grid');
         $this->gridUrlParams = $arrays->getValue($data, 'grid_url_params', []);
         $this->editUrlRoute = $arrays->getValue($data, 'edit_url_route', '*/*/edit');
@@ -306,14 +310,33 @@ abstract class Grid
      */
     protected function _prepareCollection(): Extended
     {
-        if (!$this->modelClass || !class_exists($this->modelClass)) {
-            throw new Exception(sprintf('Could not find model class: %s', $this->modelClass));
+        if ($this->collectionClass) {
+            if (!class_exists($this->collectionClass)) {
+                throw new Exception(sprintf('Could not find collection class: %s', $this->collectionClass));
+            }
+
+            $collection = $this->universalFactory->create($this->collectionClass);
+        } else {
+            if (!$this->modelClass || !class_exists($this->modelClass)) {
+                throw new Exception(sprintf('Could not find model class: %s', $this->modelClass));
+            }
+
+            $model = $this->universalFactory->create($this->modelClass);
+
+            if (!$model instanceof AbstractModel) {
+                throw new Exception(
+                    sprintf('Model class: %s does not implement class: %s', $this->modelClass, AbstractModel::class)
+                );
+            }
+
+            $collection = $model->getCollection();
         }
 
-        /** @var AbstractModel $model */
-        $model = $this->universalFactory->create($this->modelClass);
-
-        $collection = $model->getCollection();
+        if (!$collection instanceof AbstractDb) {
+            throw new Exception(
+                sprintf('Collection class: %s does not implement class: %s', get_class($collection), AbstractDb::class)
+            );
+        }
 
         $this->prepareCollection($collection);
         $this->followUpCollection($collection);

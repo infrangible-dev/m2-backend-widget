@@ -19,6 +19,9 @@ class Container
     extends Grid\Container
 {
     /** @var string */
+    protected $gridContentBlockClassName;
+
+    /** @var string */
     protected $moduleKey;
 
     /** @var string */
@@ -44,6 +47,9 @@ class Container
 
     /** @var string */
     protected $modelClass;
+
+    /** @var string */
+    protected $collectionClass;
 
     /** @var string */
     protected $addUrlRoute;
@@ -100,6 +106,7 @@ class Container
      */
     public function __construct(Context $context, Arrays $arrays, array $data = [])
     {
+        $this->gridContentBlockClassName = $arrays->getValue($data, 'grid_content_block_class_name');
         $this->moduleKey = $arrays->getValue($data, 'module_key', 'adminhtml');
         $this->objectName = $arrays->getValue($data, 'object_name', 'empty');
         $this->objectField = $arrays->getValue($data, 'object_field', 'id');
@@ -108,7 +115,8 @@ class Container
         $this->allowView = $arrays->getValue($data, 'allow_view', true);
         $this->allowDelete = $arrays->getValue($data, 'allow_delete', true);
         $this->allowExport = $arrays->getValue($data, 'allow_export', true);
-        $this->modelClass = $arrays->getValue($data, 'model_class', true);
+        $this->modelClass = $arrays->getValue($data, 'model_class');
+        $this->collectionClass = $arrays->getValue($data, 'collection_class');
         $this->addUrlRoute = $arrays->getValue($data, 'add_url_route', '*/*/add');
         $this->addUrlParams = $arrays->getValue($data, 'add_url_params', []);
         $this->gridUrlRoute = $arrays->getValue($data, 'grid_url_route', '*/*/grid');
@@ -127,7 +135,7 @@ class Container
         $this->backUrlParams = $arrays->getValue($data, 'back_url_params', []);
 
         $this->_blockGroup = $this->moduleKey;
-        $this->_controller = sprintf('Adminhtml_%s', $this->objectName);
+        $this->_controller = sprintf('Adminhtml_%s', str_replace('\\', '_', $this->objectName));
         $this->_headerText =
             sprintf('%s > %s', $arrays->getValue($data, 'title', 'Container Widget Header'), __('Manage'));
 
@@ -148,17 +156,13 @@ class Container
      */
     protected function _prepareLayout(): \Magento\Backend\Block\Widget\Container
     {
-        $blockClassName = sprintf(
-            '%s\Block\%s\Grid',
-            str_replace('_', '\\', $this->_blockGroup),
-            str_replace('_', '\\', $this->_controller)
-        );
-
-        if (!class_exists($blockClassName)) {
-            throw new Exception(sprintf('Could not find block class: %s', $blockClassName));
+        if (!class_exists($this->gridContentBlockClassName)) {
+            throw new Exception(
+                sprintf('Could not find grid content block class: %s', $this->gridContentBlockClassName)
+            );
         }
 
-        $block = $this->getLayout()->createBlock($blockClassName, $this->_controller.'.grid', [
+        $block = $this->getLayout()->createBlock($this->gridContentBlockClassName, $this->_controller.'.grid', [
             'data' => [
                 'module_key'             => $this->moduleKey,
                 'object_name'            => $this->objectName,
@@ -168,6 +172,7 @@ class Container
                 'allow_delete'           => $this->allowDelete,
                 'allow_export'           => $this->allowExport,
                 'model_class'            => $this->modelClass,
+                'collection_class'       => $this->collectionClass,
                 'grid_url_route'         => $this->gridUrlRoute,
                 'grid_url_params'        => $this->gridUrlParams,
                 'edit_url_route'         => $this->editUrlRoute,

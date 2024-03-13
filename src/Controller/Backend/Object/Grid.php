@@ -42,6 +42,7 @@ abstract class Grid
                 'allow_delete'           => $this->allowDelete(),
                 'allow_export'           => $this->allowExport(),
                 'model_class'            => $this->getModelClass(),
+                'collection_class'       => $this->getCollectionClass(),
                 'grid_url_route'         => $this->getGridUrlRoute(),
                 'grid_url_params'        => $this->getGridUrlParams(),
                 'edit_url_route'         => $this->getEditUrlRoute(),
@@ -172,5 +173,10 @@ abstract class Grid
     protected function getMassExportUrlParams(): array
     {
         return [];
+    }
+
+    protected function getCollectionClass(): ?string
+    {
+        return null;
     }
 }
