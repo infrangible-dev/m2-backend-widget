@@ -1,42 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Block\Grid\Column\Renderer;
 
+use FeWeDev\Base\Variables;
+use Infrangible\Core\Helper\Customer;
 use Magento\Backend\Block\Context;
 use Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer;
 use Magento\Framework\DataObject;
-use Tofex\Help\Variables;
-use Infrangible\Core\Helper\Customer;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class CustomerGroup
     extends AbstractRenderer
 {
     /** @var Variables */
-    protected $variableHelper;
+    protected $variables;
 
     /** @var Customer */
     protected $customerHelper;
 
     /**
      * @param Context   $context
-     * @param Variables $variableHelper
+     * @param Variables $variables
      * @param Customer  $customerHelper
      * @param array     $data
      */
     public function __construct(
         Context $context,
-        Variables $variableHelper,
+        Variables $variables,
         Customer $customerHelper,
-        array $data = [])
-    {
+        array $data = []
+    ) {
         parent::__construct($context, $data);
 
-        $this->variableHelper = $variableHelper;
+        $this->variables = $variables;
         $this->customerHelper = $customerHelper;
     }
 
@@ -53,7 +55,7 @@ class CustomerGroup
 
         $categoryGroupCodes = [];
 
-        if ( ! $this->variableHelper->isEmpty($customerGroupIds)) {
+        if (!$this->variables->isEmpty($customerGroupIds)) {
             $customerGroupIds = explode(',', $customerGroupIds);
 
             foreach ($customerGroupIds as $customerGroupId) {

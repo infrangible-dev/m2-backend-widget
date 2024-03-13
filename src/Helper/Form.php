@@ -1,29 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Helper;
 
 use Exception;
-use IntlDateFormatter;
-use Magento\Backend\Block\Store\Switcher\Form\Renderer\Fieldset\Element;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\Product\Type;
-use Magento\Cms\Model\Wysiwyg\Config;
-use Magento\Config\Model\Config\Source\Website;
-use Magento\Config\Model\Config\Source\Yesno;
-use Magento\Customer\Model\Group;
-use Magento\Customer\Model\ResourceModel\Address\Attribute\Source\Region;
-use Magento\Customer\Model\ResourceModel\Group\Collection;
-use Magento\Directory\Model\Config\Source\Country;
-use Magento\Framework\Data\Form\Element\Fieldset;
-use Magento\Framework\Data\FormFactory;
-use Magento\Framework\Data\OptionSourceInterface;
-use Magento\Framework\Escaper;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Model\AbstractModel;
-use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use Magento\Framework\View\LayoutInterface;
-use Magento\Store\Model\System\Store;
-use Magento\Theme\Model\Theme\Source\Theme;
+use FeWeDev\Base\Arrays;
+use FeWeDev\Base\Variables;
 use Infrangible\BackendWidget\Block\Config\Form\DateIso;
 use Infrangible\BackendWidget\Block\Config\Form\Value;
 use Infrangible\BackendWidget\Block\Config\Form\Wysiwyg;
@@ -45,21 +28,40 @@ use Infrangible\Core\Model\Config\Source\EntityType;
 use Infrangible\Core\Model\Config\Source\Operator;
 use Infrangible\Core\Model\Config\Source\Payment\ActiveMethods;
 use Infrangible\Core\Model\Config\Source\TypeId;
-use Tofex\Help\Arrays;
-use Tofex\Help\Variables;
+use IntlDateFormatter;
+use Magento\Backend\Block\Store\Switcher\Form\Renderer\Fieldset\Element;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Type;
+use Magento\Cms\Model\Wysiwyg\Config;
+use Magento\Config\Model\Config\Source\Website;
+use Magento\Config\Model\Config\Source\Yesno;
+use Magento\Customer\Model\Group;
+use Magento\Customer\Model\ResourceModel\Address\Attribute\Source\Region;
+use Magento\Customer\Model\ResourceModel\Group\Collection;
+use Magento\Directory\Model\Config\Source\Country;
+use Magento\Framework\Data\Form\Element\Fieldset;
+use Magento\Framework\Data\FormFactory;
+use Magento\Framework\Data\OptionSourceInterface;
+use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Framework\View\LayoutInterface;
+use Magento\Store\Model\System\Store;
+use Magento\Theme\Model\Theme\Source\Theme;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Form
 {
     /** @var Variables */
-    protected $variableHelper;
+    protected $variables;
 
     /** @var Arrays */
-    protected $arrayHelper;
+    protected $arrays;
 
     /** @var Template */
     protected $templateHelper;
@@ -158,43 +160,43 @@ class Form
     protected $escaper;
 
     /**
-     * @param Variables                                     $variableHelper
-     * @param Arrays                                        $arrayHelper
-     * @param Template                                      $templateHelper
-     * @param Url                                           $urlHelper
-     * @param Customer                                      $customerHelper
-     * @param \Infrangible\Core\Helper\Attribute                  $attributeHelper
-     * @param Instances                                     $instanceHelper
-     * @param Session                                       $adminhtmlSession
-     * @param FormFactory                                   $formFactory
-     * @param Yesno                                         $sourceYesNo
-     * @param Website                                       $sourceWebsite
-     * @param Store                                         $sourceStore
+     * @param Variables                          $variables
+     * @param Arrays                             $arrays
+     * @param Template                           $templateHelper
+     * @param Url                                $urlHelper
+     * @param Customer                           $customerHelper
+     * @param \Infrangible\Core\Helper\Attribute $attributeHelper
+     * @param Instances                          $instanceHelper
+     * @param Session                            $adminhtmlSession
+     * @param FormFactory                        $formFactory
+     * @param Yesno                              $sourceYesNo
+     * @param Website                            $sourceWebsite
+     * @param Store                              $sourceStore
      * @param \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin
-     * @param CmsBlock                                      $sourceCmsBlock
-     * @param CmsPage                                       $sourceCmsPage
-     * @param TypeId                                        $sourceTypeIds
-     * @param Categories                                    $sourceCategories
-     * @param Operator                                      $sourceOperator
-     * @param Country                                       $sourceCountry
-     * @param Region                                        $sourceRegion
-     * @param ActiveMethods                                 $sourcePaymentActiveMethods
-     * @param Attribute                                     $sourceAttributes
-     * @param AttributeSet                                  $sourceAttributeSets
-     * @param EntityType                                    $sourceEntityTypes
-     * @param ProductAttributeCode                          $sourceProductAttributeCode
-     * @param CustomerAttributeCode                         $sourceCustomerAttributeCode
-     * @param AddressAttributeCode                          $sourceAddressAttributeCode
-     * @param SortBy                                        $sourceAttributeSortBy
-     * @param Theme                                         $sourceThemes
-     * @param TimezoneInterface                             $localeDate
-     * @param Type                                          $productType
-     * @param Config                                        $wysiwygConfig
-     * @param Escaper                                       $escaper
+     * @param CmsBlock                                            $sourceCmsBlock
+     * @param CmsPage                                             $sourceCmsPage
+     * @param TypeId                                              $sourceTypeIds
+     * @param Categories                                          $sourceCategories
+     * @param Operator                                            $sourceOperator
+     * @param Country                                             $sourceCountry
+     * @param Region                                              $sourceRegion
+     * @param ActiveMethods                                       $sourcePaymentActiveMethods
+     * @param Attribute                                           $sourceAttributes
+     * @param AttributeSet                                        $sourceAttributeSets
+     * @param EntityType                                          $sourceEntityTypes
+     * @param ProductAttributeCode                                $sourceProductAttributeCode
+     * @param CustomerAttributeCode                               $sourceCustomerAttributeCode
+     * @param AddressAttributeCode                                $sourceAddressAttributeCode
+     * @param SortBy                                              $sourceAttributeSortBy
+     * @param Theme                                               $sourceThemes
+     * @param TimezoneInterface                                   $localeDate
+     * @param Type                                                $productType
+     * @param Config                                              $wysiwygConfig
+     * @param Escaper                                             $escaper
      */
     public function __construct(
-        Variables $variableHelper,
-        Arrays $arrayHelper,
+        Variables $variables,
+        Arrays $arrays,
         Template $templateHelper,
         Url $urlHelper,
         Customer $customerHelper,
@@ -225,16 +227,15 @@ class Form
         TimezoneInterface $localeDate,
         Type $productType,
         Config $wysiwygConfig,
-        Escaper $escaper)
-    {
-        $this->variableHelper = $variableHelper;
-        $this->arrayHelper = $arrayHelper;
+        Escaper $escaper
+    ) {
+        $this->variables = $variables;
+        $this->arrays = $arrays;
         $this->templateHelper = $templateHelper;
         $this->urlHelper = $urlHelper;
         $this->customerHelper = $customerHelper;
         $this->attributeHelper = $attributeHelper;
         $this->instanceHelper = $instanceHelper;
-
         $this->adminhtmlSession = $adminhtmlSession;
         $this->formFactory = $formFactory;
         $this->sourceYesNo = $sourceYesNo;
@@ -257,7 +258,6 @@ class Form
         $this->sourceAddressAttributeCode = $sourceAddressAttributeCode;
         $this->sourceAttributeSortBy = $sourceAttributeSortBy;
         $this->sourceThemes = $sourceThemes;
-
         $this->customerGroupCollection = $this->customerHelper->getCustomerGroupCollection();
         $this->dateFormatIso = $localeDate->getDateTimeFormat(IntlDateFormatter::MEDIUM);
         $this->productType = $productType;
@@ -284,17 +284,16 @@ class Form
         string $formId = 'edit_form',
         string $htmlIdPrefix = null,
         AbstractModel $object = null,
-        string $objectField = null): \Magento\Framework\Data\Form
-    {
+        string $objectField = null
+    ): \Magento\Framework\Data\Form {
         if (empty($objectField)) {
             $objectField = 'id';
         }
 
-        /** @var \Magento\Framework\Data\Form $form */
         $form = $this->formFactory->create();
 
         if ($object && $object->getId()) {
-            $saveUrlParams[ $objectField ] = $object->getId();
+            $saveUrlParams[$objectField] = $object->getId();
         }
 
         $form->setData('id', $formId);
@@ -306,7 +305,7 @@ class Form
             $form->setData('enctype', 'multipart/form-data');
         }
 
-        if ( ! $this->variableHelper->isEmpty($htmlIdPrefix)) {
+        if (!$this->variables->isEmpty($htmlIdPrefix)) {
             $form->setData('html_id_prefix', sprintf('%s_', $htmlIdPrefix));
         }
 
@@ -327,27 +326,32 @@ class Form
         string $objectFieldName,
         $defaultValue = null,
         AbstractModel $object = null,
-        string $splitObjectValueSeparator = null)
-    {
-        $formData = $this->adminhtmlSession->getData(sprintf('%s_form_%s', $objectRegistryKey,
-            $object && $object->getId() ? $object->getId() : 'add'));
+        string $splitObjectValueSeparator = null
+    ) {
+        $formData = $this->adminhtmlSession->getData(
+            sprintf(
+                '%s_form_%s',
+                $objectRegistryKey,
+                $object && $object->getId() ? $object->getId() : 'add'
+            )
+        );
 
         if (is_object($formData) && method_exists($formData, 'toArray')) {
             $formData = $formData->toArray();
         }
 
-        if ($this->variableHelper->isEmpty($formData)) {
+        if ($this->variables->isEmpty($formData)) {
             $formData = [];
         }
 
         if (array_key_exists($objectFieldName, $formData)) {
-            return $this->arrayHelper->getValue($formData, $objectFieldName);
+            return $this->arrays->getValue($formData, $objectFieldName);
         }
 
         if ($object instanceof AbstractModel && $object->getId()) {
             $objectValue = $object->getDataUsingMethod($objectFieldName);
 
-            if ( ! $this->variableHelper->isEmpty($splitObjectValueSeparator)) {
+            if (!$this->variables->isEmpty($splitObjectValueSeparator)) {
                 $objectValue = explode(',', $objectValue);
             }
 
@@ -377,8 +381,8 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false)
-    {
+        $after = false
+    ) {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -387,20 +391,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -427,10 +431,19 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addTextField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $object, $required, $readOnly,
-            $disabled, $after);
+        bool $disabled = false
+    ) {
+        $this->addTextField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $object,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
     }
 
     /**
@@ -451,8 +464,8 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -461,20 +474,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -501,8 +514,8 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         $config = [
             'name'               => $objectFieldName,
             'label'              => $label,
@@ -512,20 +525,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -556,8 +569,8 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false)
-    {
+        $after = false
+    ) {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -568,20 +581,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -614,8 +627,8 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false)
-    {
+        $after = false
+    ) {
         /** @var OptionSourceInterface $optionsClass */
         $optionsClass = $this->instanceHelper->getSingleton($className);
 
@@ -625,8 +638,19 @@ class Form
             throw new Exception(sprintf('Options class: %s does not implement method: toOptions', $className));
         }
 
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $options, $defaultValue,
-            $object, $required, $readOnly, $disabled, $after);
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $options,
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
     }
 
     /**
@@ -651,8 +675,8 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -663,20 +687,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -701,10 +725,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceYesNo->toOptionArray(), 1, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toOptionArray(),
+            1,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -727,10 +761,21 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceYesNo->toOptionArray(), 1, $object, $required, $readOnly, $disabled, $after);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toOptionArray(),
+            1,
+            $object,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
     }
 
     /**
@@ -753,10 +798,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceYesNo->toOptionArray(), $defaultValue, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toOptionArray(),
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -775,9 +830,9 @@ class Form
         string $label = null,
         AbstractModel $object = null,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $disabled = false
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Website');
         }
 
@@ -790,20 +845,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -826,10 +881,16 @@ class Form
         string $label = null,
         AbstractModel $object = null,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addWebsiteMultiselectFieldWithValue($fieldSet, $objectFieldName,
-            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object), $label, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addWebsiteMultiselectFieldWithValue(
+            $fieldSet,
+            $objectFieldName,
+            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            $label,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -846,9 +907,9 @@ class Form
         $value = null,
         string $label = null,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $disabled = false
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Website');
         }
 
@@ -861,20 +922,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -901,8 +962,8 @@ class Form
         AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false,
-        bool $all = true)
-    {
+        bool $all = true
+    ) {
         if (empty($label)) {
             $label = __('Store View');
         }
@@ -917,20 +978,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -962,10 +1023,17 @@ class Form
         string $label = null,
         AbstractModel $object = null,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addStoreMultiselectFieldWithValue($layout, $fieldSet, $objectFieldName, $label,
-            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object), $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addStoreMultiselectFieldWithValue(
+            $layout,
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -984,8 +1052,8 @@ class Form
         string $label = null,
         $value = null,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         if (empty($label)) {
             $label = __('Store View');
         }
@@ -1000,20 +1068,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -1047,8 +1115,8 @@ class Form
         AbstractModel $object = null,
         bool $required = true,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         if (empty($label)) {
             $label = __('Store View');
         }
@@ -1058,25 +1126,25 @@ class Form
             'label'    => $label,
             'title'    => $label,
             'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
-            'values'   => $this->sourceStoreWithAdmin->getStoreValuesForForm(false, false),
+            'values'   => $this->sourceStoreWithAdmin->getStoreValuesForForm(),
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -1110,14 +1178,24 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         if (empty($label)) {
             $label = __('Block');
         }
 
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceCmsBlock->getAllOptions(), $defaultValue, $object, $required, $readOnly, $disabled);
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceCmsBlock->getAllOptions(),
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1140,14 +1218,24 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         if (empty($label)) {
             $label = __('Page');
         }
 
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceCmsPage->getAllOptions(), $defaultValue, $object, $required, $readOnly, $disabled);
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceCmsPage->getAllOptions(),
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1170,10 +1258,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceTypeIds->toOptionArray(), $defaultValue, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceTypeIds->toOptionArray(),
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1194,10 +1292,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->templateHelper->getAllTemplates(), null, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->templateHelper->getAllTemplates(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1218,10 +1326,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsMultiSelectField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceCategories->toOptionArray(), null, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsMultiSelectField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceCategories->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1242,10 +1360,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceOperator->toOptionArray(), '==', $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceOperator->toOptionArray(),
+            '==',
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1266,8 +1394,8 @@ class Form
         AbstractModel $object = null,
         bool $required = true,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
+        bool $disabled = false
+    ) {
         // convert the date to local time
         $fieldSet->addType('date_iso', DateIso::class);
 
@@ -1279,20 +1407,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -1309,8 +1437,8 @@ class Form
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        bool $required = true)
-    {
+        bool $required = true
+    ) {
         $fieldSet->addField($objectFieldName, 'file', [
             'name'      => $objectFieldName,
             'label'     => $label,
@@ -1338,10 +1466,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceCountry->toOptionArray(false), null, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceCountry->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1362,10 +1500,20 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceRegion->toOptionArray(), null, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceRegion->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1380,8 +1528,8 @@ class Form
         string $objectFieldName,
         string $label,
         AbstractModel $object = null,
-        bool $required = false)
-    {
+        bool $required = false
+    ) {
         $fieldSet->addField($objectFieldName, 'image', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1408,9 +1556,9 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $disabled = false
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group');
         }
 
@@ -1424,8 +1572,18 @@ class Form
             $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => $customerGroup->getCode()];
         }
 
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $customerGroups, null, $object,
-            $required, $readOnly, $disabled);
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $customerGroups,
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1446,9 +1604,9 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $disabled = false
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group');
         }
 
@@ -1462,8 +1620,18 @@ class Form
             $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => $customerGroup->getCode()];
         }
 
-        $this->addOptionsMultiSelectField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $customerGroups,
-            null, $object, $required, $readOnly, $disabled);
+        $this->addOptionsMultiSelectField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $customerGroups,
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1490,17 +1658,27 @@ class Form
         bool $readOnly = false,
         bool $disabled = false,
         bool $allStores = false,
-        bool $withDefault = true)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $withDefault = true
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Payment Method');
         }
 
         $this->sourcePaymentActiveMethods->setAllStores($allStores);
         $this->sourcePaymentActiveMethods->setWithDefault($withDefault);
 
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourcePaymentActiveMethods->toOptionArray(), null, $object, $required, $readOnly, $disabled);
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourcePaymentActiveMethods->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 
     /**
@@ -1521,9 +1699,9 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $disabled = false
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Apply To');
         }
 
@@ -1540,20 +1718,20 @@ class Form
         ];
 
         if ($readOnly) {
-            $config[ 'readonly' ] = true;
+            $config['readonly'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' read-only';
+                $config['css_class'] .= ' read-only';
             } else {
-                $config[ 'css_class' ] = 'read-only';
+                $config['css_class'] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -1572,8 +1750,8 @@ class Form
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null)
-    {
+        AbstractModel $object = null
+    ) {
         $fieldSet->addType('wysiwyg', Wysiwyg::class);
 
         $fieldSet->addField($objectFieldName, 'wysiwyg', [
@@ -1595,8 +1773,8 @@ class Form
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null)
-    {
+        AbstractModel $object = null
+    ) {
         $fieldSet->addField($objectFieldName, 'editor', [
             'name'   => $objectFieldName,
             'label'  => $label,
@@ -1629,8 +1807,8 @@ class Form
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1660,8 +1838,8 @@ class Form
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $fieldSet->addField($objectFieldName, 'multiselect', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1691,8 +1869,8 @@ class Form
         string $label,
         array $targetFieldNames,
         bool $required = false,
-        bool $multiSelect = false)
-    {
+        bool $multiSelect = false
+    ) {
         $onChangeFieldId = sprintf('%s_%s', $objectName, $objectFieldName);
 
         $onChange = [];
@@ -1733,8 +1911,8 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = false,
-        bool $multiSelect = false)
-    {
+        bool $multiSelect = false
+    ) {
         $valueOptions = [];
 
         if ($object->getId()) {
@@ -1747,15 +1925,31 @@ class Form
             }
         }
 
-        if ($this->variableHelper->isEmpty($valueOptions)) {
+        if ($this->variables->isEmpty($valueOptions)) {
             $this->addTextField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $object, $required);
         } else {
             if ($multiSelect) {
-                $this->addOptionsMultiSelectField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-                    $valueOptions, null, $object, $required);
+                $this->addOptionsMultiSelectField(
+                    $fieldSet,
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    $label,
+                    $valueOptions,
+                    null,
+                    $object,
+                    $required
+                );
             } else {
-                $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $valueOptions, null,
-                    $object, $required);
+                $this->addOptionsField(
+                    $fieldSet,
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    $label,
+                    $valueOptions,
+                    null,
+                    $object,
+                    $required
+                );
             }
         }
     }
@@ -1782,14 +1976,18 @@ class Form
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
             'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAttributeSets->toOptionArrayWithEntities($customer, $address, $category,
-                $product),
+            'values'   => $this->sourceAttributeSets->toOptionArrayWithEntities(
+                $customer,
+                $address,
+                $category,
+                $product
+            ),
             'required' => $required
         ]);
     }
@@ -1816,8 +2014,8 @@ class Form
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1841,8 +2039,8 @@ class Form
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        bool $required = false)
-    {
+        bool $required = false
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1866,8 +2064,8 @@ class Form
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        bool $required = false)
-    {
+        bool $required = false
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1891,8 +2089,8 @@ class Form
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        bool $required = false)
-    {
+        bool $required = false
+    ) {
         $fieldSet->addField($objectFieldName, 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1918,8 +2116,8 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = false,
-        bool $multiSelect = false)
-    {
+        bool $multiSelect = false
+    ) {
         $fieldSet->addField($objectFieldName, $multiSelect ? 'multiselect' : 'select', [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -1939,11 +2137,15 @@ class Form
     protected function getUpdateEavAttributeFormElementJs(
         string $sourceElementId,
         string $targetElementId,
-        bool $multiSelect = false): string
-    {
-        return sprintf('updateEavAttributeFormElement(\'%s\', \'%s\', \'%s\', %s);',
-            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/attribute_option/values')), $sourceElementId,
-            $targetElementId, var_export($multiSelect, true));
+        bool $multiSelect = false
+    ): string {
+        return sprintf(
+            'updateEavAttributeFormElement(\'%s\', \'%s\', \'%s\', %s);',
+            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/attribute_option/values')),
+            $sourceElementId,
+            $targetElementId,
+            var_export($multiSelect, true)
+        );
     }
 
     /**
@@ -1964,8 +2166,8 @@ class Form
         $value,
         AbstractModel $object = null,
         bool $disabled = false,
-        $after = false)
-    {
+        $after = false
+    ) {
         $fieldValue = $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object);
 
         $config = [
@@ -1978,11 +2180,11 @@ class Form
         ];
 
         if ($disabled) {
-            $config[ 'disabled' ] = true;
+            $config['disabled'] = true;
             if (array_key_exists('css_class', $config)) {
-                $config[ 'css_class' ] .= ' disabled';
+                $config['css_class'] .= ' disabled';
             } else {
-                $config[ 'css_class' ] = 'disabled';
+                $config['css_class'] = 'disabled';
             }
         }
 
@@ -2003,8 +2205,8 @@ class Form
         string $objectFieldName,
         string $label,
         AbstractModel $object = null,
-        $after = false)
-    {
+        $after = false
+    ) {
         $fieldSet->addType('value', Value::class);
 
         $config = [
@@ -2031,8 +2233,8 @@ class Form
         string $label,
         string $value,
         $onClick = null,
-        $dataMageInit = null)
-    {
+        $dataMageInit = null
+    ) {
         $config = [
             'name'      => $objectFieldName,
             'label'     => $label,
@@ -2041,11 +2243,11 @@ class Form
         ];
 
         if ($dataMageInit) {
-            $config[ 'onclick' ] = $onClick;
+            $config['onclick'] = $onClick;
         }
 
         if ($dataMageInit) {
-            $config[ 'data-mage-init' ] = $dataMageInit;
+            $config['data-mage-init'] = $dataMageInit;
         }
 
         $fieldSet->addField($objectFieldName, 'button', $config);
@@ -2071,23 +2273,25 @@ class Form
         string $value,
         string $urlPath,
         array $urlParameters = [],
-        AbstractModel $object = null)
-    {
+        AbstractModel $object = null
+    ) {
         if ($object) {
             $objectId = $object->getDataUsingMethod($objectField);
 
             if ($objectId) {
-                $urlParameters[ $objectField ] = $objectId;
+                $urlParameters[$objectField] = $objectId;
             }
         }
 
-        $dataMageInit = $this->escaper->escapeHtml(json_encode([
-            'infrangible/iframe-button' => [
-                'buttonId' => sprintf('%s_%s', $objectName, $objectFieldName),
-                'src'      => $this->urlHelper->getBackendUrl($urlPath, $urlParameters),
-                'title'    => $label
-            ],
-        ]));
+        $dataMageInit = $this->escaper->escapeHtml(
+            json_encode([
+                            'infrangible/iframe-button' => [
+                                'buttonId' => sprintf('%s_%s', $objectName, $objectFieldName),
+                                'src'      => $this->urlHelper->getBackendUrl($urlPath, $urlParameters),
+                                'title'    => $label
+                            ],
+                        ])
+        );
 
         $this->addButtonField($fieldSet, $objectFieldName, $label, $value, null, $dataMageInit);
     }
@@ -2110,9 +2314,19 @@ class Form
         AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
-        bool $disabled = false)
-    {
-        $this->addOptionsField($fieldSet, $objectRegistryKey, $objectFieldName, $label,
-            $this->sourceThemes->toOptionArray(), null, $object, $required, $readOnly, $disabled);
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceThemes->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
     }
 }

@@ -1,16 +1,18 @@
 <?php /** @noinspection PhpDeprecationInspection */
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Block\Grid;
 
 use Exception;
+use FeWeDev\Base\Arrays;
 use Magento\Backend\Block\Widget\Context;
 use Magento\Backend\Block\Widget\Grid;
 use Magento\Framework\View\Element\AbstractBlock;
-use Tofex\Help\Arrays;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Container
@@ -93,49 +95,49 @@ class Container
 
     /**
      * @param Context $context
-     * @param Arrays  $arrayHelper
+     * @param Arrays  $arrays
      * @param array   $data
      */
-    public function __construct(Context $context, Arrays $arrayHelper, array $data = [])
+    public function __construct(Context $context, Arrays $arrays, array $data = [])
     {
-        $this->moduleKey = $arrayHelper->getValue($data, 'module_key', 'adminhtml');
-        $this->objectName = $arrayHelper->getValue($data, 'object_name', 'empty');
-        $this->objectField = $arrayHelper->getValue($data, 'object_field', 'id');
-        $this->allowAdd = $arrayHelper->getValue($data, 'allow_add', true);
-        $this->allowEdit = $arrayHelper->getValue($data, 'allow_edit', true);
-        $this->allowView = $arrayHelper->getValue($data, 'allow_view', true);
-        $this->allowDelete = $arrayHelper->getValue($data, 'allow_delete', true);
-        $this->allowExport = $arrayHelper->getValue($data, 'allow_export', true);
-        $this->modelClass = $arrayHelper->getValue($data, 'model_class', true);
-        $this->addUrlRoute = $arrayHelper->getValue($data, 'add_url_route', '*/*/add');
-        $this->addUrlParams = $arrayHelper->getValue($data, 'add_url_params', []);
-        $this->gridUrlRoute = $arrayHelper->getValue($data, 'grid_url_route', '*/*/grid');
-        $this->gridUrlParams = $arrayHelper->getValue($data, 'grid_url_params', []);
-        $this->editUrlRoute = $arrayHelper->getValue($data, 'edit_url_route', '*/*/edit');
-        $this->editUrlParams = $arrayHelper->getValue($data, 'edit_url_params', []);
-        $this->viewUrlRoute = $arrayHelper->getValue($data, 'view_url_route', '*/*/view');
-        $this->viewUrlParams = $arrayHelper->getValue($data, 'view_url_params', []);
-        $this->deleteUrlRoute = $arrayHelper->getValue($data, 'delete_url_route', '*/*/delete');
-        $this->deleteUrlParams = $arrayHelper->getValue($data, 'delete_url_params', []);
-        $this->massDeleteUrlRoute = $arrayHelper->getValue($data, 'mass_delete_url_route', '*/*/massDelete');
-        $this->massDeleteUrlParams = $arrayHelper->getValue($data, 'mass_delete_url_params', []);
-        $this->massExportUrlRoute = $arrayHelper->getValue($data, 'mass_export_url_route', '*/*/massExport');
-        $this->massExportUrlParams = $arrayHelper->getValue($data, 'mass_export_url_params', []);
-        $this->backUrlRoute = $arrayHelper->getValue($data, 'back_url_route');
-        $this->backUrlParams = $arrayHelper->getValue($data, 'back_url_params', []);
+        $this->moduleKey = $arrays->getValue($data, 'module_key', 'adminhtml');
+        $this->objectName = $arrays->getValue($data, 'object_name', 'empty');
+        $this->objectField = $arrays->getValue($data, 'object_field', 'id');
+        $this->allowAdd = $arrays->getValue($data, 'allow_add', true);
+        $this->allowEdit = $arrays->getValue($data, 'allow_edit', true);
+        $this->allowView = $arrays->getValue($data, 'allow_view', true);
+        $this->allowDelete = $arrays->getValue($data, 'allow_delete', true);
+        $this->allowExport = $arrays->getValue($data, 'allow_export', true);
+        $this->modelClass = $arrays->getValue($data, 'model_class', true);
+        $this->addUrlRoute = $arrays->getValue($data, 'add_url_route', '*/*/add');
+        $this->addUrlParams = $arrays->getValue($data, 'add_url_params', []);
+        $this->gridUrlRoute = $arrays->getValue($data, 'grid_url_route', '*/*/grid');
+        $this->gridUrlParams = $arrays->getValue($data, 'grid_url_params', []);
+        $this->editUrlRoute = $arrays->getValue($data, 'edit_url_route', '*/*/edit');
+        $this->editUrlParams = $arrays->getValue($data, 'edit_url_params', []);
+        $this->viewUrlRoute = $arrays->getValue($data, 'view_url_route', '*/*/view');
+        $this->viewUrlParams = $arrays->getValue($data, 'view_url_params', []);
+        $this->deleteUrlRoute = $arrays->getValue($data, 'delete_url_route', '*/*/delete');
+        $this->deleteUrlParams = $arrays->getValue($data, 'delete_url_params', []);
+        $this->massDeleteUrlRoute = $arrays->getValue($data, 'mass_delete_url_route', '*/*/massDelete');
+        $this->massDeleteUrlParams = $arrays->getValue($data, 'mass_delete_url_params', []);
+        $this->massExportUrlRoute = $arrays->getValue($data, 'mass_export_url_route', '*/*/massExport');
+        $this->massExportUrlParams = $arrays->getValue($data, 'mass_export_url_params', []);
+        $this->backUrlRoute = $arrays->getValue($data, 'back_url_route');
+        $this->backUrlParams = $arrays->getValue($data, 'back_url_params', []);
 
         $this->_blockGroup = $this->moduleKey;
         $this->_controller = sprintf('Adminhtml_%s', $this->objectName);
         $this->_headerText =
-            sprintf('%s > %s', $arrayHelper->getValue($data, 'title', 'Container Widget Header'), __('Manage'));
+            sprintf('%s > %s', $arrays->getValue($data, 'title', 'Container Widget Header'), __('Manage'));
 
         parent::__construct($context, $data);
 
-        if ( ! $this->allowAdd) {
+        if (!$this->allowAdd) {
             $this->removeButton('add');
         }
 
-        if ( ! empty($this->backUrlRoute)) {
+        if (!empty($this->backUrlRoute)) {
             $this->_addBackButton();
         }
     }
@@ -146,14 +148,17 @@ class Container
      */
     protected function _prepareLayout(): \Magento\Backend\Block\Widget\Container
     {
-        $blockClassName = sprintf('%s\Block\%s\Grid', str_replace('_', '\\', $this->_blockGroup),
-            str_replace('_', '\\', $this->_controller));
+        $blockClassName = sprintf(
+            '%s\Block\%s\Grid',
+            str_replace('_', '\\', $this->_blockGroup),
+            str_replace('_', '\\', $this->_controller)
+        );
 
-        if ( ! class_exists($blockClassName)) {
+        if (!class_exists($blockClassName)) {
             throw new Exception(sprintf('Could not find block class: %s', $blockClassName));
         }
 
-        $block = $this->getLayout()->createBlock($blockClassName, $this->_controller . '.grid', [
+        $block = $this->getLayout()->createBlock($blockClassName, $this->_controller.'.grid', [
             'data' => [
                 'module_key'             => $this->moduleKey,
                 'object_name'            => $this->objectName,

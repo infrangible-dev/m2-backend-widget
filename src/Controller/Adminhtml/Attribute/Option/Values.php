@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Controller\Adminhtml\Attribute\Option;
 
 use Exception;
+use FeWeDev\Base\Arrays;
+use FeWeDev\Base\Json;
+use Infrangible\Core\Controller\Adminhtml\Ajax;
+use Infrangible\Core\Helper\Attribute;
 use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Infrangible\Core\Controller\Adminhtml\Ajax;
-use Infrangible\Core\Helper\Attribute;
-use Tofex\Help\Arrays;
-use Tofex\Help\Json;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Values
@@ -26,18 +28,18 @@ class Values
     /**
      * @param Context         $context
      * @param LoggerInterface $logging
-     * @param Arrays          $arrayHelper
-     * @param Json            $jsonHelper
+     * @param Arrays          $arrays
+     * @param Json            $json
      * @param Attribute       $eavAttributeHelper
      */
     public function __construct(
-        Arrays $arrayHelper,
-        Json $jsonHelper,
+        Arrays $arrays,
+        Json $json,
         Attribute $eavAttributeHelper,
         Context $context,
-        LoggerInterface $logging)
-    {
-        parent::__construct($arrayHelper, $jsonHelper, $context, $logging);
+        LoggerInterface $logging
+    ) {
+        parent::__construct($arrays, $json, $context, $logging);
 
         $this->eavAttributeHelper = $eavAttributeHelper;
     }

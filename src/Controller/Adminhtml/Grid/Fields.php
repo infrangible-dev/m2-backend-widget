@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Controller\Adminhtml\Grid;
 
+use FeWeDev\Base\Arrays;
+use FeWeDev\Base\Json;
+use Infrangible\BackendWidget\Helper\Session;
+use Infrangible\Core\Controller\Adminhtml\Ajax;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Infrangible\BackendWidget\Helper\Session;
-use Infrangible\Core\Controller\Adminhtml\Ajax;
-use Tofex\Help\Arrays;
-use Tofex\Help\Json;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Fields
@@ -22,20 +24,20 @@ class Fields
     protected $sessionHelper;
 
     /**
-     * @param Arrays          $arrayHelper
-     * @param Json            $jsonHelper
+     * @param Arrays          $arrays
+     * @param Json            $json
      * @param Context         $context
      * @param LoggerInterface $logging
      * @param Session         $sessionHelper
      */
     public function __construct(
-        Arrays $arrayHelper,
-        Json $jsonHelper,
+        Arrays $arrays,
+        Json $json,
         Context $context,
         LoggerInterface $logging,
-        Session $sessionHelper)
-    {
-        parent::__construct($arrayHelper, $jsonHelper, $context, $logging);
+        Session $sessionHelper
+    ) {
+        parent::__construct($arrays, $json, $context, $logging);
 
         $this->sessionHelper = $sessionHelper;
     }
@@ -52,7 +54,7 @@ class Fields
 
         $this->sessionHelper->saveHiddenFieldList($dataGridId, $hiddenFieldList);
 
-        $this->setSuccessResponse(__('Successfully stored hidden field list'));
+        $this->setSuccessResponse(__('Successfully stored hidden field list')->render());
 
         return $this->getResponse();
     }

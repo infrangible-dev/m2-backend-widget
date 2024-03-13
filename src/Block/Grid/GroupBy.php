@@ -1,5 +1,7 @@
 <?php /** @noinspection PhpDeprecationInspection */
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Block\Grid;
 
 use Exception;
@@ -11,7 +13,7 @@ use Zend_Db_Select;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 abstract class GroupBy
@@ -24,7 +26,7 @@ abstract class GroupBy
     {
         $groupBy = $this->getParam('group_by');
 
-        if ( ! $this->variableHelper->isEmpty($groupBy)) {
+        if ( ! $this->variables->isEmpty($groupBy)) {
             $groupBy = base64_decode($groupBy);
 
             $select = $collection->getSelect();
@@ -58,7 +60,7 @@ abstract class GroupBy
 
         $groupBy = $this->getParam('group_by');
 
-        if ( ! $this->variableHelper->isEmpty($groupBy)) {
+        if ( ! $this->variables->isEmpty($groupBy)) {
             $this->addColumn('row_count', [
                 'header'           => __('Count'),
                 'index'            => 'row_count',
@@ -85,7 +87,7 @@ abstract class GroupBy
 
         $groupBy = $this->getParam('group_by');
 
-        if ( ! $this->variableHelper->isEmpty($groupBy)) {
+        if ( ! $this->variables->isEmpty($groupBy)) {
             $groupBy = base64_decode($groupBy);
 
             $fieldNames = explode(',', $groupBy);

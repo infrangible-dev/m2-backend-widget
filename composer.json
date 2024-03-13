@@ -2,7 +2,7 @@
     "name": "infrangible/m2-backend-widget",
     "description": "Infrangible Magento 2 Backend Widget",
     "type": "magento2-module",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "license": "MIT",
     "keywords": [
         "Magento"
@@ -19,8 +19,8 @@
     "require": {
         "php": ">=7.1",
         "magento/framework": "~101.0.0|~102.0.0|~103.0.0",
-        "infrangible/m2-core": "~1.0",
-        "infrangible/m2-foundation": "~1.0"
+        "infrangible/m2-core": "~2.0",
+        "infrangible/m2-foundation": "~2.0"
     },
     "autoload": {
         "files": [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
@@ -16,7 +18,7 @@ use Infrangible\Core\Helper\Registry;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 abstract class Edit
@@ -99,9 +101,9 @@ abstract class Edit
         $this->_addContent($block);
 
         if ($this->allowEdit()) {
-            $this->finishAction($object->getId() ? __('Edit') : __('Add'));
+            $this->finishAction($object->getId() ? __('Edit')->render() : __('Add')->render());
         } else if ($this->allowView()) {
-            $this->finishAction(__('View'));
+            $this->finishAction(__('View')->render());
         }
 
         $page = $this->_view->getPage();

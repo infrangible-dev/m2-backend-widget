@@ -1,15 +1,11 @@
 <?php /** @noinspection PhpDeprecationInspection */
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Helper;
 
 use Exception;
-use Magento\Backend\Block\Widget\Grid\Extended;
-use Magento\Config\Model\Config\Source\Yesno;
-use Magento\Customer\Model\Group;
-use Magento\Customer\Model\ResourceModel\Group\Collection;
-use Magento\Directory\Model\Config\Source\Country;
-use Magento\Framework\Data\OptionSourceInterface;
-use Magento\Store\Model\System\Store;
+use FeWeDev\Base\Variables;
 use Infrangible\BackendWidget\Block\Grid\Column\Renderer\CustomerGroup;
 use Infrangible\BackendWidget\Block\Grid\Column\Renderer\Description;
 use Infrangible\Core\Helper\Customer;
@@ -28,11 +24,17 @@ use Infrangible\Core\Model\Config\Source\EntityType;
 use Infrangible\Core\Model\Config\Source\Operator;
 use Infrangible\Core\Model\Config\Source\Payment\ActiveMethods;
 use Infrangible\Core\Model\Config\Source\TypeId;
-use Tofex\Help\Variables;
+use Magento\Backend\Block\Widget\Grid\Extended;
+use Magento\Config\Model\Config\Source\Yesno;
+use Magento\Customer\Model\Group;
+use Magento\Customer\Model\ResourceModel\Group\Collection;
+use Magento\Directory\Model\Config\Source\Country;
+use Magento\Framework\Data\OptionSourceInterface;
+use Magento\Store\Model\System\Store;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Grid
@@ -41,7 +43,7 @@ class Grid
     protected $templateHelper;
 
     /** @var Variables */
-    protected $variableHelper;
+    protected $variables;
 
     /** @var Customer */
     protected $customerHelper;
@@ -101,18 +103,18 @@ class Grid
     protected $customerGroupCollection;
 
     /**
-     * @param Template              $templateHelper
-     * @param Variables             $variableHelper
-     * @param Customer              $customerHelper
-     * @param Instances             $instanceHelper
-     * @param Yesno                 $sourceYesNo
-     * @param Store                 $sourceStore
-     * @param CmsPage               $sourceCmsPage
-     * @param CmsBlock              $sourceCmsBlock
-     * @param TypeId                $sourceTypeIds
-     * @param Categories            $sourceCategories
-     * @param Operator              $sourceOperator
-     * @param Country               $sourceCountry
+     * @param Template   $templateHelper
+     * @param Variables  $variables
+     * @param Customer   $customerHelper
+     * @param Instances  $instanceHelper
+     * @param Yesno      $sourceYesNo
+     * @param Store      $sourceStore
+     * @param CmsPage    $sourceCmsPage
+     * @param CmsBlock   $sourceCmsBlock
+     * @param TypeId     $sourceTypeIds
+     * @param Categories $sourceCategories
+     * @param Operator   $sourceOperator
+     * @param Country    $sourceCountry
      * @param ActiveMethods         $sourcePaymentActiveMethods
      * @param Attribute             $sourceAttributes
      * @param AttributeSet          $sourceAttributeSets
@@ -124,7 +126,7 @@ class Grid
      */
     public function __construct(
         Template $templateHelper,
-        Variables $variableHelper,
+        Variables $variables,
         Customer $customerHelper,
         Instances $instanceHelper,
         Yesno $sourceYesNo,
@@ -142,10 +144,10 @@ class Grid
         ProductAttributeCode $sourceProductAttributeCode,
         CustomerAttributeCode $sourceCustomerAttributeCode,
         AddressAttributeCode $sourceAddressAttributeCode,
-        SortBy $sourceAttributeSortBy)
-    {
+        SortBy $sourceAttributeSortBy
+    ) {
         $this->templateHelper = $templateHelper;
-        $this->variableHelper = $variableHelper;
+        $this->variables = $variables;
         $this->customerHelper = $customerHelper;
         $this->instanceHelper = $instanceHelper;
 
@@ -284,8 +286,8 @@ class Grid
         Extended $grid,
         string $objectFieldName,
         string $label,
-        string $filterIndex)
-    {
+        string $filterIndex
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'index'            => $objectFieldName,
@@ -307,8 +309,8 @@ class Grid
         Extended $grid,
         string $objectFieldName,
         string $label,
-        $callback)
-    {
+        $callback
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'                    => $label,
             'index'                     => $objectFieldName,
@@ -349,8 +351,8 @@ class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        $after = null)
-    {
+        $after = null
+    ) {
         $config = [
             'header'           => $label,
             'type'             => 'options',
@@ -360,7 +362,7 @@ class Grid
         ];
 
         if ($after) {
-            $config[ 'after' ] = $after;
+            $config['after'] = $after;
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), $config);
@@ -380,8 +382,8 @@ class Grid
         string $objectFieldName,
         string $label,
         string $className,
-        $after = null)
-    {
+        $after = null
+    ) {
         $this->addOptionsClassCallbackColumn($grid, $objectFieldName, $label, $className, 'toOptions', [], $after);
     }
 
@@ -403,8 +405,8 @@ class Grid
         string $className,
         string $methodName,
         array $parameters = [],
-        $after = null)
-    {
+        $after = null
+    ) {
         /** @var OptionSourceInterface $optionsClass */
         $optionsClass = $this->instanceHelper->getSingleton($className);
 
@@ -423,7 +425,7 @@ class Grid
         ];
 
         if ($after) {
-            $config[ 'after' ] = $after;
+            $config['after'] = $after;
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), $config);
@@ -443,8 +445,8 @@ class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        string $filterIndex)
-    {
+        string $filterIndex
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'options',
@@ -469,8 +471,8 @@ class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        $callback)
-    {
+        $callback
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'                    => $label,
             'type'                      => 'options',
@@ -497,8 +499,8 @@ class Grid
         string $label,
         array $options,
         $callback,
-        string $renderer)
-    {
+        string $renderer
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'                    => $label,
             'type'                      => 'options',
@@ -526,8 +528,8 @@ class Grid
         string $label,
         array $options,
         $filterCallback,
-        $frameCallback)
-    {
+        $frameCallback
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'                    => $label,
             'type'                      => 'options',
@@ -553,8 +555,8 @@ class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        $callback)
-    {
+        $callback
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'options',
@@ -634,8 +636,13 @@ class Grid
      */
     public function addYesNoColumnWithFilterCondition(Extended $grid, string $objectFieldName, string $label, $callback)
     {
-        $this->addOptionsColumnWithFilterCondition($grid, $objectFieldName, $label, $this->sourceYesNo->toArray(),
-            $callback);
+        $this->addOptionsColumnWithFilterCondition(
+            $grid,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toArray(),
+            $callback
+        );
     }
 
     /**
@@ -647,7 +654,7 @@ class Grid
      */
     public function addWebsiteNameColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
-        if ($this->variableHelper->isEmpty($label)) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Website');
         }
 
@@ -678,7 +685,7 @@ class Grid
             'type'             => 'options',
             'column_css_class' => 'data-grid-td',
             'index'            => $objectFieldName,
-            'options'          => $this->sourceStore->getStoreOptionHash(false),
+            'options'          => $this->sourceStore->getStoreOptionHash(),
             'sortable'         => false
         ]);
     }
@@ -848,8 +855,8 @@ class Grid
         string $objectFieldName,
         string $label,
         string $width = '100%',
-        string $height = '15px')
-    {
+        string $height = '15px'
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'text',
@@ -883,12 +890,12 @@ class Grid
      */
     public function addCountryColumn(Extended $grid, string $objectFieldName, string $label)
     {
-        $optionArray = $this->sourceCountry->toOptionArray(false);
+        $optionArray = $this->sourceCountry->toOptionArray();
 
         $options = [];
 
         foreach ($optionArray as $option) {
-            $options[ $option[ 'value' ] ] = $option[ 'label' ];
+            $options[$option['value']] = $option['label'];
         }
 
         $this->addOptionsColumn($grid, $objectFieldName, $label, $options);
@@ -903,7 +910,7 @@ class Grid
      */
     public function addCustomerGroupColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
-        if ($this->variableHelper->isEmpty($label)) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group');
         }
 
@@ -914,7 +921,7 @@ class Grid
 
         /** @var Group $customerGroup */
         foreach ($this->customerGroupCollection as $customerGroup) {
-            $customerGroups[ $customerGroup->getId() ] = $customerGroup->getCode();
+            $customerGroups[$customerGroup->getId()] = $customerGroup->getCode();
         }
 
         $this->addOptionsColumn($grid, $objectFieldName, $label, $customerGroups);
@@ -929,7 +936,7 @@ class Grid
      */
     public function addCustomerGroupsColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
-        if ($this->variableHelper->isEmpty($label)) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group');
         }
 
@@ -940,11 +947,16 @@ class Grid
 
         /** @var Group $customerGroup */
         foreach ($this->customerGroupCollection as $customerGroup) {
-            $customerGroups[ $customerGroup->getId() ] = $customerGroup->getCode();
+            $customerGroups[$customerGroup->getId()] = $customerGroup->getCode();
         }
 
-        $this->addOptionsColumnWithFilterConditionAndRenderer($grid, $objectFieldName, $label, $customerGroups,
-            [$grid, 'filterInSet'], CustomerGroup::class);
+        $this->addOptionsColumnWithFilterConditionAndRenderer(
+            $grid,
+            $objectFieldName,
+            $label,
+            $customerGroups, [$grid, 'filterInSet'],
+            CustomerGroup::class
+        );
     }
 
     /**
@@ -961,9 +973,9 @@ class Grid
         string $objectFieldName,
         string $label = null,
         bool $allStores = false,
-        bool $withDefault = true)
-    {
-        if ($this->variableHelper->isEmpty($label)) {
+        bool $withDefault = true
+    ) {
+        if ($this->variables->isEmpty($label)) {
             $label = __('Payment Method');
         }
 
@@ -991,24 +1003,28 @@ class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'options',
             'column_css_class' => 'data-grid-td',
             'index'            => $objectFieldName,
-            'options'          => $this->sourceAttributes->toOptionsWithEntities($customer, $address, $category,
-                $product)
+            'options'          => $this->sourceAttributes->toOptionsWithEntities(
+                $customer,
+                $address,
+                $category,
+                $product
+            )
         ]);
     }
 
     /**
      * @param \Infrangible\BackendWidget\Block\Grid $grid
-     * @param string                          $valueFieldName
-     * @param string                          $attributeFieldName
-     * @param string                          $label
-     * @param bool                            $multiValue
+     * @param string                                $valueFieldName
+     * @param string                                $attributeFieldName
+     * @param string                                $label
+     * @param bool                                  $multiValue
      *
      * @throws Exception
      */
@@ -1017,8 +1033,8 @@ class Grid
         string $valueFieldName,
         string $attributeFieldName,
         string $label,
-        bool $multiValue = false)
-    {
+        bool $multiValue = false
+    ) {
         $objectFieldValueName = sprintf('%s_value', $valueFieldName);
 
         $grid->addColumn($this->getColumnId($valueFieldName), [
@@ -1054,15 +1070,19 @@ class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'options',
             'column_css_class' => 'data-grid-td',
             'index'            => $objectFieldName,
-            'options'          => $this->sourceAttributeSets->toOptionsWithEntities($customer, $address, $category,
-                $product)
+            'options'          => $this->sourceAttributeSets->toOptionsWithEntities(
+                $customer,
+                $address,
+                $category,
+                $product
+            )
         ]);
     }
 
@@ -1084,15 +1104,19 @@ class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
+        bool $product = true
+    ) {
         $grid->addColumn($this->getColumnId($objectFieldName), [
             'header'           => $label,
             'type'             => 'options',
             'column_css_class' => 'data-grid-td',
             'index'            => $objectFieldName,
-            'options'          => $this->sourceEntityTypes->toOptionsWithEntities($customer, $address, $category,
-                $product)
+            'options'          => $this->sourceEntityTypes->toOptionsWithEntities(
+                $customer,
+                $address,
+                $category,
+                $product
+            )
         ]);
     }
 
@@ -1106,8 +1130,8 @@ class Grid
     public function addProductAttributeCodeColumn(
         Extended $grid,
         string $objectFieldName,
-        string $label)
-    {
+        string $label
+    ) {
         $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceProductAttributeCode->toOptions());
     }
 
@@ -1121,8 +1145,8 @@ class Grid
     public function addCustomerAttributeCodeColumn(
         Extended $grid,
         string $objectFieldName,
-        string $label)
-    {
+        string $label
+    ) {
         $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceCustomerAttributeCode->toOptions());
     }
 
@@ -1136,8 +1160,8 @@ class Grid
     public function addAddressAttributeCodeColumn(
         Extended $grid,
         string $objectFieldName,
-        string $label)
-    {
+        string $label
+    ) {
         $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceAddressAttributeCode->toOptions());
     }
 
@@ -1151,8 +1175,8 @@ class Grid
     public function addAttributeSortByColumn(
         Extended $grid,
         string $objectFieldName,
-        string $label)
-    {
+        string $label
+    ) {
         $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceAttributeSortBy->toOptions());
     }
 }

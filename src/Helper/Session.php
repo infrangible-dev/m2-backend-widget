@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Helper;
 
+use FeWeDev\Base\Arrays;
 use Magento\Framework\Exception\NotFoundException;
-use Tofex\Help\Arrays;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Session
 {
     /** @var Arrays */
-    protected $arrayHelper;
+    protected $arrays;
 
     /** @var \Magento\Backend\Model\Session */
     protected $backendSession;
@@ -22,16 +24,16 @@ class Session
     protected $authSession;
 
     /**
-     * @param Arrays                              $arrayHelper
+     * @param Arrays                              $arrays
      * @param \Magento\Backend\Model\Session      $backendSession
      * @param \Magento\Backend\Model\Auth\Session $authSession
      */
     public function __construct(
-        Arrays $arrayHelper,
+        Arrays $arrays,
         \Magento\Backend\Model\Session $backendSession,
-        \Magento\Backend\Model\Auth\Session $authSession)
-    {
-        $this->arrayHelper = $arrayHelper;
+        \Magento\Backend\Model\Auth\Session $authSession
+    ) {
+        $this->arrays = $arrays;
 
         $this->backendSession = $backendSession;
         $this->authSession = $authSession;
@@ -51,7 +53,7 @@ class Session
             throw new NotFoundException(__('No data for grid with id: %1', $dataGridId));
         }
 
-        return is_array($hiddenFieldLists) ? $this->arrayHelper->getValue($hiddenFieldLists, $dataGridId, []) : [];
+        return is_array($hiddenFieldLists) ? $this->arrays->getValue($hiddenFieldLists, $dataGridId, []) : [];
     }
 
     /**
@@ -66,7 +68,7 @@ class Session
             $hiddenFieldLists = [];
         }
 
-        $hiddenFieldLists[ $dataGridId ] = $hiddenFieldList;
+        $hiddenFieldLists[$dataGridId] = $hiddenFieldList;
 
         /** @noinspection PhpUndefinedMethodInspection */
         $this->backendSession->setDataGridHiddenFieldLists($hiddenFieldLists);

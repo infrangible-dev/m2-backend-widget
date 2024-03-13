@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Model\Store\System;
 
 use Magento\Store\Model\Group;
@@ -7,7 +9,7 @@ use Magento\Store\Model\Website;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Store
@@ -37,7 +39,6 @@ class Store
         $this->_groupCollection = [];
 
         foreach ($this->_storeManager->getWebsites(true) as $website) {
-            /** @var \Magento\Store\Model\Store $group */
             foreach ($website->getGroups() as $group) {
                 $this->_groupCollection[ $group->getId() ] = $group;
             }

@@ -1,8 +1,17 @@
 <?php /** @noinspection PhpDeprecationInspection */
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Block;
 
 use Exception;
+use FeWeDev\Base\Arrays;
+use FeWeDev\Base\Variables;
+use Infrangible\BackendWidget\Block\Grid\Fields;
+use Infrangible\BackendWidget\Block\Grid\MassAction;
+use Infrangible\BackendWidget\Helper\Session;
+use Infrangible\Core\Helper\Database;
+use Infrangible\Core\Helper\Registry;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Button;
 use Magento\Backend\Block\Widget\Grid\Column;
@@ -20,18 +29,11 @@ use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Magento\Framework\Validator\UniversalFactory;
-use Infrangible\BackendWidget\Block\Grid\Fields;
-use Infrangible\BackendWidget\Block\Grid\MassAction;
-use Infrangible\BackendWidget\Helper\Session;
-use Infrangible\Core\Helper\Database;
-use Infrangible\Core\Helper\Registry;
-use Tofex\Help\Arrays;
-use Tofex\Help\Variables;
 use Zend_Db_Expr;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 abstract class Grid
@@ -41,7 +43,7 @@ abstract class Grid
     protected $databaseHelper;
 
     /** @var Variables */
-    protected $variableHelper;
+    protected $variables;
 
     /** @var Registry */
     protected $registryHelper;
@@ -53,7 +55,7 @@ abstract class Grid
     protected $sessionHelper;
 
     /** @var Arrays */
-    protected $arrayHelper;
+    protected $arrays;
 
     /** @var UniversalFactory */
     protected $universalFactory;
@@ -146,8 +148,8 @@ abstract class Grid
      * @param Context                                $context
      * @param Data                                   $backendHelper
      * @param Database                               $databaseHelper
-     * @param Arrays                                 $arrayHelper
-     * @param Variables                              $variableHelper
+     * @param Arrays                                 $arrays
+     * @param Variables                              $variables
      * @param Registry                               $registryHelper
      * @param \Infrangible\BackendWidget\Helper\Grid $gridHelper
      * @param Session                                $sessionHelper
@@ -159,46 +161,45 @@ abstract class Grid
         Context $context,
         Data $backendHelper,
         Database $databaseHelper,
-        Arrays $arrayHelper,
-        Variables $variableHelper,
+        Arrays $arrays,
+        Variables $variables,
         Registry $registryHelper,
         \Infrangible\BackendWidget\Helper\Grid $gridHelper,
         Session $sessionHelper,
         UniversalFactory $universalFactory,
         Config $eavConfig,
-        array $data = [])
-    {
-        $this->moduleKey = $arrayHelper->getValue($data, 'module_key', 'adminhtml');
-        $this->objectName = $arrayHelper->getValue($data, 'object_name', 'empty');
-        $this->objectField = $arrayHelper->getValue($data, 'object_field', 'id');
-        $this->objectRegistryKey = $arrayHelper->getValue($data, 'object_registry_key');
-        $this->allowEdit = $arrayHelper->getValue($data, 'allow_edit', true);
-        $this->allowView = $arrayHelper->getValue($data, 'allow_view', true);
-        $this->allowDelete = $arrayHelper->getValue($data, 'allow_delete', true);
-        $this->allowExport = $arrayHelper->getValue($data, 'allow_export', true);
-        $this->modelClass = $arrayHelper->getValue($data, 'model_class');
-        $this->gridUrlRoute = $arrayHelper->getValue($data, 'grid_url_route', '*/*/grid');
-        $this->gridUrlParams = $arrayHelper->getValue($data, 'grid_url_params', []);
-        $this->editUrlRoute = $arrayHelper->getValue($data, 'edit_url_route', '*/*/edit');
-        $this->editUrlParams = $arrayHelper->getValue($data, 'edit_url_params', []);
-        $this->viewUrlRoute = $arrayHelper->getValue($data, 'view_url_route', '*/*/view');
-        $this->viewUrlParams = $arrayHelper->getValue($data, 'view_url_params', []);
-        $this->deleteUrlRoute = $arrayHelper->getValue($data, 'delete_url_route', '*/*/delete');
-        $this->deleteUrlParams = $arrayHelper->getValue($data, 'delete_url_params', []);
-        $this->massDeleteUrlRoute = $arrayHelper->getValue($data, 'mass_delete_url_route', '*/*/massDelete');
-        $this->massDeleteUrlParams = $arrayHelper->getValue($data, 'mass_delete_url_params', []);
-        $this->massExportUrlRoute = $arrayHelper->getValue($data, 'mass_export_url_route', '*/*/massExport');
-        $this->massExportUrlParams = $arrayHelper->getValue($data, 'mass_export_url_params', []);
+        array $data = []
+    ) {
+        $this->moduleKey = $arrays->getValue($data, 'module_key', 'adminhtml');
+        $this->objectName = $arrays->getValue($data, 'object_name', 'empty');
+        $this->objectField = $arrays->getValue($data, 'object_field', 'id');
+        $this->objectRegistryKey = $arrays->getValue($data, 'object_registry_key');
+        $this->allowEdit = $arrays->getValue($data, 'allow_edit', true);
+        $this->allowView = $arrays->getValue($data, 'allow_view', true);
+        $this->allowDelete = $arrays->getValue($data, 'allow_delete', true);
+        $this->allowExport = $arrays->getValue($data, 'allow_export', true);
+        $this->modelClass = $arrays->getValue($data, 'model_class');
+        $this->gridUrlRoute = $arrays->getValue($data, 'grid_url_route', '*/*/grid');
+        $this->gridUrlParams = $arrays->getValue($data, 'grid_url_params', []);
+        $this->editUrlRoute = $arrays->getValue($data, 'edit_url_route', '*/*/edit');
+        $this->editUrlParams = $arrays->getValue($data, 'edit_url_params', []);
+        $this->viewUrlRoute = $arrays->getValue($data, 'view_url_route', '*/*/view');
+        $this->viewUrlParams = $arrays->getValue($data, 'view_url_params', []);
+        $this->deleteUrlRoute = $arrays->getValue($data, 'delete_url_route', '*/*/delete');
+        $this->deleteUrlParams = $arrays->getValue($data, 'delete_url_params', []);
+        $this->massDeleteUrlRoute = $arrays->getValue($data, 'mass_delete_url_route', '*/*/massDelete');
+        $this->massDeleteUrlParams = $arrays->getValue($data, 'mass_delete_url_params', []);
+        $this->massExportUrlRoute = $arrays->getValue($data, 'mass_export_url_route', '*/*/massExport');
+        $this->massExportUrlParams = $arrays->getValue($data, 'mass_export_url_params', []);
 
         parent::__construct($context, $backendHelper, $data);
 
         $this->databaseHelper = $databaseHelper;
-        $this->variableHelper = $variableHelper;
+        $this->variables = $variables;
         $this->registryHelper = $registryHelper;
         $this->gridHelper = $gridHelper;
         $this->sessionHelper = $sessionHelper;
-        $this->arrayHelper = $arrayHelper;
-
+        $this->arrays = $arrays;
         $this->universalFactory = $universalFactory;
         $this->eavConfig = $eavConfig;
     }
@@ -213,8 +214,10 @@ abstract class Grid
     {
         parent::_construct();
 
-        $this->setData('id',
-            sprintf('adminhtml_%s_%s_grid', $this->moduleKey, preg_replace('/[^a-z0-9_]*/i', '', $this->objectName)));
+        $this->setData(
+            'id',
+            sprintf('adminhtml_%s_%s_grid', $this->moduleKey, preg_replace('/[^a-z0-9_]*/i', '', $this->objectName))
+        );
 
         $this->setSaveParametersInSession(true);
         $this->setData('use_ajax', true);
@@ -235,9 +238,9 @@ abstract class Grid
         $filtersButton = $this->getLayout()->createBlock(Button::class);
 
         $filtersButton->setData([
-            'label' => __('Show filters'),
-            'class' => 'action-filters action-tertiary'
-        ]);
+                                    'label' => __('Show filters'),
+                                    'class' => 'action-filters action-tertiary'
+                                ]);
 
         $this->setChild('filters_button', $filtersButton);
 
@@ -245,10 +248,10 @@ abstract class Grid
         $columnsButton = $this->getLayout()->createBlock(Button::class);
 
         $columnsButton->setData([
-            'label'      => __('Show columns'),
-            'class'      => 'action-columns action-tertiary',
-            'after_html' => $this->getFieldsBlock()->toHtml()
-        ]);
+                                    'label'      => __('Show columns'),
+                                    'class'      => 'action-columns action-tertiary',
+                                    'after_html' => $this->getFieldsBlock()->toHtml()
+                                ]);
 
         $this->setChild('columns_button', $columnsButton);
 
@@ -283,12 +286,12 @@ abstract class Grid
             $column = $this->getLayout()->getBlock($childName);
 
             if ($column instanceof Column) {
-                if ( ! $column->getData('is_system')) {
+                if (!$column->getData('is_system')) {
                     $name = $column->getData('id');
                     $label = $column->getData('header');
 
-                    if ( ! $this->variableHelper->isEmpty($name) && ! $this->variableHelper->isEmpty($label)) {
-                        $fieldList[ $name ] = $label;
+                    if (!$this->variables->isEmpty($name) && !$this->variables->isEmpty($label)) {
+                        $fieldList[$name] = $label;
                     }
                 }
             }
@@ -303,7 +306,7 @@ abstract class Grid
      */
     protected function _prepareCollection(): Extended
     {
-        if ( ! $this->modelClass || ! class_exists($this->modelClass)) {
+        if (!$this->modelClass || !class_exists($this->modelClass)) {
             throw new Exception(sprintf('Could not find model class: %s', $this->modelClass));
         }
 
@@ -347,18 +350,35 @@ abstract class Grid
                 $optionValueTableAlias = sprintf('eaov_%s', $valueColumnName);
                 $optionValueColumnName = sprintf('%s_value', $valueColumnName);
 
-                $collection->getSelect()
-                    ->joinLeft([$optionTableAlias => $this->databaseHelper->getTableName('eav_attribute_option')],
-                        sprintf('%s.attribute_id = main_table.%s and %s.option_id = main_table.%s', $optionTableAlias,
-                            $attributeColumnName, $optionTableAlias, $valueColumnName), '');
+                $collection->getSelect()->joinLeft(
+                    [$optionTableAlias => $this->databaseHelper->getTableName('eav_attribute_option')],
+                    sprintf(
+                        '%s.attribute_id = main_table.%s and %s.option_id = main_table.%s',
+                        $optionTableAlias,
+                        $attributeColumnName,
+                        $optionTableAlias,
+                        $valueColumnName
+                    ),
+                    ''
+                );
 
-                $collection->getSelect()
-                    ->joinLeft([$optionValueTableAlias => $this->databaseHelper->getTableName('eav_attribute_option_value')],
-                        sprintf('%s.option_id = %s.option_id and %s.store_id = 0', $optionValueTableAlias,
-                            $optionTableAlias, $optionValueTableAlias), [
-                            sprintf('IF(%s.value IS NULL, main_table.%s, %s.value) as %s', $optionValueTableAlias,
-                                $valueColumnName, $optionValueTableAlias, $optionValueColumnName)
-                        ]);
+                $collection->getSelect()->joinLeft(
+                    [$optionValueTableAlias => $this->databaseHelper->getTableName('eav_attribute_option_value')],
+                    sprintf(
+                        '%s.option_id = %s.option_id and %s.store_id = 0',
+                        $optionValueTableAlias,
+                        $optionTableAlias,
+                        $optionValueTableAlias
+                    ), [
+                        sprintf(
+                            'IF(%s.value IS NULL, main_table.%s, %s.value) as %s',
+                            $optionValueTableAlias,
+                            $valueColumnName,
+                            $optionValueTableAlias,
+                            $optionValueColumnName
+                        )
+                    ]
+                );
             }
 
             foreach ($this->joinAttributeMultiValues as $valueColumnName => $attributeColumnName) {
@@ -366,19 +386,35 @@ abstract class Grid
                 $optionValueTableAlias = sprintf('eaov_%s', $valueColumnName);
                 $optionValueColumnName = sprintf('%s_value', $valueColumnName);
 
-                $collection->getSelect()
-                    ->joinLeft([$optionTableAlias => $this->databaseHelper->getTableName('eav_attribute_option')],
-                        sprintf('%s.attribute_id = main_table.%s and FIND_IN_SET(%s.option_id, main_table.%s) > 0',
-                            $optionTableAlias, $attributeColumnName, $optionTableAlias, $valueColumnName), '');
+                $collection->getSelect()->joinLeft(
+                    [$optionTableAlias => $this->databaseHelper->getTableName('eav_attribute_option')],
+                    sprintf(
+                        '%s.attribute_id = main_table.%s and FIND_IN_SET(%s.option_id, main_table.%s) > 0',
+                        $optionTableAlias,
+                        $attributeColumnName,
+                        $optionTableAlias,
+                        $valueColumnName
+                    ),
+                    ''
+                );
 
-                $collection->getSelect()
-                    ->joinLeft([$optionValueTableAlias => $this->databaseHelper->getTableName('eav_attribute_option_value')],
-                        sprintf('%s.option_id = %s.option_id and %s.store_id = 0', $optionValueTableAlias,
-                            $optionTableAlias, $optionValueTableAlias), [
-                            sprintf('IF(%s.value IS NULL, main_table.%s, GROUP_CONCAT(%s.value)) as %s',
-                                $optionValueTableAlias, $valueColumnName, $optionValueTableAlias,
-                                $optionValueColumnName)
-                        ]);
+                $collection->getSelect()->joinLeft(
+                    [$optionValueTableAlias => $this->databaseHelper->getTableName('eav_attribute_option_value')],
+                    sprintf(
+                        '%s.option_id = %s.option_id and %s.store_id = 0',
+                        $optionValueTableAlias,
+                        $optionTableAlias,
+                        $optionValueTableAlias
+                    ), [
+                        sprintf(
+                            'IF(%s.value IS NULL, main_table.%s, GROUP_CONCAT(%s.value)) as %s',
+                            $optionValueTableAlias,
+                            $valueColumnName,
+                            $optionValueTableAlias,
+                            $optionValueColumnName
+                        )
+                    ]
+                );
             }
         }
 
@@ -393,14 +429,14 @@ abstract class Grid
      */
     protected function addJoinValuesToCollection(Collection $collection, array $joinValues)
     {
-        if ($collection instanceof AbstractDb && ! $this->variableHelper->isEmpty($joinValues)) {
+        if ($collection instanceof AbstractDb && !$this->variables->isEmpty($joinValues)) {
             foreach ($joinValues as $joinValue) {
-                $tableName = $this->arrayHelper->getValue($joinValue, 'table_name');
-                $joinFields = $this->arrayHelper->getValue($joinValue, 'join_fields');
-                $resultFields = $this->arrayHelper->getValue($joinValue, 'result_fields');
-                $tableAlias = $this->arrayHelper->getValue($joinValue, 'table_alias');
+                $tableName = $this->arrays->getValue($joinValue, 'table_name');
+                $joinFields = $this->arrays->getValue($joinValue, 'join_fields');
+                $resultFields = $this->arrays->getValue($joinValue, 'result_fields');
+                $tableAlias = $this->arrays->getValue($joinValue, 'table_alias');
 
-                if ($this->variableHelper->isEmpty($tableAlias)) {
+                if ($this->variables->isEmpty($tableAlias)) {
                     $tableAlias = $tableName;
                 }
 
@@ -411,7 +447,7 @@ abstract class Grid
                         sprintf('main_table.%s = %s.%s', $mainTableFieldName, $tableAlias, $joinTableFieldName);
                 }
 
-                /** @noinspection PhpParamsInspection, RedundantSuppression */
+                /** @noinspection PhpParamsInspection, RedundantSuppression, PhpPossiblePolymorphicInvocationInspection */
                 $collection->join([$tableAlias => $tableName], implode(' AND ', $joinConditions), $resultFields);
             }
         }
@@ -441,12 +477,13 @@ abstract class Grid
      */
     protected function addProductToCollection(
         AbstractDb $collection,
-        array $eavAttributes = [])
-    {
+        array $eavAttributes = []
+    ) {
         $select = $collection->getSelect();
 
         $select->join(['product' => $this->databaseHelper->getTableName('catalog_product_entity')],
-            'main_table.product_id = product.entity_id', ['attribute_set_id', 'type_id', 'sku']);
+                      'main_table.product_id = product.entity_id',
+                      ['attribute_set_id', 'type_id', 'sku']);
 
         foreach ($eavAttributes as $eavAttributeName) {
             $eavAttribute = $this->eavConfig->getAttribute(Product::ENTITY, $eavAttributeName);
@@ -454,9 +491,14 @@ abstract class Grid
             $tableAlias = sprintf('eav_attribute_%s', $eavAttributeName);
 
             $select->join([$tableAlias => $eavAttribute->getBackendTable()],
-                sprintf('main_table.product_id = %s.entity_id AND %s.attribute_id = %d AND %s.store_id = 0',
-                    $tableAlias, $tableAlias, $eavAttribute->getId(), $tableAlias),
-                [sprintf('product_%s', $eavAttributeName) => 'value']);
+                          sprintf(
+                              'main_table.product_id = %s.entity_id AND %s.attribute_id = %d AND %s.store_id = 0',
+                              $tableAlias,
+                              $tableAlias,
+                              $eavAttribute->getId(),
+                              $tableAlias
+                          ),
+                          [sprintf('product_%s', $eavAttributeName) => 'value']);
         }
     }
 
@@ -649,8 +691,8 @@ abstract class Grid
         string $objectFieldName,
         string $label,
         string $className,
-        $after = null)
-    {
+        $after = null
+    ) {
         $this->gridHelper->addOptionsClassColumn($this, $objectFieldName, $label, $className, $after);
     }
 
@@ -670,10 +712,17 @@ abstract class Grid
         string $className,
         string $methodName,
         array $parameters = [],
-        $after = null)
-    {
-        $this->gridHelper->addOptionsClassCallbackColumn($this, $objectFieldName, $label, $className, $methodName,
-            $parameters, $after);
+        $after = null
+    ) {
+        $this->gridHelper->addOptionsClassCallbackColumn(
+            $this,
+            $objectFieldName,
+            $label,
+            $className,
+            $methodName,
+            $parameters,
+            $after
+        );
     }
 
     /**
@@ -688,8 +737,8 @@ abstract class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        string $filterIndex)
-    {
+        string $filterIndex
+    ) {
         $this->gridHelper->addOptionsColumnWithFilter($this, $objectFieldName, $label, $options, $filterIndex);
     }
 
@@ -705,8 +754,8 @@ abstract class Grid
         string $objectFieldName,
         string $label,
         array $options,
-        $callback)
-    {
+        $callback
+    ) {
         $this->gridHelper->addOptionsColumnWithFilterCondition($this, $objectFieldName, $label, $options, $callback);
     }
 
@@ -724,10 +773,16 @@ abstract class Grid
         string $label,
         array $options,
         $filterCallback,
-        $frameCallback)
-    {
-        $this->gridHelper->addOptionsColumnWithFilterConditionAndFrame($this, $objectFieldName, $label, $options,
-            $filterCallback, $frameCallback);
+        $frameCallback
+    ) {
+        $this->gridHelper->addOptionsColumnWithFilterConditionAndFrame(
+            $this,
+            $objectFieldName,
+            $label,
+            $options,
+            $filterCallback,
+            $frameCallback
+        );
     }
 
     /**
@@ -808,8 +863,12 @@ abstract class Grid
      */
     protected function addWebsiteNameColumn(string $objectFieldName, string $label = null)
     {
-        $this->addJoinValues('store_website', [$objectFieldName => 'website_id'], ['website_name' => 'name'],
-            'website');
+        $this->addJoinValues(
+            'store_website',
+            [$objectFieldName => 'website_id'],
+            ['website_name' => 'name'],
+            'website'
+        );
 
         $this->gridHelper->addWebsiteNameColumn($this, $objectFieldName, $label);
     }
@@ -914,8 +973,8 @@ abstract class Grid
         string $objectFieldName,
         string $label,
         string $width = '100%',
-        string $height = '15px')
-    {
+        string $height = '15px'
+    ) {
         $this->gridHelper->addDescriptionColumn($this, $objectFieldName, $label, $width, $height);
     }
 
@@ -975,8 +1034,8 @@ abstract class Grid
         string $objectFieldName,
         string $label = null,
         bool $allStores = false,
-        bool $withDefault = true)
-    {
+        bool $withDefault = true
+    ) {
         $this->gridHelper->addPaymentActiveMethods($this, $objectFieldName, $label, $allStores, $withDefault);
     }
 
@@ -990,13 +1049,13 @@ abstract class Grid
      */
     public function filterStoreCondition(
         AbstractCollection $collection,
-        Column $column)
-    {
+        Column $column
+    ) {
         $filter = $column->getFilter();
 
         $value = $filter->getDataUsingMethod('value');
 
-        if ($this->variableHelper->isEmpty($value)) {
+        if ($this->variables->isEmpty($value)) {
             return;
         }
 
@@ -1015,12 +1074,19 @@ abstract class Grid
 
         $value = $filter->getDataUsingMethod('value');
 
-        if ($this->variableHelper->isEmpty($value)) {
+        if ($this->variables->isEmpty($value)) {
             return;
         }
 
-        $collection->getSelect()->where(new Zend_Db_Expr(sprintf('FIND_IN_SET("%s", main_table.%s)', $value,
-            $column->getData('index'))));
+        $collection->getSelect()->where(
+            new Zend_Db_Expr(
+                sprintf(
+                    'FIND_IN_SET("%s", main_table.%s)',
+                    $value,
+                    $column->getData('index')
+                )
+            )
+        );
     }
 
     /**
@@ -1035,8 +1101,8 @@ abstract class Grid
         string $label,
         string $urlPath,
         bool $confirm = false,
-        array $urlParams = [])
-    {
+        array $urlParams = []
+    ) {
         $objectField = $this->getObjectField();
 
         if (empty($objectField)) {
@@ -1044,14 +1110,14 @@ abstract class Grid
         }
 
         if ($confirm) {
-            $this->actions[ $actionId ] = [
+            $this->actions[$actionId] = [
                 'caption' => $label,
                 'url'     => ['base' => $urlPath, 'params' => $urlParams],
                 'field'   => $objectField,
                 'confirm' => __('Are you sure?')
             ];
         } else {
-            $this->actions[ $actionId ] = [
+            $this->actions[$actionId] = [
                 'caption' => $label,
                 'url'     => ['base' => $urlPath, 'params' => $urlParams],
                 'field'   => $objectField
@@ -1065,16 +1131,16 @@ abstract class Grid
     protected function addActionColumn()
     {
         if ($this->allowEdit) {
-            $this->addAction('edit', __('Edit'), $this->editUrlRoute, false, $this->editUrlParams);
-        } else if ($this->allowView) {
-            $this->addAction('view', __('View'), $this->viewUrlRoute, false, $this->viewUrlParams);
+            $this->addAction('edit', __('Edit')->render(), $this->editUrlRoute, false, $this->editUrlParams);
+        } elseif ($this->allowView) {
+            $this->addAction('view', __('View')->render(), $this->viewUrlRoute, false, $this->viewUrlParams);
         }
 
         if ($this->allowDelete) {
-            $this->addAction('delete', __('Delete'), $this->deleteUrlRoute, true, $this->deleteUrlParams);
+            $this->addAction('delete', __('Delete')->render(), $this->deleteUrlRoute, true, $this->deleteUrlParams);
         }
 
-        if ( ! empty($this->actions)) {
+        if (!empty($this->actions)) {
             uasort($this->actions, [$this, 'sortActions']);
 
             $objectField = $this->getObjectField();
@@ -1104,8 +1170,8 @@ abstract class Grid
      */
     protected function sortActions(array $action1, array $action2): int
     {
-        $label1 = array_key_exists('caption', $action1) ? $action1[ 'caption' ] : '';
-        $label2 = array_key_exists('caption', $action2) ? $action2[ 'caption' ] : '';
+        $label1 = array_key_exists('caption', $action1) ? $action1['caption'] : '';
+        $label2 = array_key_exists('caption', $action2) ? $action2['caption'] : '';
 
         return strcasecmp($label1, $label2);
     }
@@ -1117,7 +1183,7 @@ abstract class Grid
     {
         $gridUrlParams = $this->gridUrlParams;
 
-        $gridUrlParams[ '_current' ] = true;
+        $gridUrlParams['_current'] = true;
 
         return $this->getUrl($this->gridUrlRoute, $gridUrlParams);
     }
@@ -1137,11 +1203,11 @@ abstract class Grid
 
         $editUrlParams = $this->editUrlParams;
 
-        $editUrlParams[ $objectField ] = $item->getData($objectField);
+        $editUrlParams[$objectField] = $item->getData($objectField);
 
         $viewUrlParams = $this->viewUrlParams;
 
-        $viewUrlParams[ $objectField ] = $item->getData($objectField);
+        $viewUrlParams[$objectField] = $item->getData($objectField);
 
         return $this->allowEdit ? $this->getUrl($this->editUrlRoute, $editUrlParams) :
             ($this->allowView ? $this->getUrl($this->viewUrlRoute, $viewUrlParams) : false);
@@ -1159,16 +1225,16 @@ abstract class Grid
         string $label,
         string $urlPath,
         bool $confirm = false,
-        array $urlParams = [])
-    {
+        array $urlParams = []
+    ) {
         if ($confirm) {
-            $this->massActions[ $actionId ] = [
+            $this->massActions[$actionId] = [
                 'label'   => $label,
                 'url'     => $this->getUrl($urlPath, $urlParams),
                 'confirm' => __('Are you sure?')
             ];
         } else {
-            $this->massActions[ $actionId ] = [
+            $this->massActions[$actionId] = [
                 'label' => $label,
                 'url'   => $this->getUrl($urlPath, $urlParams)
             ];
@@ -1181,14 +1247,26 @@ abstract class Grid
     protected function _prepareMassaction(): Grid
     {
         if ($this->allowDelete) {
-            $this->addMassAction('delete', __('Delete'), $this->massDeleteUrlRoute, true, $this->massDeleteUrlParams);
+            $this->addMassAction(
+                'delete',
+                __('Delete')->render(),
+                $this->massDeleteUrlRoute,
+                true,
+                $this->massDeleteUrlParams
+            );
         }
 
         if ($this->allowExport) {
-            $this->addMassAction('export', __('Export'), $this->massExportUrlRoute, false, $this->massExportUrlParams);
+            $this->addMassAction(
+                'export',
+                __('Export')->render(),
+                $this->massExportUrlRoute,
+                false,
+                $this->massExportUrlParams
+            );
         }
 
-        if ( ! empty($this->massActions)) {
+        if (!empty($this->massActions)) {
             $objectField = $this->getObjectField();
 
             if (empty($objectField)) {
@@ -1239,8 +1317,8 @@ abstract class Grid
      */
     protected function sortMassActions(array $action1, array $action2): int
     {
-        $label1 = array_key_exists('label', $action1) ? $action1[ 'label' ] : '';
-        $label2 = array_key_exists('label', $action2) ? $action2[ 'label' ] : '';
+        $label1 = array_key_exists('label', $action1) ? $action1['label'] : '';
+        $label2 = array_key_exists('label', $action2) ? $action2['label'] : '';
 
         return strcasecmp($label1, $label2);
     }
@@ -1289,10 +1367,17 @@ abstract class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
-        $this->gridHelper->addEavAttributeColumn($this, $objectFieldName, $label, $customer, $address, $category,
-            $product);
+        bool $product = true
+    ) {
+        $this->gridHelper->addEavAttributeColumn(
+            $this,
+            $objectFieldName,
+            $label,
+            $customer,
+            $address,
+            $category,
+            $product
+        );
     }
 
     /**
@@ -1307,8 +1392,8 @@ abstract class Grid
         string $valueFieldName,
         string $attributeFieldName,
         string $label,
-        bool $multiValue = false)
-    {
+        bool $multiValue = false
+    ) {
         $this->gridHelper->addEavAttributeValueColumn($this, $valueFieldName, $attributeFieldName, $label, $multiValue);
     }
 
@@ -1328,10 +1413,17 @@ abstract class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
-        $this->gridHelper->addEavAttributeSetColumn($this, $objectFieldName, $label, $customer, $address, $category,
-            $product);
+        bool $product = true
+    ) {
+        $this->gridHelper->addEavAttributeSetColumn(
+            $this,
+            $objectFieldName,
+            $label,
+            $customer,
+            $address,
+            $category,
+            $product
+        );
     }
 
     /**
@@ -1350,10 +1442,17 @@ abstract class Grid
         bool $customer = false,
         bool $address = false,
         bool $category = false,
-        bool $product = true)
-    {
-        $this->gridHelper->addEavEntityTypeColumn($this, $objectFieldName, $label, $customer, $address, $category,
-            $product);
+        bool $product = true
+    ) {
+        $this->gridHelper->addEavEntityTypeColumn(
+            $this,
+            $objectFieldName,
+            $label,
+            $customer,
+            $address,
+            $category,
+            $product
+        );
     }
 
     /**
@@ -1364,8 +1463,8 @@ abstract class Grid
      */
     public function addProductAttributeCodeColumn(
         string $objectFieldName,
-        string $label)
-    {
+        string $label
+    ) {
         $this->gridHelper->addProductAttributeCodeColumn($this, $objectFieldName, $label);
     }
 
@@ -1408,7 +1507,7 @@ abstract class Grid
      */
     public function addJoinAttributeValues(string $valueFieldName, string $attributeFieldName)
     {
-        $this->joinAttributeValues[ $valueFieldName ] = $attributeFieldName;
+        $this->joinAttributeValues[$valueFieldName] = $attributeFieldName;
     }
 
     /**
@@ -1417,7 +1516,7 @@ abstract class Grid
      */
     public function addJoinAttributeMultiValues(string $valueFieldName, string $attributeFieldName)
     {
-        $this->joinAttributeMultiValues[ $valueFieldName ] = $attributeFieldName;
+        $this->joinAttributeMultiValues[$valueFieldName] = $attributeFieldName;
     }
 
     /**
@@ -1432,7 +1531,7 @@ abstract class Grid
 
         if (is_array($condition) && array_key_exists('like', $condition)) {
             /** @var Zend_Db_Expr $expression */
-            $expression = $condition[ 'like' ];
+            $expression = $condition['like'];
 
             $value = $expression->__toString();
 
@@ -1440,8 +1539,15 @@ abstract class Grid
             $valueColumnName = preg_replace('/_value$/', '', $optionValueColumnName);
             $optionValueTableAlias = sprintf('eaov_%s', $valueColumnName);
 
-            $collection->getSelect()->where(sprintf('IF(%s.value IS NULL, main_table.%s, %s.value) like %s',
-                $optionValueTableAlias, $valueColumnName, $optionValueTableAlias, $value));
+            $collection->getSelect()->where(
+                sprintf(
+                    'IF(%s.value IS NULL, main_table.%s, %s.value) like %s',
+                    $optionValueTableAlias,
+                    $valueColumnName,
+                    $optionValueTableAlias,
+                    $value
+                )
+            );
         }
     }
 

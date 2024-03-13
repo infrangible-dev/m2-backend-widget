@@ -1,25 +1,27 @@
 <?php /** @noinspection PhpDeprecationInspection */
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Block\Form;
 
 use Exception;
+use FeWeDev\Base\Arrays;
+use Infrangible\BackendWidget\Model\Backend\Session;
+use Infrangible\Core\Helper\Registry;
 use Magento\Backend\Block\Widget\Context;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\View\Element\AbstractBlock;
-use Infrangible\BackendWidget\Model\Backend\Session;
-use Infrangible\Core\Helper\Registry;
-use Tofex\Help\Arrays;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Container
     extends \Magento\Backend\Block\Widget\Form\Container
 {
     /** @var Arrays */
-    protected $arrayHelper;
+    protected $arrays;
 
     /** @var Registry */
     protected $registryHelper;
@@ -83,40 +85,39 @@ class Container
 
     /**
      * @param Context  $context
-     * @param Arrays   $arrayHelper
+     * @param Arrays   $arrays
      * @param Registry $registryHelper
      * @param Session  $session
      * @param array    $data
      */
     public function __construct(
         Context $context,
-        Arrays $arrayHelper,
+        Arrays $arrays,
         Registry $registryHelper,
         Session $session,
         array $data = [])
     {
-        $this->arrayHelper = $arrayHelper;
+        $this->arrays = $arrays;
         $this->registryHelper = $registryHelper;
-
         $this->session = $session;
 
-        $this->moduleKey = $arrayHelper->getValue($data, 'module_key', 'adminhtml');
-        $this->objectName = $arrayHelper->getValue($data, 'object_name', 'empty');
-        $this->objectField = $arrayHelper->getValue($data, 'object_field', 'id');
-        $this->objectRegistryKey = $arrayHelper->getValue($data, 'object_registry_key');
-        $this->objectTitle = $arrayHelper->getValue($data, 'title', 'Container Widget Header');
-        $this->allowAdd = $arrayHelper->getValue($data, 'allow_add', true);
-        $this->allowEdit = $arrayHelper->getValue($data, 'allow_edit', true);
-        $this->allowView = $arrayHelper->getValue($data, 'allow_view', false);
-        $this->allowDelete = $arrayHelper->getValue($data, 'allow_delete', true);
-        $this->allowExport = $arrayHelper->getValue($data, 'allow_export', true);
-        $this->saveUrlRoute = $arrayHelper->getValue($data, 'save_url_route', '*/*/save');
-        $this->saveUrlParams = $arrayHelper->getValue($data, 'save_url_params', []);
-        $this->deleteUrlRoute = $arrayHelper->getValue($data, 'delete_url_route', '*/*/delete');
-        $this->deleteUrlParams = $arrayHelper->getValue($data, 'delete_url_params', []);
-        $this->indexUrlRoute = $arrayHelper->getValue($data, 'index_url_route');
-        $this->indexUrlParams = $arrayHelper->getValue($data, 'index_url_params', []);
-        $this->formContentBlockType = $arrayHelper->getValue($data, 'form_content_block_type');
+        $this->moduleKey = $arrays->getValue($data, 'module_key', 'adminhtml');
+        $this->objectName = $arrays->getValue($data, 'object_name', 'empty');
+        $this->objectField = $arrays->getValue($data, 'object_field', 'id');
+        $this->objectRegistryKey = $arrays->getValue($data, 'object_registry_key');
+        $this->objectTitle = $arrays->getValue($data, 'title', 'Container Widget Header');
+        $this->allowAdd = $arrays->getValue($data, 'allow_add', true);
+        $this->allowEdit = $arrays->getValue($data, 'allow_edit', true);
+        $this->allowView = $arrays->getValue($data, 'allow_view', false);
+        $this->allowDelete = $arrays->getValue($data, 'allow_delete', true);
+        $this->allowExport = $arrays->getValue($data, 'allow_export', true);
+        $this->saveUrlRoute = $arrays->getValue($data, 'save_url_route', '*/*/save');
+        $this->saveUrlParams = $arrays->getValue($data, 'save_url_params', []);
+        $this->deleteUrlRoute = $arrays->getValue($data, 'delete_url_route', '*/*/delete');
+        $this->deleteUrlParams = $arrays->getValue($data, 'delete_url_params', []);
+        $this->indexUrlRoute = $arrays->getValue($data, 'index_url_route');
+        $this->indexUrlParams = $arrays->getValue($data, 'index_url_params', []);
+        $this->formContentBlockType = $arrays->getValue($data, 'form_content_block_type');
 
         parent::__construct($context, $data);
     }

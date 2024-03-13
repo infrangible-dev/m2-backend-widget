@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Magento\Framework\View\Element\AbstractBlock;
@@ -8,7 +10,7 @@ use Infrangible\BackendWidget\Block\Grid\Container;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2023 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 abstract class Index
@@ -25,7 +27,7 @@ abstract class Index
 
         $this->_addContent($block);
 
-        $this->finishAction(__('Manage'));
+        $this->finishAction(__('Manage')->render());
 
         $page = $this->_view->getPage();
 
