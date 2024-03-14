@@ -24,6 +24,8 @@ use Infrangible\Core\Model\Config\Source\AttributeSet;
 use Infrangible\Core\Model\Config\Source\Categories;
 use Infrangible\Core\Model\Config\Source\CmsBlock;
 use Infrangible\Core\Model\Config\Source\CmsPage;
+use Infrangible\Core\Model\Config\Source\Directory\Region;
+use Infrangible\Core\Model\Config\Source\Directory\RegionAny;
 use Infrangible\Core\Model\Config\Source\EntityType;
 use Infrangible\Core\Model\Config\Source\Operator;
 use Infrangible\Core\Model\Config\Source\Payment\ActiveMethods;
@@ -36,7 +38,6 @@ use Magento\Cms\Model\Wysiwyg\Config;
 use Magento\Config\Model\Config\Source\Website;
 use Magento\Config\Model\Config\Source\Yesno;
 use Magento\Customer\Model\Group;
-use Magento\Customer\Model\ResourceModel\Address\Attribute\Source\Region;
 use Magento\Customer\Model\ResourceModel\Group\Collection;
 use Magento\Directory\Model\Config\Source\Country;
 use Magento\Framework\Data\Form\Element\Fieldset;
@@ -117,6 +118,9 @@ class Form
     /** @var Region */
     protected $sourceRegion;
 
+    /** @var RegionAny */
+    protected $sourceRegionAny;
+
     /** @var ActiveMethods */
     protected $sourcePaymentActiveMethods;
 
@@ -160,18 +164,18 @@ class Form
     protected $escaper;
 
     /**
-     * @param Variables                          $variables
-     * @param Arrays                             $arrays
-     * @param Template                           $templateHelper
-     * @param Url                                $urlHelper
-     * @param Customer                           $customerHelper
-     * @param \Infrangible\Core\Helper\Attribute $attributeHelper
-     * @param Instances                          $instanceHelper
-     * @param Session                            $adminhtmlSession
-     * @param FormFactory                        $formFactory
-     * @param Yesno                              $sourceYesNo
-     * @param Website                            $sourceWebsite
-     * @param Store                              $sourceStore
+     * @param Variables                                           $variables
+     * @param Arrays                                              $arrays
+     * @param Template                                            $templateHelper
+     * @param Url                                                 $urlHelper
+     * @param Customer                                            $customerHelper
+     * @param \Infrangible\Core\Helper\Attribute                  $attributeHelper
+     * @param Instances                                           $instanceHelper
+     * @param Session                                             $adminhtmlSession
+     * @param FormFactory                                         $formFactory
+     * @param Yesno                                               $sourceYesNo
+     * @param Website                                             $sourceWebsite
+     * @param Store                                               $sourceStore
      * @param \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin
      * @param CmsBlock                                            $sourceCmsBlock
      * @param CmsPage                                             $sourceCmsPage
@@ -180,6 +184,7 @@ class Form
      * @param Operator                                            $sourceOperator
      * @param Country                                             $sourceCountry
      * @param Region                                              $sourceRegion
+     * @param RegionAny                                           $sourceRegionAny
      * @param ActiveMethods                                       $sourcePaymentActiveMethods
      * @param Attribute                                           $sourceAttributes
      * @param AttributeSet                                        $sourceAttributeSets
@@ -215,6 +220,7 @@ class Form
         Operator $sourceOperator,
         Country $sourceCountry,
         Region $sourceRegion,
+        RegionAny $sourceRegionAny,
         ActiveMethods $sourcePaymentActiveMethods,
         Attribute $sourceAttributes,
         AttributeSet $sourceAttributeSets,
@@ -249,6 +255,7 @@ class Form
         $this->sourceOperator = $sourceOperator;
         $this->sourceCountry = $sourceCountry;
         $this->sourceRegion = $sourceRegion;
+        $this->sourceRegionAny = $sourceRegionAny;
         $this->sourcePaymentActiveMethods = $sourcePaymentActiveMethods;
         $this->sourceAttributes = $sourceAttributes;
         $this->sourceAttributeSets = $sourceAttributeSets;
@@ -1508,6 +1515,40 @@ class Form
             $objectFieldName,
             $label,
             $this->sourceRegion->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    /**
+     * @param Fieldset           $fieldSet
+     * @param string             $objectRegistryKey
+     * @param string             $objectFieldName
+     * @param string             $label
+     * @param AbstractModel|null $object
+     * @param bool               $required
+     * @param bool               $readOnly
+     * @param bool               $disabled
+     */
+    public function addRegionAnyField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        AbstractModel $object = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceRegionAny->toOptionArray(),
             null,
             $object,
             $required,

@@ -934,6 +934,34 @@ abstract class Form
     }
 
     /**
+     * @param Fieldset $fieldSet
+     * @param string   $objectFieldName
+     * @param string   $label
+     * @param bool     $required
+     * @param bool     $readOnly
+     * @param bool     $disabled
+     */
+    protected function addRegionAnyField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->formHelper->addRegionAnyField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required,
+            $this->isReadOnlyAll() ? true : $readOnly,
+            $this->isDisableAll() ? true : $disabled
+        );
+    }
+
+    /**
      * @param Fieldset           $fieldSet
      * @param string             $objectFieldName
      * @param string             $label

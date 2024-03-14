@@ -1024,6 +1024,28 @@ abstract class Grid
     }
 
     /**
+     * @param string $objectFieldName
+     * @param string $label
+     *
+     * @throws Exception
+     */
+    protected function addRegionColumn(string $objectFieldName, string $label)
+    {
+        $this->gridHelper->addRegionColumn($this, $objectFieldName, $label);
+    }
+
+    /**
+     * @param string $objectFieldName
+     * @param string $label
+     *
+     * @throws Exception
+     */
+    protected function addRegionAnyColumn(string $objectFieldName, string $label)
+    {
+        $this->gridHelper->addRegionAnyColumn($this, $objectFieldName, $label);
+    }
+
+    /**
      * @param string      $objectFieldName
      * @param string|null $label
      *

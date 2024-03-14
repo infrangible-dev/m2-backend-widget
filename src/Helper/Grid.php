@@ -20,6 +20,8 @@ use Infrangible\Core\Model\Config\Source\AttributeSet;
 use Infrangible\Core\Model\Config\Source\Categories;
 use Infrangible\Core\Model\Config\Source\CmsBlock;
 use Infrangible\Core\Model\Config\Source\CmsPage;
+use Infrangible\Core\Model\Config\Source\Directory\Region;
+use Infrangible\Core\Model\Config\Source\Directory\RegionAny;
 use Infrangible\Core\Model\Config\Source\EntityType;
 use Infrangible\Core\Model\Config\Source\Operator;
 use Infrangible\Core\Model\Config\Source\Payment\ActiveMethods;
@@ -75,6 +77,12 @@ class Grid
     /** @var Country */
     protected $sourceCountry;
 
+    /** @var Region */
+    protected $sourceRegion;
+
+    /** @var RegionAny */
+    protected $sourceRegionAny;
+
     /** @var ActiveMethods */
     protected $sourcePaymentActiveMethods;
 
@@ -103,18 +111,20 @@ class Grid
     protected $customerGroupCollection;
 
     /**
-     * @param Template   $templateHelper
-     * @param Variables  $variables
-     * @param Customer   $customerHelper
-     * @param Instances  $instanceHelper
-     * @param Yesno      $sourceYesNo
-     * @param Store      $sourceStore
-     * @param CmsPage    $sourceCmsPage
-     * @param CmsBlock   $sourceCmsBlock
-     * @param TypeId     $sourceTypeIds
-     * @param Categories $sourceCategories
-     * @param Operator   $sourceOperator
-     * @param Country    $sourceCountry
+     * @param Template              $templateHelper
+     * @param Variables             $variables
+     * @param Customer              $customerHelper
+     * @param Instances             $instanceHelper
+     * @param Yesno                 $sourceYesNo
+     * @param Store                 $sourceStore
+     * @param CmsPage               $sourceCmsPage
+     * @param CmsBlock              $sourceCmsBlock
+     * @param TypeId                $sourceTypeIds
+     * @param Categories            $sourceCategories
+     * @param Operator              $sourceOperator
+     * @param Country               $sourceCountry
+     * @param Region                $sourceRegion
+     * @param RegionAny             $sourceRegionAny
      * @param ActiveMethods         $sourcePaymentActiveMethods
      * @param Attribute             $sourceAttributes
      * @param AttributeSet          $sourceAttributeSets
@@ -137,6 +147,8 @@ class Grid
         Categories $sourceCategories,
         Operator $sourceOperator,
         Country $sourceCountry,
+        Region $sourceRegion,
+        RegionAny $sourceRegionAny,
         ActiveMethods $sourcePaymentActiveMethods,
         Attribute $sourceAttributes,
         AttributeSet $sourceAttributeSets,
@@ -159,6 +171,8 @@ class Grid
         $this->sourceCategories = $sourceCategories;
         $this->sourceOperator = $sourceOperator;
         $this->sourceCountry = $sourceCountry;
+        $this->sourceRegion = $sourceRegion;
+        $this->sourceRegionAny = $sourceRegionAny;
         $this->sourcePaymentActiveMethods = $sourcePaymentActiveMethods;
         $this->sourceAttributes = $sourceAttributes;
         $this->sourceAttributeSets = $sourceAttributeSets;
@@ -902,6 +916,30 @@ class Grid
     }
 
     /**
+     * @param Extended $grid
+     * @param string   $objectFieldName
+     * @param string   $label
+     *
+     * @throws Exception
+     */
+    public function addRegionColumn(Extended $grid, string $objectFieldName, string $label)
+    {
+        $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceRegion->toOptions());
+    }
+
+    /**
+     * @param Extended $grid
+     * @param string   $objectFieldName
+     * @param string   $label
+     *
+     * @throws Exception
+     */
+    public function addRegionAnyColumn(Extended $grid, string $objectFieldName, string $label)
+    {
+        $this->addOptionsColumn($grid, $objectFieldName, $label, $this->sourceRegionAny->toOptions());
+    }
+
+    /**
      * @param Extended    $grid
      * @param string      $objectFieldName
      * @param string|null $label
@@ -954,7 +992,8 @@ class Grid
             $grid,
             $objectFieldName,
             $label,
-            $customerGroups, [$grid, 'filterInSet'],
+            $customerGroups,
+            [$grid, 'filterInSet'],
             CustomerGroup::class
         );
     }
