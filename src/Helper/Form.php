@@ -840,7 +840,7 @@ class Form
         bool $disabled = false
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Website');
+            $label = __('Website')->render();
         }
 
         $config = [
@@ -917,7 +917,7 @@ class Form
         bool $disabled = false
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Website');
+            $label = __('Website')->render();
         }
 
         $config = [
@@ -972,7 +972,7 @@ class Form
         bool $all = true
     ) {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $config = [
@@ -1062,7 +1062,7 @@ class Form
         bool $disabled = false
     ) {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $config = [
@@ -1125,7 +1125,7 @@ class Form
         bool $disabled = false
     ) {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $config = [
@@ -1188,7 +1188,7 @@ class Form
         bool $disabled = false
     ) {
         if (empty($label)) {
-            $label = __('Block');
+            $label = __('Block')->render();
         }
 
         $this->addOptionsField(
@@ -1228,7 +1228,7 @@ class Form
         bool $disabled = false
     ) {
         if (empty($label)) {
-            $label = __('Page');
+            $label = __('Page')->render();
         }
 
         $this->addOptionsField(
@@ -1600,13 +1600,13 @@ class Form
         bool $disabled = false
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Customer Group');
+            $label = __('Customer Group')->render();
         }
 
         $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
         $this->customerGroupCollection->loadData();
 
-        $customerGroups = [['value' => '', 'label' => __('--Please Select--')]];
+        $customerGroups = [['value' => '', 'label' => __('--Please Select--')->render()]];
 
         /** @var Group $customerGroup */
         foreach ($this->customerGroupCollection as $customerGroup) {
@@ -1648,13 +1648,13 @@ class Form
         bool $disabled = false
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Customer Group');
+            $label = __('Customer Group')->render();
         }
 
         $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
         $this->customerGroupCollection->loadData();
 
-        $customerGroups = [['value' => '', 'label' => __('--Please Select--')]];
+        $customerGroups = [['value' => '', 'label' => __('--Please Select--')->render()]];
 
         /** @var Group $customerGroup */
         foreach ($this->customerGroupCollection as $customerGroup) {
@@ -1702,7 +1702,7 @@ class Form
         bool $withDefault = true
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Payment Method');
+            $label = __('Payment Method')->render();
         }
 
         $this->sourcePaymentActiveMethods->setAllStores($allStores);
@@ -1743,7 +1743,7 @@ class Form
         bool $disabled = false
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Apply To');
+            $label = __('Apply To')->render();
         }
 
         $config = [
@@ -1752,8 +1752,8 @@ class Form
             'value'       => $this->getFieldValue($objectRegistryKey, $objectFieldName, 'all', $object),
             'values'      => $this->productType->getOptions(),
             'mode_labels' => [
-                'all'    => __('All Product Types'),
-                'custom' => __('Selected Product Types')
+                'all'    => __('All Product Types')->render(),
+                'custom' => __('Selected Product Types')->render()
             ],
             'required'    => $required
         ];
