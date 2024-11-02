@@ -669,7 +669,7 @@ class Grid
     public function addWebsiteNameColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Website');
+            $label = __('Website')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -691,7 +691,7 @@ class Grid
     public function addStoreColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -714,7 +714,7 @@ class Grid
     public function addStoreStructureColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -739,7 +739,7 @@ class Grid
     public function addStoreWithAdminStructureColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if (empty($label)) {
-            $label = __('Store View');
+            $label = __('Store View')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -766,7 +766,7 @@ class Grid
     public function addCmsPageColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if (empty($label)) {
-            $label = __('Page');
+            $label = __('Page')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -789,7 +789,7 @@ class Grid
     public function addCmsBlockColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if (empty($label)) {
-            $label = __('Block');
+            $label = __('Block')->render();
         }
 
         $grid->addColumn($this->getColumnId($objectFieldName), [
@@ -949,7 +949,7 @@ class Grid
     public function addCustomerGroupColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Customer Group');
+            $label = __('Customer Group')->render();
         }
 
         $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
@@ -975,7 +975,7 @@ class Grid
     public function addCustomerGroupsColumn(Extended $grid, string $objectFieldName, string $label = null)
     {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Customer Group');
+            $label = __('Customer Group')->render();
         }
 
         $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
@@ -1015,7 +1015,7 @@ class Grid
         bool $withDefault = true
     ) {
         if ($this->variables->isEmpty($label)) {
-            $label = __('Payment Method');
+            $label = __('Payment Method')->render();
         }
 
         $this->sourcePaymentActiveMethods->setAllStores($allStores);
