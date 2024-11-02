@@ -18,6 +18,7 @@ use Infrangible\Core\Helper\Url;
 use Infrangible\Core\Model\Config\Source\Attribute;
 use Infrangible\Core\Model\Config\Source\Attribute\AddressAttributeCode;
 use Infrangible\Core\Model\Config\Source\Attribute\CustomerAttributeCode;
+use Infrangible\Core\Model\Config\Source\Attribute\Product\Filterable;
 use Infrangible\Core\Model\Config\Source\Attribute\ProductAttributeCode;
 use Infrangible\Core\Model\Config\Source\Attribute\SortBy;
 use Infrangible\Core\Model\Config\Source\AttributeSet;
@@ -148,6 +149,12 @@ class Form
     /** @var Theme */
     protected $sourceThemes;
 
+    /** @var Attribute\Product */
+    protected $sourceAttributeProduct;
+
+    /** @var Filterable */
+    protected $sourceAttributeProductFilterable;
+
     /** @var Collection */
     protected $customerGroupCollection;
 
@@ -163,42 +170,6 @@ class Form
     /** @var Escaper */
     protected $escaper;
 
-    /**
-     * @param Variables                                           $variables
-     * @param Arrays                                              $arrays
-     * @param Template                                            $templateHelper
-     * @param Url                                                 $urlHelper
-     * @param Customer                                            $customerHelper
-     * @param \Infrangible\Core\Helper\Attribute                  $attributeHelper
-     * @param Instances                                           $instanceHelper
-     * @param Session                                             $adminhtmlSession
-     * @param FormFactory                                         $formFactory
-     * @param Yesno                                               $sourceYesNo
-     * @param Website                                             $sourceWebsite
-     * @param Store                                               $sourceStore
-     * @param \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin
-     * @param CmsBlock                                            $sourceCmsBlock
-     * @param CmsPage                                             $sourceCmsPage
-     * @param TypeId                                              $sourceTypeIds
-     * @param Categories                                          $sourceCategories
-     * @param Operator                                            $sourceOperator
-     * @param Country                                             $sourceCountry
-     * @param Region                                              $sourceRegion
-     * @param RegionAny                                           $sourceRegionAny
-     * @param ActiveMethods                                       $sourcePaymentActiveMethods
-     * @param Attribute                                           $sourceAttributes
-     * @param AttributeSet                                        $sourceAttributeSets
-     * @param EntityType                                          $sourceEntityTypes
-     * @param ProductAttributeCode                                $sourceProductAttributeCode
-     * @param CustomerAttributeCode                               $sourceCustomerAttributeCode
-     * @param AddressAttributeCode                                $sourceAddressAttributeCode
-     * @param SortBy                                              $sourceAttributeSortBy
-     * @param Theme                                               $sourceThemes
-     * @param TimezoneInterface                                   $localeDate
-     * @param Type                                                $productType
-     * @param Config                                              $wysiwygConfig
-     * @param Escaper                                             $escaper
-     */
     public function __construct(
         Variables $variables,
         Arrays $arrays,
@@ -230,6 +201,8 @@ class Form
         AddressAttributeCode $sourceAddressAttributeCode,
         SortBy $sourceAttributeSortBy,
         Theme $sourceThemes,
+        Attribute\Product $sourceAttributeProduct,
+        Filterable $sourceAttributeProductFilterable,
         TimezoneInterface $localeDate,
         Type $productType,
         Config $wysiwygConfig,
@@ -265,6 +238,8 @@ class Form
         $this->sourceAddressAttributeCode = $sourceAddressAttributeCode;
         $this->sourceAttributeSortBy = $sourceAttributeSortBy;
         $this->sourceThemes = $sourceThemes;
+        $this->sourceAttributeProduct = $sourceAttributeProduct;
+        $this->sourceAttributeProductFilterable = $sourceAttributeProductFilterable;
         $this->customerGroupCollection = $this->customerHelper->getCustomerGroupCollection();
         $this->dateFormatIso = $localeDate->getDateTimeFormat(IntlDateFormatter::MEDIUM);
         $this->productType = $productType;
@@ -273,15 +248,6 @@ class Form
     }
 
     /**
-     * @param string             $saveUrlRoute
-     * @param array              $saveUrlParams
-     * @param bool               $isUpload
-     * @param string             $formId
-     * @param string|null        $htmlIdPrefix
-     * @param AbstractModel|null $object
-     * @param string|null        $objectField
-     *
-     * @return \Magento\Framework\Data\Form
      * @throws LocalizedException
      */
     public function createPostForm(
@@ -289,9 +255,9 @@ class Form
         array $saveUrlParams,
         bool $isUpload = false,
         string $formId = 'edit_form',
-        string $htmlIdPrefix = null,
-        AbstractModel $object = null,
-        string $objectField = null
+        ?string $htmlIdPrefix = null,
+        ?AbstractModel $object = null,
+        ?string $objectField = null
     ): \Magento\Framework\Data\Form {
         if (empty($objectField)) {
             $objectField = 'id';
@@ -300,40 +266,55 @@ class Form
         $form = $this->formFactory->create();
 
         if ($object && $object->getId()) {
-            $saveUrlParams[$objectField] = $object->getId();
+            $saveUrlParams[ $objectField ] = $object->getId();
         }
 
-        $form->setData('id', $formId);
-        $form->setData('action', $this->urlHelper->getBackendUrl($saveUrlRoute, $saveUrlParams));
-        $form->setData('method', 'post');
-        $form->setData('use_container', true);
+        $form->setData(
+            'id',
+            $formId
+        );
+        $form->setData(
+            'action',
+            $this->urlHelper->getBackendUrl(
+                $saveUrlRoute,
+                $saveUrlParams
+            )
+        );
+        $form->setData(
+            'method',
+            'post'
+        );
+        $form->setData(
+            'use_container',
+            true
+        );
 
         if ($isUpload) {
-            $form->setData('enctype', 'multipart/form-data');
+            $form->setData(
+                'enctype',
+                'multipart/form-data'
+            );
         }
 
-        if (!$this->variables->isEmpty($htmlIdPrefix)) {
-            $form->setData('html_id_prefix', sprintf('%s_', $htmlIdPrefix));
+        if (! $this->variables->isEmpty($htmlIdPrefix)) {
+            $form->setData(
+                'html_id_prefix',
+                sprintf(
+                    '%s_',
+                    $htmlIdPrefix
+                )
+            );
         }
 
         return $form;
     }
 
-    /**
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param string|null        $splitObjectValueSeparator
-     *
-     * @return mixed
-     */
     public function getFieldValue(
         string $objectRegistryKey,
         string $objectFieldName,
         $defaultValue = null,
-        AbstractModel $object = null,
-        string $splitObjectValueSeparator = null
+        ?AbstractModel $object = null,
+        ?string $splitObjectValueSeparator = null
     ) {
         $formData = $this->adminhtmlSession->getData(
             sprintf(
@@ -343,7 +324,10 @@ class Form
             )
         );
 
-        if (is_object($formData) && method_exists($formData, 'toArray')) {
+        if (is_object($formData) && method_exists(
+                $formData,
+                'toArray'
+            )) {
             $formData = $formData->toArray();
         }
 
@@ -351,15 +335,24 @@ class Form
             $formData = [];
         }
 
-        if (array_key_exists($objectFieldName, $formData)) {
-            return $this->arrays->getValue($formData, $objectFieldName);
+        if (array_key_exists(
+            $objectFieldName,
+            $formData
+        )) {
+            return $this->arrays->getValue(
+                $formData,
+                $objectFieldName
+            );
         }
 
         if ($object instanceof AbstractModel && $object->getId()) {
             $objectValue = $object->getDataUsingMethod($objectFieldName);
 
-            if (!$this->variables->isEmpty($splitObjectValueSeparator)) {
-                $objectValue = explode(',', $objectValue);
+            if (! $this->variables->isEmpty($splitObjectValueSeparator)) {
+                $objectValue = explode(
+                    ',',
+                    $objectValue
+                );
             }
 
             return $objectValue;
@@ -369,22 +362,14 @@ class Form
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     * @param mixed              $after
+     * @param bool|string|null $after
      */
     public function addTextField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
@@ -393,49 +378,54 @@ class Form
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, '', $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                '',
+                $object
+            ),
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'text', $config, $after);
+        $fieldSet->addField(
+            $objectFieldName,
+            'text',
+            $config,
+            $after
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param string             $after
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addTextFieldAfter(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         string $after,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -453,22 +443,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addTextareaField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -476,49 +456,53 @@ class Form
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, '', $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                '',
+                $object
+            ),
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'textarea', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'textarea',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param string             $comment
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addTextareaWithCommentField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         string $comment,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -526,44 +510,52 @@ class Form
         $config = [
             'name'               => $objectFieldName,
             'label'              => $label,
-            'value'              => $this->getFieldValue($objectRegistryKey, $objectFieldName, '', $object),
+            'value'              => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                '',
+                $object
+            ),
             'required'           => $required,
-            'after_element_html' => sprintf('<div>%s</div>', nl2br($comment))
+            'after_element_html' => sprintf(
+                '<div>%s</div>',
+                nl2br($comment)
+            )
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'textarea', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'textarea',
+            $config
+        );
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param array              $options
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     * @param mixed              $after
+     * @param bool|string|null $after
      */
     public function addOptionsField(
         Fieldset $fieldSet,
@@ -572,7 +564,7 @@ class Form
         string $label,
         array $options,
         $defaultValue,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
@@ -582,44 +574,50 @@ class Form
             'name'     => $objectFieldName,
             'label'    => $label,
             'title'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, $defaultValue, $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                $defaultValue,
+                $object
+            ),
             'values'   => $options,
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'select', $config, $after);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            $config,
+            $after
+        );
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param string             $className
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     * @param mixed              $after
+     * @param bool|string|null $after
      *
      * @throws Exception
      */
@@ -630,7 +628,7 @@ class Form
         string $label,
         string $className,
         $defaultValue,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
@@ -639,10 +637,18 @@ class Form
         /** @var OptionSourceInterface $optionsClass */
         $optionsClass = $this->instanceHelper->getSingleton($className);
 
-        if (method_exists($optionsClass, 'toOptionArray')) {
+        if (method_exists(
+            $optionsClass,
+            'toOptionArray'
+        )) {
             $options = $optionsClass->toOptionArray();
         } else {
-            throw new Exception(sprintf('Options class: %s does not implement method: toOptions', $className));
+            throw new Exception(
+                sprintf(
+                    'Options class: %s does not implement method: toOptions',
+                    $className
+                )
+            );
         }
 
         $this->addOptionsField(
@@ -660,18 +666,6 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param array              $options
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addOptionsMultiSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -679,7 +673,7 @@ class Form
         string $label,
         array $options,
         $defaultValue,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -688,48 +682,53 @@ class Form
             'name'     => $objectFieldName,
             'label'    => $label,
             'title'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, $defaultValue, $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                $defaultValue,
+                $object
+            ),
             'values'   => $options,
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'multiselect', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'multiselect',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addYesNoField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -748,24 +747,13 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectFieldName
-     * @param string             $objectRegistryKey
-     * @param string             $label
-     * @param string             $after
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addYesNoFieldAfter(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         string $after,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -785,24 +773,13 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addYesNoWithDefaultField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         $defaultValue,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -821,21 +798,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addWebsiteSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label = null,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
     ) {
@@ -846,73 +814,76 @@ class Form
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                0,
+                $object
+            ),
             'values'   => $this->sourceWebsite->toOptionArray(),
             'required' => true
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField('website_id', 'select', $config);
+        $fieldSet->addField(
+            'website_id',
+            'select',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addWebsiteMultiselectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label = null,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
     ) {
         $this->addWebsiteMultiselectFieldWithValue(
             $fieldSet,
             $objectFieldName,
-            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                0,
+                $object
+            ),
             $label,
             $readOnly,
             $disabled
         );
     }
 
-    /**
-     * @param Fieldset    $fieldSet
-     * @param mixed       $value
-     * @param string      $objectFieldName
-     * @param string|null $label
-     * @param bool        $readOnly
-     * @param bool        $disabled
-     */
     public function addWebsiteMultiselectFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
         $value = null,
-        string $label = null,
+        ?string $label = null,
         bool $readOnly = false,
         bool $disabled = false
     ) {
@@ -929,44 +900,43 @@ class Form
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField('website_id', 'multiselect', $config);
+        $fieldSet->addField(
+            'website_id',
+            'multiselect',
+            $config
+        );
     }
 
-    /**
-     * @param LayoutInterface    $layout
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     * @param bool               $all
-     */
     public function addStoreSelectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false,
         bool $all = true
@@ -979,30 +949,48 @@ class Form
             'name'     => $objectFieldName,
             'label'    => $label,
             'title'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
-            'values'   => $this->sourceStore->getStoreValuesForForm(false, $all),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                0,
+                $object
+            ),
+            'values'   => $this->sourceStore->getStoreValuesForForm(
+                false,
+                $all
+            ),
             'required' => true
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $field = $fieldSet->addField($objectFieldName, 'multiselect', $config);
+        $field = $fieldSet->addField(
+            $objectFieldName,
+            'multiselect',
+            $config
+        );
 
         /** @var Element $renderer */
         $renderer = $layout->createBlock(Element::class);
@@ -1012,23 +1000,13 @@ class Form
         }
     }
 
-    /**
-     * @param LayoutInterface    $layout
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addStoreMultiselectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
     ) {
@@ -1037,26 +1015,22 @@ class Form
             $fieldSet,
             $objectFieldName,
             $label,
-            $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                0,
+                $object
+            ),
             $readOnly,
             $disabled
         );
     }
 
-    /**
-     * @param LayoutInterface $layout
-     * @param Fieldset        $fieldSet
-     * @param string          $objectFieldName
-     * @param string|null     $label
-     * @param mixed           $value
-     * @param bool            $readOnly
-     * @param bool            $disabled
-     */
     public function addStoreMultiselectFieldWithValue(
         LayoutInterface $layout,
         Fieldset $fieldSet,
         string $objectFieldName,
-        string $label = null,
+        ?string $label = null,
         $value = null,
         bool $readOnly = false,
         bool $disabled = false
@@ -1066,33 +1040,49 @@ class Form
         }
 
         $config = [
-            'name'     => sprintf('%s[]', $objectFieldName),
+            'name'     => sprintf(
+                '%s[]',
+                $objectFieldName
+            ),
             'label'    => $label,
             'title'    => $label,
             'value'    => $value,
-            'values'   => $this->sourceStore->getStoreValuesForForm(false, true),
+            'values'   => $this->sourceStore->getStoreValuesForForm(
+                false,
+                true
+            ),
             'required' => true
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $field = $fieldSet->addField($objectFieldName, 'multiselect', $config);
+        $field = $fieldSet->addField(
+            $objectFieldName,
+            'multiselect',
+            $config
+        );
 
         /** @var Element $renderer */
         $renderer = $layout->createBlock(Element::class);
@@ -1102,24 +1092,13 @@ class Form
         }
     }
 
-    /**
-     * @param LayoutInterface    $layout
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addStoreWithAdminSelectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $required = true,
         bool $readOnly = false,
         bool $disabled = false
@@ -1132,30 +1111,45 @@ class Form
             'name'     => $objectFieldName,
             'label'    => $label,
             'title'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, 0, $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                0,
+                $object
+            ),
             'values'   => $this->sourceStoreWithAdmin->getStoreValuesForForm(),
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $field = $fieldSet->addField($objectFieldName, 'select', $config);
+        $field = $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            $config
+        );
 
         /** @var Element $renderer */
         $renderer = $layout->createBlock('Magento\Backend\Block\Store\Switcher\Form\Renderer\Fieldset\Element');
@@ -1165,24 +1159,13 @@ class Form
         }
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param null               $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCmsBlockSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
+        ?string $label = null,
         $defaultValue = null,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1205,24 +1188,13 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param null               $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCmsPageSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
+        ?string $label = null,
         $defaultValue = null,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1245,24 +1217,13 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param mixed              $defaultValue
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addTypeIdField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         $defaultValue = null,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1281,22 +1242,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addTemplateField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1315,22 +1266,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCategoriesField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1349,22 +1290,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addOperatorField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1383,94 +1314,90 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addDateIsoField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = true,
         bool $readOnly = false,
         bool $disabled = false
     ) {
         // convert the date to local time
-        $fieldSet->addType('date_iso', DateIso::class);
+        $fieldSet->addType(
+            'date_iso',
+            DateIso::class
+        );
 
         $config = [
             'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                null,
+                $object
+            ),
             'format'   => $this->dateFormatIso,
             'required' => $required
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'date_iso', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'date_iso',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset $fieldSet
-     * @param string   $objectFieldName
-     * @param string   $label
-     * @param bool     $required
-     */
     public function addFileField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
         bool $required = true
     ) {
-        $fieldSet->addField($objectFieldName, 'file', [
-            'name'      => $objectFieldName,
-            'label'     => $label,
-            'class'     => 'disable',
-            'required'  => $required,
-            'css_class' => 'admin__field-file'
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'file',
+            [
+                'name'      => $objectFieldName,
+                'label'     => $label,
+                'class'     => 'disable',
+                'required'  => $required,
+                'css_class' => 'admin__field-file'
+            ]
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCountryField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1489,22 +1416,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addRegionField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1523,22 +1440,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addRegionAnyField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1557,44 +1464,31 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     */
     public function addImageField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false
     ) {
-        $fieldSet->addField($objectFieldName, 'image', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $object && $object->getId() ? $object->getDataUsingMethod($objectFieldName) : null,
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'image',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $object && $object->getId() ? $object->getDataUsingMethod($objectFieldName) : null,
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCustomerGroupField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1627,22 +1521,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addCustomerGroupMultiSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1676,25 +1560,14 @@ class Form
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     * @param bool               $allStores
-     * @param bool               $withDefault
-     *
      * @throws LocalizedException
      */
     public function addPaymentActiveMethodsField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
@@ -1722,22 +1595,12 @@ class Form
         );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string|null        $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addProductTypeField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
-        AbstractModel $object = null,
+        ?string $label = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1747,9 +1610,17 @@ class Form
         }
 
         $config = [
-            'name'        => sprintf('%s[]', $objectFieldName),
+            'name'        => sprintf(
+                '%s[]',
+                $objectFieldName
+            ),
             'label'       => $label,
-            'value'       => $this->getFieldValue($objectRegistryKey, $objectFieldName, 'all', $object),
+            'value'       => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                'all',
+                $object
+            ),
             'values'      => $this->productType->getOptions(),
             'mode_labels' => [
                 'all'    => __('All Product Types')->render(),
@@ -1759,85 +1630,90 @@ class Form
         ];
 
         if ($readOnly) {
-            $config['readonly'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' read-only';
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
             } else {
-                $config['css_class'] = 'read-only';
+                $config[ 'css_class' ] = 'read-only';
             }
         }
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'apply', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'apply',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     */
     public function addWysiwygField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null
+        ?AbstractModel $object = null
     ) {
-        $fieldSet->addType('wysiwyg', Wysiwyg::class);
+        $fieldSet->addType(
+            'wysiwyg',
+            Wysiwyg::class
+        );
 
-        $fieldSet->addField($objectFieldName, 'wysiwyg', [
-            'name'  => $objectFieldName,
-            'label' => $label,
-            'value' => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object)
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'wysiwyg',
+            [
+                'name'  => $objectFieldName,
+                'label' => $label,
+                'value' => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                )
+            ]
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     */
     public function addEditorField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null
+        ?AbstractModel $object = null
     ) {
-        $fieldSet->addField($objectFieldName, 'editor', [
-            'name'   => $objectFieldName,
-            'label'  => $label,
-            'state'  => 'html',
-            'value'  => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'style'  => 'height: 400px;',
-            'config' => $this->wysiwygConfig->getConfig()
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'editor',
+            [
+                'name'   => $objectFieldName,
+                'label'  => $label,
+                'state'  => 'html',
+                'value'  => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'style'  => 'height: 400px;',
+                'config' => $this->wysiwygConfig->getConfig()
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $customer
-     * @param bool          $address
-     * @param bool          $category
-     * @param bool          $product
-     */
     public function addEavAttributeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -1850,26 +1726,29 @@ class Form
         bool $category = false,
         bool $product = true
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAttributes->toOptionArrayWithEntities($customer, $address, $category, $product),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributes->toOptionArrayWithEntities(
+                    $customer,
+                    $address,
+                    $category,
+                    $product
+                ),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $customer
-     * @param bool          $address
-     * @param bool          $category
-     * @param bool          $product
-     */
     protected function addEavAttributeMultiselectField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -1881,26 +1760,24 @@ class Form
         bool $category = false,
         bool $product = true
     ) {
-        $fieldSet->addField($objectFieldName, 'multiselect', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $object->getDataUsingMethod($objectFieldName),
-            'values'   => $this->sourceAttributes->toOptionArrayWithEntities($customer, $address, $category, $product),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'multiselect',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $object->getDataUsingMethod($objectFieldName),
+                'values'   => $this->sourceAttributes->toOptionArrayWithEntities(
+                    $customer,
+                    $address,
+                    $category,
+                    $product
+                ),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param string        $objectName
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param array         $targetFieldNames
-     * @param bool          $required
-     * @param bool          $multiSelect
-     */
     public function addEavAttributeFieldWithUpdate(
         AbstractModel $object,
         string $objectName,
@@ -1912,36 +1789,209 @@ class Form
         bool $required = false,
         bool $multiSelect = false
     ) {
-        $onChangeFieldId = sprintf('%s_%s', $objectName, $objectFieldName);
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
 
         $onChange = [];
 
         foreach ($targetFieldNames as $targetFieldName) {
-            $targetFieldId = sprintf('%s_%s', $objectName, $targetFieldName);
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
 
-            $onChange[] = $this->getUpdateEavAttributeFormElementJs($onChangeFieldId, $targetFieldId, $multiSelect);
+            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId,
+                $multiSelect
+            );
         }
 
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAttributes->toOptionArray(),
-            'required' => $required,
-            'onchange' => implode(';', $onChange)
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributes->toOptionArray(),
+                'required' => $required,
+                'onchange' => implode(
+                    ';',
+                    $onChange
+                )
+            ]
+        );
+    }
+
+    public function addEavAttributeProductField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceAttributeProduct->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    public function addEavAttributeProductFieldWithUpdate(
+        AbstractModel $object,
+        string $objectName,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        bool $required = false,
+        bool $multiSelect = false
+    ) {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId,
+                $multiSelect
+            );
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributeProduct->toOptionArray(),
+                'required' => $required,
+                'onchange' => implode(
+                    ';',
+                    $onChange
+                )
+            ]
+        );
+    }
+
+    public function addEavAttributeProductFilterableField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceAttributeProductFilterable->toOptionArray(),
+            null,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    public function addEavAttributeProductFilterableFieldWithUpdate(
+        AbstractModel $object,
+        string $objectName,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        bool $required = false,
+        bool $multiSelect = false
+    ) {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId,
+                $multiSelect
+            );
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributeProductFilterable->toOptionArray(),
+                'required' => $required,
+                'onchange' => implode(
+                    ';',
+                    $onChange
+                )
+            ]
+        );
     }
 
     /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectAttributeFieldName
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $multiSelect
-     *
      * @throws Exception
      */
     public function addEavAttributeValueField(
@@ -1960,14 +2010,24 @@ class Form
             $attributeId = $object->getDataUsingMethod($objectAttributeFieldName);
 
             if ($attributeId) {
-                $attribute = $this->attributeHelper->getAttribute(Product::ENTITY, $attributeId);
+                $attribute = $this->attributeHelper->getAttribute(
+                    Product::ENTITY,
+                    $attributeId
+                );
 
                 $valueOptions = $attribute->getSource()->getAllOptions();
             }
         }
 
         if ($this->variables->isEmpty($valueOptions)) {
-            $this->addTextField($fieldSet, $objectRegistryKey, $objectFieldName, $label, $object, $required);
+            $this->addTextField(
+                $fieldSet,
+                $objectRegistryKey,
+                $objectFieldName,
+                $label,
+                $object,
+                $required
+            );
         } else {
             if ($multiSelect) {
                 $this->addOptionsMultiSelectField(
@@ -1995,18 +2055,6 @@ class Form
         }
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $customer
-     * @param bool          $address
-     * @param bool          $category
-     * @param bool          $product
-     */
     public function addEavAttributeSetField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2019,32 +2067,29 @@ class Form
         bool $category = false,
         bool $product = true
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAttributeSets->toOptionArrayWithEntities(
-                $customer,
-                $address,
-                $category,
-                $product
-            ),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributeSets->toOptionArrayWithEntities(
+                    $customer,
+                    $address,
+                    $category,
+                    $product
+                ),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $customer
-     * @param bool          $address
-     * @param bool          $category
-     * @param bool          $product
-     */
     public function addEavEntityTypeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2057,23 +2102,29 @@ class Form
         bool $category = false,
         bool $product = true
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceEntityTypes->toOptionArrayWithEntities($customer, $address, $category, $product),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceEntityTypes->toOptionArrayWithEntities(
+                    $customer,
+                    $address,
+                    $category,
+                    $product
+                ),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     */
     public function addProductAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2082,23 +2133,24 @@ class Form
         string $label,
         bool $required = false
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceProductAttributeCode->toOptionArray(),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceProductAttributeCode->toOptionArray(),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     */
     public function addCustomerAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2107,23 +2159,24 @@ class Form
         string $label,
         bool $required = false
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceCustomerAttributeCode->toOptionArray(),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceCustomerAttributeCode->toOptionArray(),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     */
     public function addAddressAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2132,24 +2185,24 @@ class Form
         string $label,
         bool $required = false
     ) {
-        $fieldSet->addField($objectFieldName, 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAddressAttributeCode->toOptionArray(),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAddressAttributeCode->toOptionArray(),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param AbstractModel $object
-     * @param Fieldset      $fieldSet
-     * @param string        $objectRegistryKey
-     * @param string        $objectFieldName
-     * @param string        $label
-     * @param bool          $required
-     * @param bool          $multiSelect
-     */
     public function addAttributeSortByField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2159,22 +2212,24 @@ class Form
         bool $required = false,
         bool $multiSelect = false
     ) {
-        $fieldSet->addField($objectFieldName, $multiSelect ? 'multiselect' : 'select', [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object),
-            'values'   => $this->sourceAttributeSortBy->toOptionArray(),
-            'required' => $required
-        ]);
+        $fieldSet->addField(
+            $objectFieldName,
+            $multiSelect ? 'multiselect' : 'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $this->sourceAttributeSortBy->toOptionArray(),
+                'required' => $required
+            ]
+        );
     }
 
-    /**
-     * @param string $sourceElementId
-     * @param string $targetElementId
-     * @param bool   $multiSelect
-     *
-     * @return string
-     */
     protected function getUpdateEavAttributeFormElementJs(
         string $sourceElementId,
         string $targetElementId,
@@ -2185,19 +2240,15 @@ class Form
             urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/attribute_option/values')),
             $sourceElementId,
             $targetElementId,
-            var_export($multiSelect, true)
+            var_export(
+                $multiSelect,
+                true
+            )
         );
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param mixed              $value
-     * @param AbstractModel|null $object
-     * @param bool               $disabled
-     * @param mixed              $after
+     * @param bool|string|null $after
      */
     public function addCheckboxField(
         Fieldset $fieldSet,
@@ -2205,11 +2256,16 @@ class Form
         string $objectFieldName,
         string $label,
         $value,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $disabled = false,
         $after = false
     ) {
-        $fieldValue = $this->getFieldValue($objectRegistryKey, $objectFieldName, null, $object);
+        $fieldValue = $this->getFieldValue(
+            $objectRegistryKey,
+            $objectFieldName,
+            null,
+            $object
+        );
 
         $config = [
             'name'      => $objectFieldName,
@@ -2221,53 +2277,61 @@ class Form
         ];
 
         if ($disabled) {
-            $config['disabled'] = true;
-            if (array_key_exists('css_class', $config)) {
-                $config['css_class'] .= ' disabled';
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
             } else {
-                $config['css_class'] = 'disabled';
+                $config[ 'css_class' ] = 'disabled';
             }
         }
 
-        $fieldSet->addField($objectFieldName, 'checkbox', $config, $after);
+        $fieldSet->addField(
+            $objectFieldName,
+            'checkbox',
+            $config,
+            $after
+        );
     }
 
     /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param mixed              $after
+     * @param bool|string|null $after
      */
     public function addValueField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         $after = false
     ) {
-        $fieldSet->addType('value', Value::class);
+        $fieldSet->addType(
+            'value',
+            Value::class
+        );
 
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
-            'value'    => $this->getFieldValue($objectRegistryKey, $objectFieldName, '', $object),
+            'value'    => $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                '',
+                $object
+            ),
             'required' => false
         ];
 
-        $fieldSet->addField($objectFieldName, 'value', $config, $after);
+        $fieldSet->addField(
+            $objectFieldName,
+            'value',
+            $config,
+            $after
+        );
     }
 
-    /**
-     * @param Fieldset $fieldSet
-     * @param string   $objectFieldName
-     * @param string   $label
-     * @param string   $value
-     * @param mixed    $onClick
-     * @param mixed    $dataMageInit
-     */
     public function addButtonField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -2284,27 +2348,20 @@ class Form
         ];
 
         if ($dataMageInit) {
-            $config['onclick'] = $onClick;
+            $config[ 'onclick' ] = $onClick;
         }
 
         if ($dataMageInit) {
-            $config['data-mage-init'] = $dataMageInit;
+            $config[ 'data-mage-init' ] = $dataMageInit;
         }
 
-        $fieldSet->addField($objectFieldName, 'button', $config);
+        $fieldSet->addField(
+            $objectFieldName,
+            'button',
+            $config
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectName
-     * @param string             $objectField
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param string             $value
-     * @param string             $urlPath
-     * @param array              $urlParameters
-     * @param AbstractModel|null $object
-     */
     public function addIframeButtonField(
         Fieldset $fieldSet,
         string $objectName,
@@ -2314,45 +2371,49 @@ class Form
         string $value,
         string $urlPath,
         array $urlParameters = [],
-        AbstractModel $object = null
+        ?AbstractModel $object = null
     ) {
         if ($object) {
             $objectId = $object->getDataUsingMethod($objectField);
 
             if ($objectId) {
-                $urlParameters[$objectField] = $objectId;
+                $urlParameters[ $objectField ] = $objectId;
             }
         }
 
         $dataMageInit = $this->escaper->escapeHtml(
             json_encode([
-                            'infrangible/iframe-button' => [
-                                'buttonId' => sprintf('%s_%s', $objectName, $objectFieldName),
-                                'src'      => $this->urlHelper->getBackendUrl($urlPath, $urlParameters),
-                                'title'    => $label
-                            ],
-                        ])
+                'infrangible/iframe-button' => [
+                    'buttonId' => sprintf(
+                        '%s_%s',
+                        $objectName,
+                        $objectFieldName
+                    ),
+                    'src'      => $this->urlHelper->getBackendUrl(
+                        $urlPath,
+                        $urlParameters
+                    ),
+                    'title'    => $label
+                ],
+            ])
         );
 
-        $this->addButtonField($fieldSet, $objectFieldName, $label, $value, null, $dataMageInit);
+        $this->addButtonField(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $value,
+            null,
+            $dataMageInit
+        );
     }
 
-    /**
-     * @param Fieldset           $fieldSet
-     * @param string             $objectRegistryKey
-     * @param string             $objectFieldName
-     * @param string             $label
-     * @param AbstractModel|null $object
-     * @param bool               $required
-     * @param bool               $readOnly
-     * @param bool               $disabled
-     */
     public function addThemeField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        AbstractModel $object = null,
+        ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
