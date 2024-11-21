@@ -10,6 +10,10 @@ use FeWeDev\Base\Variables;
 use Infrangible\BackendWidget\Block\Config\Form\DateIso;
 use Infrangible\BackendWidget\Block\Config\Form\Value;
 use Infrangible\BackendWidget\Block\Config\Form\Wysiwyg;
+use Infrangible\BackendWidget\Data\Form\Element\Autocomplete;
+use Infrangible\BackendWidget\Data\Form\Element\Discount;
+use Infrangible\BackendWidget\Data\Form\Element\Integer;
+use Infrangible\BackendWidget\Data\Form\Element\Price;
 use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Customer;
 use Infrangible\Core\Helper\Instances;
@@ -34,7 +38,9 @@ use Infrangible\Core\Model\Config\Source\TypeId;
 use IntlDateFormatter;
 use Magento\Backend\Block\Store\Switcher\Form\Renderer\Fieldset\Element;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type;
+use Magento\Catalog\Model\Product\Visibility;
 use Magento\Cms\Model\Wysiwyg\Config;
 use Magento\Config\Model\Config\Source\Website;
 use Magento\Config\Model\Config\Source\Yesno;
@@ -374,7 +380,7 @@ class Form
         bool $readOnly = false,
         bool $disabled = false,
         $after = false
-    ) {
+    ): void {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -429,7 +435,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addTextField(
             $fieldSet,
             $objectRegistryKey,
@@ -452,7 +458,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -506,7 +512,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $config = [
             'name'               => $objectFieldName,
             'label'              => $label,
@@ -569,7 +575,7 @@ class Form
         bool $readOnly = false,
         bool $disabled = false,
         $after = false
-    ) {
+    ): void {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -633,7 +639,7 @@ class Form
         bool $readOnly = false,
         bool $disabled = false,
         $after = false
-    ) {
+    ): void {
         /** @var OptionSourceInterface $optionsClass */
         $optionsClass = $this->instanceHelper->getSingleton($className);
 
@@ -677,7 +683,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $config = [
             'name'     => $objectFieldName,
             'label'    => $label,
@@ -732,7 +738,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -757,7 +763,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -783,7 +789,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -806,7 +812,7 @@ class Form
         ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Website')->render();
         }
@@ -863,7 +869,7 @@ class Form
         ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addWebsiteMultiselectFieldWithValue(
             $fieldSet,
             $objectFieldName,
@@ -886,7 +892,7 @@ class Form
         ?string $label = null,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Website')->render();
         }
@@ -940,7 +946,7 @@ class Form
         bool $readOnly = false,
         bool $disabled = false,
         bool $all = true
-    ) {
+    ): void {
         if (empty($label)) {
             $label = __('Store View')->render();
         }
@@ -1009,7 +1015,7 @@ class Form
         ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addStoreMultiselectFieldWithValue(
             $layout,
             $fieldSet,
@@ -1034,7 +1040,7 @@ class Form
         $value = null,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if (empty($label)) {
             $label = __('Store View')->render();
         }
@@ -1102,7 +1108,7 @@ class Form
         bool $required = true,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if (empty($label)) {
             $label = __('Store View')->render();
         }
@@ -1169,7 +1175,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if (empty($label)) {
             $label = __('Block')->render();
         }
@@ -1198,7 +1204,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if (empty($label)) {
             $label = __('Page')->render();
         }
@@ -1227,7 +1233,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1251,7 +1257,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1275,7 +1281,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsMultiSelectField(
             $fieldSet,
             $objectRegistryKey,
@@ -1299,7 +1305,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1323,7 +1329,7 @@ class Form
         bool $required = true,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         // convert the date to local time
         $fieldSet->addType(
             'date_iso',
@@ -1378,7 +1384,7 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = true
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'file',
@@ -1401,7 +1407,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1425,7 +1431,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1449,7 +1455,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1470,7 +1476,7 @@ class Form
         string $label,
         ?AbstractModel $object = null,
         bool $required = false
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'image',
@@ -1492,7 +1498,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group')->render();
         }
@@ -1530,7 +1536,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Customer Group')->render();
         }
@@ -1573,7 +1579,7 @@ class Form
         bool $disabled = false,
         bool $allStores = false,
         bool $withDefault = true
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Payment Method')->render();
         }
@@ -1604,7 +1610,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         if ($this->variables->isEmpty($label)) {
             $label = __('Apply To')->render();
         }
@@ -1666,7 +1672,7 @@ class Form
         string $objectFieldName,
         string $label,
         ?AbstractModel $object = null
-    ) {
+    ): void {
         $fieldSet->addType(
             'wysiwyg',
             Wysiwyg::class
@@ -1694,7 +1700,7 @@ class Form
         string $objectFieldName,
         string $label,
         ?AbstractModel $object = null
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'editor',
@@ -1725,7 +1731,7 @@ class Form
         bool $address = false,
         bool $category = false,
         bool $product = true
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -1759,7 +1765,7 @@ class Form
         bool $address = false,
         bool $category = false,
         bool $product = true
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'multiselect',
@@ -1788,7 +1794,7 @@ class Form
         array $targetFieldNames,
         bool $required = false,
         bool $multiSelect = false
-    ) {
+    ): void {
         $onChangeFieldId = sprintf(
             '%s_%s',
             $objectName,
@@ -1842,7 +1848,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1867,7 +1873,7 @@ class Form
         array $targetFieldNames,
         bool $required = false,
         bool $multiSelect = false
-    ) {
+    ): void {
         $onChangeFieldId = sprintf(
             '%s_%s',
             $objectName,
@@ -1921,7 +1927,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -1946,7 +1952,7 @@ class Form
         array $targetFieldNames,
         bool $required = false,
         bool $multiSelect = false
-    ) {
+    ): void {
         $onChangeFieldId = sprintf(
             '%s_%s',
             $objectName,
@@ -2003,7 +2009,7 @@ class Form
         string $label,
         bool $required = false,
         bool $multiSelect = false
-    ) {
+    ): void {
         $valueOptions = [];
 
         if ($object->getId()) {
@@ -2066,7 +2072,7 @@ class Form
         bool $address = false,
         bool $category = false,
         bool $product = true
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -2101,7 +2107,7 @@ class Form
         bool $address = false,
         bool $category = false,
         bool $product = true
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -2132,7 +2138,7 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = false
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -2158,7 +2164,7 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = false
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -2184,7 +2190,7 @@ class Form
         string $objectFieldName,
         string $label,
         bool $required = false
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             'select',
@@ -2211,7 +2217,7 @@ class Form
         string $label,
         bool $required = false,
         bool $multiSelect = false
-    ) {
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             $multiSelect ? 'multiselect' : 'select',
@@ -2259,7 +2265,7 @@ class Form
         ?AbstractModel $object = null,
         bool $disabled = false,
         $after = false
-    ) {
+    ): void {
         $fieldValue = $this->getFieldValue(
             $objectRegistryKey,
             $objectFieldName,
@@ -2306,7 +2312,7 @@ class Form
         string $label,
         ?AbstractModel $object = null,
         $after = false
-    ) {
+    ): void {
         $fieldSet->addType(
             'value',
             Value::class
@@ -2339,7 +2345,7 @@ class Form
         string $value,
         $onClick = null,
         $dataMageInit = null
-    ) {
+    ): void {
         $config = [
             'name'      => $objectFieldName,
             'label'     => $label,
@@ -2372,7 +2378,7 @@ class Form
         string $urlPath,
         array $urlParameters = [],
         ?AbstractModel $object = null
-    ) {
+    ): void {
         if ($object) {
             $objectId = $object->getDataUsingMethod($objectField);
 
@@ -2417,7 +2423,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
-    ) {
+    ): void {
         $this->addOptionsField(
             $fieldSet,
             $objectRegistryKey,
@@ -2429,6 +2435,148 @@ class Form
             $required,
             $readOnly,
             $disabled
+        );
+    }
+
+    public function addCustomerNameField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $fieldSet->addField(
+            $objectFieldName,
+            Autocomplete::class,
+            [
+                'name'               => $objectFieldName,
+                'label'              => $label,
+                'search_collection'  => \Magento\Customer\Model\ResourceModel\Customer\Collection::class,
+                'search_fields'      => ['name'],
+                'search_expressions' => ['name' => 'CONCAT({{firstname}}, " ", {{lastname}})'],
+                'result_id'          => '{{id}}',
+                'result_value'       => '{{firstname}} {{lastname}}',
+                'result_label'       => '{{firstname}} {{lastname}}',
+                'required'           => $required,
+                'value'              => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    '',
+                    $object
+                ),
+                'object_id'          => $object->getId()
+            ]
+        );
+    }
+
+    public function addProductNameField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $fieldSet->addField(
+            $objectFieldName,
+            Autocomplete::class,
+            [
+                'name'              => $objectFieldName,
+                'label'             => $label,
+                'search_collection' => \Magento\Catalog\Model\ResourceModel\Product\Collection::class,
+                'search_fields'     => ['sku', 'name'],
+                'search_conditions' => [
+                    'status'     => ['eq' => Status::STATUS_ENABLED],
+                    'visibility' => ['neq' => Visibility::VISIBILITY_NOT_VISIBLE]
+                ],
+                'result_id'         => '{{id}}',
+                'result_value'      => '{{name}}',
+                'result_label'      => '{{name}} ({{sku}})',
+                'required'          => $required,
+                'value'             => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    '',
+                    $object
+                ),
+                'object_id'         => $object->getId()
+            ]
+        );
+    }
+
+    public function addPriceField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $fieldSet->addField(
+            $objectFieldName,
+            Price::class,
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'required' => $required,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    '',
+                    $object
+                )
+            ]
+        );
+    }
+
+    public function addDiscountField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $fieldSet->addField(
+            $objectFieldName,
+            Discount::class,
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'required' => $required,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    '',
+                    $object
+                )
+            ]
+        );
+    }
+
+    public function addIntegerField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $fieldSet->addField(
+            $objectFieldName,
+            Integer::class,
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'required' => $required,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    '',
+                    $object
+                )
+            ]
         );
     }
 }

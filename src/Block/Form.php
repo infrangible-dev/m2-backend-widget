@@ -1235,4 +1235,84 @@ abstract class Form extends Generic
             $disabled
         );
     }
+
+    public function addCustomerNameField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addCustomerNameField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required
+        );
+    }
+
+    public function addProductNameField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductNameField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required
+        );
+    }
+
+    public function addPriceField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addPriceField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required
+        );
+    }
+
+    public function addDiscountField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addDiscountField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required
+        );
+    }
+
+    public function addIntegerField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addIntegerField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required
+        );
+    }
 }
