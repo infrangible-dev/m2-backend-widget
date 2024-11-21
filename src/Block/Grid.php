@@ -1740,7 +1740,7 @@ abstract class Grid extends Extended
     {
         $this->addJoinValues(
             'customer_entity',
-            ['customer_id' => 'entity_id'],
+            [$objectFieldName => 'entity_id'],
             ['firstname', 'lastname'],
             'customer'
         );
@@ -1771,7 +1771,7 @@ abstract class Grid extends Extended
     {
         $this->addJoinValues(
             'catalog_product_entity_varchar',
-            ['product_id' => 'entity_id', 'name.store_id = 0'],
+            [$objectFieldName => 'entity_id', 'name.store_id = 0'],
             ['product_name' => 'name.value'],
             'name'
         );
