@@ -19,10 +19,7 @@ use Zend_Db_Select;
 abstract class GroupBy
     extends Grid
 {
-    /**
-     * @param AbstractDb $collection
-     */
-    protected function followUpCollection(AbstractDb $collection)
+    protected function followUpCollection(AbstractDb $collection): void
     {
         $groupBy = $this->getParam('group_by');
 
@@ -51,10 +48,9 @@ abstract class GroupBy
     }
 
     /**
-     * @return void
      * @throws Exception
      */
-    protected function followUpFields()
+    protected function followUpFields(): void
     {
         parent::followUpFields();
 
@@ -76,7 +72,6 @@ abstract class GroupBy
     }
 
     /**
-     * @return Fields
      * @throws LocalizedException
      */
     protected function getFieldsBlock(): Fields
@@ -99,7 +94,6 @@ abstract class GroupBy
     }
 
     /**
-     * @return array
      * @throws LocalizedException
      */
     protected function getGroupByFieldList(): array
@@ -117,8 +111,5 @@ abstract class GroupBy
         return $fieldList;
     }
 
-    /**
-     * @return array
-     */
     abstract public function getNotGroupableFieldNames(): array;
 }
