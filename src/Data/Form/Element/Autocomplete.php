@@ -150,7 +150,7 @@ class Autocomplete extends Text
         }
 
         $searchUrl = $this->urlHelper->getBackendUrl(
-            'product_customer_price/search/term',
+            'infrangible_backendwidget/search/term',
             $searchUrlParams
         );
 
@@ -161,7 +161,7 @@ class Autocomplete extends Text
         ];
 
         $valueUrl = $this->urlHelper->getBackendUrl(
-            'product_customer_price/search/value',
+            'infrangible_backendwidget/search/value',
             $valueUrlParams
         );
 
