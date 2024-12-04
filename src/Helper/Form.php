@@ -2478,6 +2478,13 @@ class Form
         ?AbstractModel $object = null,
         bool $required = false
     ): void {
+        $fieldValue = $this->getFieldValue(
+            $objectRegistryKey,
+            $objectFieldName,
+            '',
+            $object
+        );
+
         $fieldSet->addField(
             $objectFieldName,
             Autocomplete::class,
@@ -2494,13 +2501,8 @@ class Form
                 'result_value'      => '{{name}}',
                 'result_label'      => '{{name}} ({{sku}})',
                 'required'          => $required,
-                'value'             => $this->getFieldValue(
-                    $objectRegistryKey,
-                    $objectFieldName,
-                    '',
-                    $object
-                ),
-                'object_id'         => $object->getId()
+                'value'             => $fieldValue,
+                'object_id'         => $fieldValue
             ]
         );
     }

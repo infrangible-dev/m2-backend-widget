@@ -171,6 +171,17 @@ class Autocomplete extends Text
             $('#$htmlId').autocomplete({
                 minLength: 2,
                 create: function() {
+                    $(this).data('ui-autocomplete')._renderItem = function (ul, item) {
+                        var itemNode = $('<li>');
+                        itemNode.addClass('ui-menu-item');
+                        itemNode.data('ui-autocomplete-item', item);
+                        itemNode.appendTo(ul);
+                        var itemLabelNode = $('<div>');
+                        itemLabelNode.addClass('ui-menu-item-wrapper');
+                        itemLabelNode.append(item.label);
+                        itemLabelNode.appendTo(itemNode);
+                        return itemNode
+                    };
                     $.getJSON('$valueUrl', {}, function(data, status, xhr) {
                         $('#$htmlId').val(data.value);
                         $('#$htmlId').addClass('selected');
