@@ -19,6 +19,13 @@ class Product extends AbstractRenderer
      */
     public function render(DataObject $row): string
     {
-        return $row->getData('product_name');
+        $column = $this->getColumn();
+
+        return $row->getData(
+            sprintf(
+                '%s_product_name',
+                $column->getData('index')
+            )
+        );
     }
 }

@@ -582,6 +582,10 @@ abstract class Grid extends Extended
                     $joinValue,
                     'table_alias'
                 );
+                $conditions = $this->arrays->getValue(
+                    $joinValue,
+                    'conditions'
+                );
 
                 if ($this->variables->isEmpty($tableAlias)) {
                     $tableAlias = $tableName;
@@ -621,6 +625,12 @@ abstract class Grid extends Extended
                         $joinConditions
                     ),
                     $resultFields);
+
+                if ($conditions && is_array($conditions)) {
+                    foreach ($conditions as $condition) {
+                        $collection->getSelect()->where($condition);
+                    }
+                }
             }
         }
     }
@@ -629,13 +639,15 @@ abstract class Grid extends Extended
         string $tableName,
         array $joinFields,
         array $resultFields = [],
-        ?string $tableAlias = null
+        ?string $tableAlias = null,
+        ?array $conditions = null
     ): void {
         $this->joinValues[] = [
             'table_name'    => $tableName,
             'join_fields'   => $joinFields,
             'result_fields' => $resultFields,
-            'table_alias'   => $tableAlias
+            'table_alias'   => $tableAlias,
+            'conditions'    => $conditions
         ];
     }
 
@@ -1738,11 +1750,31 @@ abstract class Grid extends Extended
      */
     public function addCustomerNameColumn(string $objectFieldName, string $label): void
     {
+        $columnTableAlias = sprintf(
+            '%s_customer',
+            $objectFieldName
+        );
+
         $this->addJoinValues(
             'customer_entity',
             [$objectFieldName => 'entity_id'],
-            ['firstname', 'lastname'],
-            'customer'
+            [
+                sprintf(
+                    '%s_firstname',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.firstname',
+                    $columnTableAlias
+                ),
+                sprintf(
+                    '%s_lastname',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.lastname',
+                    $columnTableAlias
+                )
+            ],
+            $columnTableAlias
         );
 
         $this->gridHelper->addCustomerNameColumn(
@@ -1758,8 +1790,21 @@ abstract class Grid extends Extended
 
         $condition = $filter->getCondition();
 
+        $objectFieldName = $column->getData('index');
+
+        $columnTableAlias = sprintf(
+            '%s_customer',
+            $objectFieldName
+        );
+
         $collection->addFieldToFilter(
-            new Zend_Db_Expr('CONCAT(customer.firstname, " ", customer.lastname)'),
+            new Zend_Db_Expr(
+                sprintf(
+                    'CONCAT(%s.firstname, " ", %s.lastname)',
+                    $columnTableAlias,
+                    $columnTableAlias
+                )
+            ),
             $condition
         );
     }
@@ -1769,18 +1814,53 @@ abstract class Grid extends Extended
      */
     public function addProductNameColumn(string $objectFieldName, string $label): void
     {
+        $valueTableAlias = sprintf(
+            '%s_name',
+            $objectFieldName
+        );
+
+        $attributeTableAlias = sprintf(
+            '%s_name_attribute',
+            $objectFieldName
+        );
+
         $this->addJoinValues(
             'catalog_product_entity_varchar',
-            [$objectFieldName => 'entity_id', 'name.store_id = 0'],
-            ['product_name' => 'name.value'],
-            'name'
+            [
+                $objectFieldName => 'entity_id',
+                sprintf(
+                    '%s.store_id = 0',
+                    $valueTableAlias
+                )
+            ],
+            [
+                sprintf(
+                    '%s_product_name',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.value',
+                    $valueTableAlias
+                )
+            ],
+            $valueTableAlias,
+            [
+                sprintf(
+                    '%s.attribute_code = "name"',
+                    $attributeTableAlias
+                )
+            ]
         );
 
         $this->addJoinValues(
             'eav_attribute',
-            ['name.attribute_id' => 'attribute_id'],
+            [
+                sprintf(
+                    '%s.attribute_id',
+                    $valueTableAlias
+                ) => 'attribute_id'
+            ],
             [],
-            'name_attribute'
+            $attributeTableAlias
         );
 
         $this->gridHelper->addProductNameColumn(
@@ -1796,8 +1876,18 @@ abstract class Grid extends Extended
 
         $condition = $filter->getCondition();
 
+        $objectFieldName = $column->getData('index');
+
+        $valueTableAlias = sprintf(
+            '%s_name',
+            $objectFieldName
+        );
+
         $collection->addFieldToFilter(
-            'name.value',
+            sprintf(
+                '%s.value',
+                $valueTableAlias
+            ),
             $condition
         );
     }

@@ -19,10 +19,22 @@ class Customer extends AbstractRenderer
      */
     public function render(DataObject $row): string
     {
+        $column = $this->getColumn();
+
         return sprintf(
             '%s %s',
-            $row->getData('firstname'),
-            $row->getData('lastname')
+            $row->getData(
+                sprintf(
+                    '%s_firstname',
+                    $column->getData('index')
+                )
+            ),
+            $row->getData(
+                sprintf(
+                    '%s_lastname',
+                    $column->getData('index')
+                )
+            )
         );
     }
 }
