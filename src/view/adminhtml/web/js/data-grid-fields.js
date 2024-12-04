@@ -28,7 +28,7 @@ define([
         },
 
         _create: function createDataGridColumns() {
-            this.dataGrid = $('div[data-grid-id]')
+            this.dataGrid = $('div[data-grid-id]');
             this.dataGridColumnsList = $('.data-grid-columns');
             this.dataGridColumnsCheckboxes = $('.data-grid-column-checkbox', this.dataGridColumnsList);
 

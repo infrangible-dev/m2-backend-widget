@@ -1,3 +1,9 @@
+/**
+ * @author      Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 //noinspection LessUnresolvedVariable
 & when (@media-common = true) {
     body.infrangible-backend-widget {
@@ -198,6 +204,70 @@
                 .admin__field-control {
                     input {
                         margin-left: 1rem;
+                    }
+                }
+            }
+        }
+    }
+
+    input.ui-autocomplete-input:not(.selected) {
+        color: #aaa;
+    }
+
+    ul.ui-autocomplete {
+        background-color: rgb(255, 255, 255);
+        border: 1px solid rgb(136, 136, 136);
+        list-style-type: none;
+        z-index: 9999;
+
+        li {
+            cursor: pointer;
+            display: block;
+
+            .ui-menu-item-wrapper {
+                padding: .6875em 1em;
+            }
+
+            .ui-menu-item-wrapper.ui-state-active {
+                background-color: #e0f6fe;
+            }
+        }
+    }
+
+    .ui-helper-hidden-accessible {
+        display: none;
+    }
+
+    .admin__old {
+        .entry-edit.form-inline {
+            fieldset.actions {
+                margin: 0 auto;
+                overflow: hidden;
+                width: 80%;
+
+                legend {
+                    display: none;
+                }
+
+                > br {
+                    display: none;
+                }
+
+                div.admin__field {
+                    margin: 0 0 0 10px;
+                    float: right;
+
+                    div.admin__field-control {
+                        margin: 0;
+                        width: auto;
+
+                        input {
+                            width: auto;
+                            font-size: 1.6rem;
+                            letter-spacing: .025em;
+                            padding-bottom: 0.6875em;
+                            padding-top: 0.6875em;
+                        }
                     }
                 }
             }
