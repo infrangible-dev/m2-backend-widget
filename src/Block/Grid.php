@@ -586,6 +586,11 @@ abstract class Grid extends Extended
                     $joinValue,
                     'conditions'
                 );
+                $required = $this->arrays->getValue(
+                    $joinValue,
+                    'required',
+                    true
+                );
 
                 if ($this->variables->isEmpty($tableAlias)) {
                     $tableAlias = $tableName;
@@ -626,13 +631,22 @@ abstract class Grid extends Extended
                     }
                 }
 
-                /** @noinspection PhpParamsInspection, RedundantSuppression, PhpPossiblePolymorphicInvocationInspection */
-                $collection->join([$tableAlias => $tableName],
-                    implode(
-                        ' AND ',
-                        $joinConditions
-                    ),
-                    $resultFields);
+                if ($required) {
+                    /** @noinspection PhpParamsInspection, RedundantSuppression, PhpPossiblePolymorphicInvocationInspection */
+                    $collection->join([$tableAlias => $tableName],
+                        implode(
+                            ' AND ',
+                            $joinConditions
+                        ),
+                        $resultFields);
+                } else {
+                    $collection->getSelect()->joinLeft([$tableAlias => $tableName],
+                        implode(
+                            ' AND ',
+                            $joinConditions
+                        ),
+                        $resultFields);
+                }
 
                 if ($conditions && is_array($conditions)) {
                     foreach ($conditions as $condition) {
@@ -648,14 +662,16 @@ abstract class Grid extends Extended
         array $joinFields,
         array $resultFields = [],
         ?string $tableAlias = null,
-        ?array $conditions = null
+        ?array $conditions = null,
+        bool $required = true
     ): void {
         $this->joinValues[] = [
             'table_name'    => $tableName,
             'join_fields'   => $joinFields,
             'result_fields' => $resultFields,
             'table_alias'   => $tableAlias,
-            'conditions'    => $conditions
+            'conditions'    => $conditions,
+            'required'      => $required
         ];
     }
 
@@ -1822,13 +1838,11 @@ abstract class Grid extends Extended
      */
     protected function addProductOptionColumn(
         string $valueFieldName,
-        string $productIdFieldName,
         string $label
     ): void {
         $this->gridHelper->addProductOptionColumn(
             $this,
             $valueFieldName,
-            $productIdFieldName,
             $label
         );
     }

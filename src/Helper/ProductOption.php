@@ -27,7 +27,7 @@ class ProductOption
     {
         $product = $this->productHelper->loadProduct($productId);
 
-        $options = [];
+        $options = [['value' => '', 'label' => __('No selection')]];
 
         /** @var Option $productOption */
         foreach ($product->getProductOptionsCollection() as $productOption) {

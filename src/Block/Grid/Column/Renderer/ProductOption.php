@@ -21,11 +21,13 @@ class ProductOption extends AbstractRenderer
     {
         $column = $this->getColumn();
 
-        return $row->getData(
+        $value = $row->getData(
             sprintf(
                 '%s_title',
                 $column->getData('index')
             )
         );
+
+        return $value ? : '';
     }
 }

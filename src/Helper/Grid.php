@@ -1303,7 +1303,6 @@ class Grid
     public function addProductOptionColumn(
         \Infrangible\BackendWidget\Block\Grid $grid,
         string $valueFieldName,
-        string $productIdFieldName,
         string $label
     ): void {
         $grid->addColumn(
@@ -1319,60 +1318,17 @@ class Grid
             ]
         );
 
-        $productOptionAliasName = sprintf(
-            '%s_cpo',
-            $valueFieldName
-        );
-
-        $productOptionTypeValueAliasName = sprintf(
-            '%s_cpotv',
-            $valueFieldName
-        );
-
         $productOptionTypeTitleAliasName = sprintf(
             '%s_cpott',
             $valueFieldName
         );
 
         $grid->addJoinValues(
-            'catalog_product_option',
-            [
-                sprintf(
-                    '%s.product_id',
-                    $productOptionAliasName
-                ) => sprintf(
-                    'main_table.%s',
-                    $productIdFieldName
-                )
-            ],
-            [],
-            $productOptionAliasName
-        );
-
-        $grid->addJoinValues(
-            'catalog_product_option_type_value',
-            [
-                sprintf(
-                    '%s.option_id',
-                    $productOptionTypeValueAliasName
-                ) => sprintf(
-                    '%s.option_id',
-                    $productOptionAliasName
-                )
-            ],
-            [],
-            $productOptionTypeValueAliasName
-        );
-
-        $grid->addJoinValues(
             'catalog_product_option_type_title',
             [
-                sprintf(
+                $valueFieldName => sprintf(
                     '%s.option_type_id',
                     $productOptionTypeTitleAliasName
-                ) => sprintf(
-                    '%s.option_type_id',
-                    $productOptionTypeValueAliasName
                 ),
                 sprintf(
                     '%s.store_id = 0',
@@ -1389,13 +1345,8 @@ class Grid
                 )
             ],
             $productOptionTypeTitleAliasName,
-            [
-                sprintf(
-                    '%s.option_type_id = main_table.%s',
-                    $productOptionTypeTitleAliasName,
-                    $valueFieldName
-                )
-            ]
+            [],
+            false
         );
     }
 }
