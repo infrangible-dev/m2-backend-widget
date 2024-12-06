@@ -2,7 +2,7 @@
     "name": "infrangible/m2-backend-widget",
     "description": "Infrangible Magento 2 Backend Widget",
     "type": "magento2-module",
-    "version": "2.4.7",
+    "version": "2.5.0",
     "license": "MIT",
     "keywords": [
         "Magento"

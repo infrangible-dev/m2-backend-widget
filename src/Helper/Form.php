@@ -176,6 +176,9 @@ class Form
     /** @var Escaper */
     protected $escaper;
 
+    /** @var ProductOption */
+    protected $productOptionHelper;
+
     public function __construct(
         Variables $variables,
         Arrays $arrays,
@@ -212,7 +215,8 @@ class Form
         TimezoneInterface $localeDate,
         Type $productType,
         Config $wysiwygConfig,
-        Escaper $escaper
+        Escaper $escaper,
+        ProductOption $productOptionHelper
     ) {
         $this->variables = $variables;
         $this->arrays = $arrays;
@@ -251,6 +255,7 @@ class Form
         $this->productType = $productType;
         $this->wysiwygConfig = $wysiwygConfig;
         $this->escaper = $escaper;
+        $this->productOptionHelper = $productOptionHelper;
     }
 
     /**
@@ -2476,7 +2481,8 @@ class Form
         string $objectFieldName,
         string $label,
         ?AbstractModel $object = null,
-        bool $required = false
+        bool $required = false,
+        ?string $onChange = null
     ): void {
         $fieldValue = $this->getFieldValue(
             $objectRegistryKey,
@@ -2485,25 +2491,76 @@ class Form
             $object
         );
 
+        $config = [
+            'name'              => $objectFieldName,
+            'label'             => $label,
+            'search_collection' => \Magento\Catalog\Model\ResourceModel\Product\Collection::class,
+            'search_fields'     => ['sku', 'name'],
+            'search_conditions' => [
+                'status'     => ['eq' => Status::STATUS_ENABLED],
+                'visibility' => ['neq' => Visibility::VISIBILITY_NOT_VISIBLE]
+            ],
+            'result_id'         => '{{id}}',
+            'result_value'      => '{{name}}',
+            'result_label'      => '{{name}} ({{sku}})',
+            'required'          => $required,
+            'value'             => $fieldValue,
+            'object_id'         => $fieldValue
+        ];
+
+        if (! $this->variables->isEmpty($onChange)) {
+            $config[ 'onchange' ] = $onChange;
+        }
+
         $fieldSet->addField(
             $objectFieldName,
             Autocomplete::class,
-            [
-                'name'              => $objectFieldName,
-                'label'             => $label,
-                'search_collection' => \Magento\Catalog\Model\ResourceModel\Product\Collection::class,
-                'search_fields'     => ['sku', 'name'],
-                'search_conditions' => [
-                    'status'     => ['eq' => Status::STATUS_ENABLED],
-                    'visibility' => ['neq' => Visibility::VISIBILITY_NOT_VISIBLE]
-                ],
-                'result_id'         => '{{id}}',
-                'result_value'      => '{{name}}',
-                'result_label'      => '{{name}} ({{sku}})',
-                'required'          => $required,
-                'value'             => $fieldValue,
-                'object_id'         => $fieldValue
-            ]
+            $config
+        );
+    }
+
+    public function addProductNameFieldWithProductOptions(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        string $objectName,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateProductOptionsFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId
+            );
+        }
+
+        $this->addProductNameField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $object,
+            $required,
+            implode(
+                ';',
+                $onChange
+            )
         );
     }
 
@@ -2579,6 +2636,53 @@ class Form
                     $object
                 )
             ]
+        );
+    }
+
+    protected function getUpdateProductOptionsFormElementJs(
+        string $sourceElementId,
+        string $targetElementId
+    ): string {
+        return sprintf(
+            'updateProductOptionsFormElement(\'%s\', \'%s\', \'%s\');',
+            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/product_option/values')),
+            $sourceElementId,
+            $targetElementId
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionField(
+        AbstractModel $object,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ): void {
+        $valueOptions = [];
+
+        if ($object->getId()) {
+            $productId = $object->getDataUsingMethod($objectProductIdFieldName);
+
+            if ($productId) {
+                $valueOptions =
+                    $this->productOptionHelper->getProductOptionValues($this->variables->intValue($productId));
+            }
+        }
+
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $valueOptions,
+            null,
+            $object,
+            $required
         );
     }
 }

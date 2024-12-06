@@ -1268,6 +1268,25 @@ abstract class Form extends Generic
         );
     }
 
+    public function addProductNameFieldWithProductOptions(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductNameFieldWithProductOptions(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $targetFieldNames,
+            $this->objectName,
+            $this->getObject(),
+            $required
+        );
+    }
+
     public function addPriceField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -1312,6 +1331,27 @@ abstract class Form extends Generic
             $objectFieldName,
             $label,
             $this->getObject(),
+            $required
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionField(
+        Fieldset $fieldSet,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductOptionField(
+            $this->getObject(),
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectProductIdFieldName,
+            $objectFieldName,
+            $label,
             $required
         );
     }

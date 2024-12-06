@@ -8,5 +8,6 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="Infrangible_BackendWidget::js/eav.js"/>
+        <script src="Infrangible_BackendWidget::js/product-options.js"/>
     </head>
 </page>

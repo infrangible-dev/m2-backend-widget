@@ -10,6 +10,7 @@ use Magento\Framework\Data\Form\Element\CollectionFactory;
 use Magento\Framework\Data\Form\Element\Factory;
 use Magento\Framework\Data\Form\Element\Text;
 use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
 /**
@@ -64,6 +65,9 @@ class Autocomplete extends Text
         );
     }
 
+    /**
+     * @throws LocalizedException
+     */
     public function getElementHtml(): string
     {
         $valueHtml = sprintf(
@@ -75,6 +79,33 @@ class Autocomplete extends Text
             $this->_getUiId(),
             $this->serialize($this->getHtmlAttributes())
         );
+
+        $events = array_filter(
+            $this->getHtmlAttributes(),
+            function (string $attribute): bool {
+                return mb_strpos(
+                        $attribute,
+                        'on'
+                    ) === 0;
+            }
+        );
+
+        foreach ($events as $event) {
+            $eventShort = mb_substr(
+                $event,
+                2
+            );
+            $methodName = 'getOn' . $eventShort;
+            $eventListener = $this->$methodName();
+
+            if ($eventListener) {
+                $valueHtml .= $this->secureRenderer->renderEventListenerAsTag(
+                    $event,
+                    $eventListener,
+                    "*[formelementhookid='{$this->getData('formelementhookid')}']"
+                );
+            }
+        }
 
         $this->setData(
             'value_name',
@@ -206,6 +237,7 @@ class Autocomplete extends Text
                 },
                 select: function(event, ui) {
                     $('#$valueHtmlId').val(ui.item.id);
+                    $('#$valueHtmlId').trigger('change');
                     $('#$htmlId').addClass('selected');
                 }
             });

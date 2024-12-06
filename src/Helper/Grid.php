@@ -622,8 +622,18 @@ class Grid
     /**
      * @throws Exception
      */
-    public function addWebsiteNameColumn(Extended $grid, string $objectFieldName, ?string $label = null): void
-    {
+    public function addWebsiteNameColumn(
+        \Infrangible\BackendWidget\Block\Grid $grid,
+        string $objectFieldName,
+        ?string $label = null
+    ): void {
+        $grid->addJoinValues(
+            'store_website',
+            [$objectFieldName => 'website_id'],
+            ['website_name' => 'name'],
+            'website'
+        );
+
         if ($this->variables->isEmpty($label)) {
             $label = __('Website')->render();
         }
@@ -1170,8 +1180,38 @@ class Grid
     /**
      * @throws Exception
      */
-    public function addCustomerNameColumn(Extended $grid, string $objectFieldName, string $label)
-    {
+    public function addCustomerNameColumn(
+        \Infrangible\BackendWidget\Block\Grid $grid,
+        string $objectFieldName,
+        string $label
+    ) {
+        $columnTableAlias = sprintf(
+            '%s_customer',
+            $objectFieldName
+        );
+
+        $grid->addJoinValues(
+            'customer_entity',
+            [$objectFieldName => 'entity_id'],
+            [
+                sprintf(
+                    '%s_firstname',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.firstname',
+                    $columnTableAlias
+                ),
+                sprintf(
+                    '%s_lastname',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.lastname',
+                    $columnTableAlias
+                )
+            ],
+            $columnTableAlias
+        );
+
         $grid->addColumn(
             $this->getColumnId($objectFieldName),
             [
@@ -1189,8 +1229,60 @@ class Grid
     /**
      * @throws Exception
      */
-    public function addProductNameColumn(Extended $grid, string $objectFieldName, string $label)
-    {
+    public function addProductNameColumn(
+        \Infrangible\BackendWidget\Block\Grid $grid,
+        string $objectFieldName,
+        string $label
+    ) {
+        $valueTableAlias = sprintf(
+            '%s_name',
+            $objectFieldName
+        );
+
+        $attributeTableAlias = sprintf(
+            '%s_name_attribute',
+            $objectFieldName
+        );
+
+        $grid->addJoinValues(
+            'catalog_product_entity_varchar',
+            [
+                $objectFieldName => 'entity_id',
+                sprintf(
+                    '%s.store_id = 0',
+                    $valueTableAlias
+                )
+            ],
+            [
+                sprintf(
+                    '%s_product_name',
+                    $objectFieldName
+                ) => sprintf(
+                    '%s.value',
+                    $valueTableAlias
+                )
+            ],
+            $valueTableAlias,
+            [
+                sprintf(
+                    '%s.attribute_code = "name"',
+                    $attributeTableAlias
+                )
+            ]
+        );
+
+        $grid->addJoinValues(
+            'eav_attribute',
+            [
+                sprintf(
+                    '%s.attribute_id',
+                    $valueTableAlias
+                ) => 'attribute_id'
+            ],
+            [],
+            $attributeTableAlias
+        );
+
         $grid->addColumn(
             $this->getColumnId($objectFieldName),
             [
@@ -1201,6 +1293,108 @@ class Grid
                 'sortable'                  => false,
                 'renderer'                  => Product::class,
                 'filter_condition_callback' => [$grid, 'filterProductName']
+            ]
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionColumn(
+        \Infrangible\BackendWidget\Block\Grid $grid,
+        string $valueFieldName,
+        string $productIdFieldName,
+        string $label
+    ): void {
+        $grid->addColumn(
+            $this->getColumnId($valueFieldName),
+            [
+                'header'                    => $label,
+                'index'                     => $valueFieldName,
+                'type'                      => 'text',
+                'column_css_class'          => 'data-grid-td',
+                'sortable'                  => false,
+                'renderer'                  => \Infrangible\BackendWidget\Block\Grid\Column\Renderer\ProductOption::class,
+                'filter_condition_callback' => [$grid, 'filterProductOptionValue']
+            ]
+        );
+
+        $productOptionAliasName = sprintf(
+            '%s_cpo',
+            $valueFieldName
+        );
+
+        $productOptionTypeValueAliasName = sprintf(
+            '%s_cpotv',
+            $valueFieldName
+        );
+
+        $productOptionTypeTitleAliasName = sprintf(
+            '%s_cpott',
+            $valueFieldName
+        );
+
+        $grid->addJoinValues(
+            'catalog_product_option',
+            [
+                sprintf(
+                    '%s.product_id',
+                    $productOptionAliasName
+                ) => sprintf(
+                    'main_table.%s',
+                    $productIdFieldName
+                )
+            ],
+            [],
+            $productOptionAliasName
+        );
+
+        $grid->addJoinValues(
+            'catalog_product_option_type_value',
+            [
+                sprintf(
+                    '%s.option_id',
+                    $productOptionTypeValueAliasName
+                ) => sprintf(
+                    '%s.option_id',
+                    $productOptionAliasName
+                )
+            ],
+            [],
+            $productOptionTypeValueAliasName
+        );
+
+        $grid->addJoinValues(
+            'catalog_product_option_type_title',
+            [
+                sprintf(
+                    '%s.option_type_id',
+                    $productOptionTypeTitleAliasName
+                ) => sprintf(
+                    '%s.option_type_id',
+                    $productOptionTypeValueAliasName
+                ),
+                sprintf(
+                    '%s.store_id = 0',
+                    $productOptionTypeTitleAliasName
+                )
+            ],
+            [
+                sprintf(
+                    '%s_title',
+                    $valueFieldName
+                ) => sprintf(
+                    '%s.title',
+                    $productOptionTypeTitleAliasName
+                )
+            ],
+            $productOptionTypeTitleAliasName,
+            [
+                sprintf(
+                    '%s.option_type_id = main_table.%s',
+                    $productOptionTypeTitleAliasName,
+                    $valueFieldName
+                )
             ]
         );
     }

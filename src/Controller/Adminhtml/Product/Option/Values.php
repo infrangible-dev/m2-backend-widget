@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\BackendWidget\Controller\Adminhtml\Attribute\Option;
+namespace Infrangible\BackendWidget\Controller\Adminhtml\Product\Option;
 
-use Exception;
 use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Json;
+use FeWeDev\Base\Variables;
+use Infrangible\BackendWidget\Helper\ProductOption;
 use Infrangible\Core\Controller\Adminhtml\Ajax;
-use Infrangible\Core\Helper\Attribute;
-use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -21,15 +20,19 @@ use Psr\Log\LoggerInterface;
  */
 class Values extends Ajax
 {
-    /** @var Attribute */
-    protected $eavAttributeHelper;
+    /** @var Variables */
+    protected $variables;
+
+    /** @var ProductOption */
+    protected $productOptionHelper;
 
     public function __construct(
         Arrays $arrays,
         Json $json,
-        Attribute $eavAttributeHelper,
         Context $context,
-        LoggerInterface $logging
+        LoggerInterface $logging,
+        Variables $variables,
+        ProductOption $productOptionHelper
     ) {
         parent::__construct(
             $arrays,
@@ -38,29 +41,23 @@ class Values extends Ajax
             $logging
         );
 
-        $this->eavAttributeHelper = $eavAttributeHelper;
+        $this->variables = $variables;
+        $this->productOptionHelper = $productOptionHelper;
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function execute(): ResponseInterface
     {
-        $attributeId = $this->getRequest()->getParam('attribute_id');
+        $productId = $this->getRequest()->getParam('product_id');
 
-        $attribute = $this->eavAttributeHelper->getAttribute(
-            Product::ENTITY,
-            $attributeId
+        $options = $this->productOptionHelper->getProductOptionValues($this->variables->intValue($productId));
+
+        $this->addResponseValue(
+            'options',
+            $options
         );
-
-        if ($attribute->usesSource()) {
-            $valueOptions = $attribute->getSource()->getAllOptions();
-
-            $this->addResponseValue(
-                'options',
-                $valueOptions
-            );
-        }
 
         return $this->getResponse();
     }

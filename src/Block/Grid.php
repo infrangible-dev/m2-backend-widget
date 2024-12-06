@@ -597,24 +597,32 @@ abstract class Grid extends Extended
                     if (is_numeric($mainTableFieldName)) {
                         $joinConditions[] = $joinTableFieldName;
                     } else {
-                        if (str_contains(
+                        if (! str_contains(
                             $mainTableFieldName,
                             '.'
                         )) {
-                            $joinConditions[] = sprintf(
-                                '%s = %s.%s',
-                                $mainTableFieldName,
-                                $tableAlias,
-                                $joinTableFieldName
+                            $mainTableFieldName = sprintf(
+                                'main_table.%s',
+                                $mainTableFieldName
                             );
-                        } else {
-                            $joinConditions[] = sprintf(
-                                'main_table.%s = %s.%s',
-                                $mainTableFieldName,
+                        }
+
+                        if (! str_contains(
+                            $joinTableFieldName,
+                            '.'
+                        )) {
+                            $joinTableFieldName = sprintf(
+                                '%s.%s',
                                 $tableAlias,
                                 $joinTableFieldName
                             );
                         }
+
+                        $joinConditions[] = sprintf(
+                            '%s = %s',
+                            $mainTableFieldName,
+                            $joinTableFieldName
+                        );
                     }
                 }
 
@@ -635,7 +643,7 @@ abstract class Grid extends Extended
         }
     }
 
-    protected function addJoinValues(
+    public function addJoinValues(
         string $tableName,
         array $joinFields,
         array $resultFields = [],
@@ -1055,13 +1063,6 @@ abstract class Grid extends Extended
      */
     protected function addWebsiteNameColumn(string $objectFieldName, ?string $label = null): void
     {
-        $this->addJoinValues(
-            'store_website',
-            [$objectFieldName => 'website_id'],
-            ['website_name' => 'name'],
-            'website'
-        );
-
         $this->gridHelper->addWebsiteNameColumn(
             $this,
             $objectFieldName,
@@ -1698,7 +1699,7 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addProductAttributeCodeColumn(
+    protected function addProductAttributeCodeColumn(
         string $objectFieldName,
         string $label
     ): void {
@@ -1712,7 +1713,7 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addCustomerAttributeCodeColumn(string $objectFieldName, string $label): void
+    protected function addCustomerAttributeCodeColumn(string $objectFieldName, string $label): void
     {
         $this->gridHelper->addCustomerAttributeCodeColumn(
             $this,
@@ -1724,7 +1725,7 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addAddressAttributeCodeColumn(string $objectFieldName, string $label): void
+    protected function addAddressAttributeCodeColumn(string $objectFieldName, string $label): void
     {
         $this->gridHelper->addAddressAttributeCodeColumn(
             $this,
@@ -1736,7 +1737,7 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addAttributeSortByColumn(string $objectFieldName, string $label): void
+    protected function addAttributeSortByColumn(string $objectFieldName, string $label): void
     {
         $this->gridHelper->addAttributeSortByColumn(
             $this,
@@ -1748,35 +1749,8 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addCustomerNameColumn(string $objectFieldName, string $label): void
+    protected function addCustomerNameColumn(string $objectFieldName, string $label): void
     {
-        $columnTableAlias = sprintf(
-            '%s_customer',
-            $objectFieldName
-        );
-
-        $this->addJoinValues(
-            'customer_entity',
-            [$objectFieldName => 'entity_id'],
-            [
-                sprintf(
-                    '%s_firstname',
-                    $objectFieldName
-                ) => sprintf(
-                    '%s.firstname',
-                    $columnTableAlias
-                ),
-                sprintf(
-                    '%s_lastname',
-                    $objectFieldName
-                ) => sprintf(
-                    '%s.lastname',
-                    $columnTableAlias
-                )
-            ],
-            $columnTableAlias
-        );
-
         $this->gridHelper->addCustomerNameColumn(
             $this,
             $objectFieldName,
@@ -1812,57 +1786,8 @@ abstract class Grid extends Extended
     /**
      * @throws Exception
      */
-    public function addProductNameColumn(string $objectFieldName, string $label): void
+    protected function addProductNameColumn(string $objectFieldName, string $label): void
     {
-        $valueTableAlias = sprintf(
-            '%s_name',
-            $objectFieldName
-        );
-
-        $attributeTableAlias = sprintf(
-            '%s_name_attribute',
-            $objectFieldName
-        );
-
-        $this->addJoinValues(
-            'catalog_product_entity_varchar',
-            [
-                $objectFieldName => 'entity_id',
-                sprintf(
-                    '%s.store_id = 0',
-                    $valueTableAlias
-                )
-            ],
-            [
-                sprintf(
-                    '%s_product_name',
-                    $objectFieldName
-                ) => sprintf(
-                    '%s.value',
-                    $valueTableAlias
-                )
-            ],
-            $valueTableAlias,
-            [
-                sprintf(
-                    '%s.attribute_code = "name"',
-                    $attributeTableAlias
-                )
-            ]
-        );
-
-        $this->addJoinValues(
-            'eav_attribute',
-            [
-                sprintf(
-                    '%s.attribute_id',
-                    $valueTableAlias
-                ) => 'attribute_id'
-            ],
-            [],
-            $attributeTableAlias
-        );
-
         $this->gridHelper->addProductNameColumn(
             $this,
             $objectFieldName,
@@ -1887,6 +1812,44 @@ abstract class Grid extends Extended
             sprintf(
                 '%s.value',
                 $valueTableAlias
+            ),
+            $condition
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionColumn(
+        string $valueFieldName,
+        string $productIdFieldName,
+        string $label
+    ): void {
+        $this->gridHelper->addProductOptionColumn(
+            $this,
+            $valueFieldName,
+            $productIdFieldName,
+            $label
+        );
+    }
+
+    public function filterProductOptionValue(AbstractCollection $collection, Column $column): void
+    {
+        $filter = $column->getFilter();
+
+        $condition = $filter->getCondition();
+
+        $objectFieldName = $column->getData('index');
+
+        $productOptionTypeTitleAliasName = sprintf(
+            '%s_cpott',
+            $objectFieldName
+        );
+
+        $collection->addFieldToFilter(
+            sprintf(
+                '%s.title',
+                $productOptionTypeTitleAliasName
             ),
             $condition
         );
