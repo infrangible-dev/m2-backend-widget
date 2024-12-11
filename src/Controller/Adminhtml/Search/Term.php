@@ -71,7 +71,7 @@ class Term extends Base
                         'attribute' => $searchField,
                         'like'      => sprintf(
                             '%%%s%%',
-                            $term
+                            trim($term)
                         )
                     ];
                 }
