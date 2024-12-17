@@ -1355,4 +1355,25 @@ abstract class Form extends Generic
             $required
         );
     }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionValueField(
+        Fieldset $fieldSet,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductOptionValueField(
+            $this->getObject(),
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectProductIdFieldName,
+            $objectFieldName,
+            $label,
+            $required
+        );
+    }
 }

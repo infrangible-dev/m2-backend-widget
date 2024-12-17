@@ -23,6 +23,29 @@ class ProductOption
         $this->productHelper = $productHelper;
     }
 
+    public function getProductOptions(int $productId): array
+    {
+        $product = $this->productHelper->loadProduct($productId);
+
+        $options = [['value' => '', 'label' => __('No selection')]];
+
+        /** @var Option $productOption */
+        foreach ($product->getProductOptionsCollection() as $productOption) {
+            $productOptionValues = $productOption->getValues();
+
+            if ($productOptionValues !== null) {
+                continue;
+            }
+
+            $options[] = [
+                'value' => $productOption->getId(),
+                'label' => $productOption->getTitle()
+            ];
+        }
+
+        return $options;
+    }
+
     public function getProductOptionValues(int $productId): array
     {
         $product = $this->productHelper->loadProduct($productId);
@@ -31,10 +54,16 @@ class ProductOption
 
         /** @var Option $productOption */
         foreach ($product->getProductOptionsCollection() as $productOption) {
+            $productOptionValues = $productOption->getValues();
+
+            if ($productOptionValues === null) {
+                continue;
+            }
+
             $optionValues = [];
 
             /** @var Value $productOptionValue */
-            foreach ($productOption->getValues() as $productOptionValue) {
+            foreach ($productOptionValues as $productOptionValue) {
                 $optionValues[] = [
                     'value' => $productOptionValue->getId(),
                     'label' => $productOptionValue->getTitle()

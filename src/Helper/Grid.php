@@ -1314,6 +1314,59 @@ class Grid
                 'column_css_class'          => 'data-grid-td',
                 'sortable'                  => false,
                 'renderer'                  => \Infrangible\BackendWidget\Block\Grid\Column\Renderer\ProductOption::class,
+                'filter_condition_callback' => [$grid, 'filterProductOption']
+            ]
+        );
+
+        $productOptionTitleAliasName = sprintf(
+            '%s_cpot',
+            $valueFieldName
+        );
+
+        $grid->addJoinValues(
+            'catalog_product_option_title',
+            [
+                $valueFieldName => sprintf(
+                    '%s.option_id',
+                    $productOptionTitleAliasName
+                ),
+                sprintf(
+                    '%s.store_id = 0',
+                    $productOptionTitleAliasName
+                )
+            ],
+            [
+                sprintf(
+                    '%s_title',
+                    $valueFieldName
+                ) => sprintf(
+                    '%s.title',
+                    $productOptionTitleAliasName
+                )
+            ],
+            $productOptionTitleAliasName,
+            [],
+            false
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionValueColumn(
+        \Infrangible\BackendWidget\Block\Grid $grid,
+        string $valueFieldName,
+        string $label
+    ): void {
+        $grid->addColumn(
+            $this->getColumnId($valueFieldName),
+            [
+                'header'                    => $label,
+                'index'                     => $valueFieldName,
+                'type'                      => 'text',
+                'column_css_class'          => 'data-grid-td',
+                'sortable'                  => false,
+                'renderer'                  => \Infrangible\BackendWidget\Block\Grid\Column\Renderer\ProductOption::class,
                 'filter_condition_callback' => [$grid, 'filterProductOptionValue']
             ]
         );

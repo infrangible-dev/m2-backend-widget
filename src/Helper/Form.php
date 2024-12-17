@@ -2671,6 +2671,40 @@ class Form
             $productId = $object->getDataUsingMethod($objectProductIdFieldName);
 
             if ($productId) {
+                $valueOptions = $this->productOptionHelper->getProductOptions($this->variables->intValue($productId));
+            }
+        }
+
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $valueOptions,
+            null,
+            $object,
+            $required
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionValueField(
+        AbstractModel $object,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ): void {
+        $valueOptions = [];
+
+        if ($object->getId()) {
+            $productId = $object->getDataUsingMethod($objectProductIdFieldName);
+
+            if ($productId) {
                 $valueOptions =
                     $this->productOptionHelper->getProductOptionValues($this->variables->intValue($productId));
             }

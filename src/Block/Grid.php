@@ -1847,6 +1847,42 @@ abstract class Grid extends Extended
         );
     }
 
+    public function filterProductOption(AbstractCollection $collection, Column $column): void
+    {
+        $filter = $column->getFilter();
+
+        $condition = $filter->getCondition();
+
+        $objectFieldName = $column->getData('index');
+
+        $productOptionTitleAliasName = sprintf(
+            '%s_cpot',
+            $objectFieldName
+        );
+
+        $collection->addFieldToFilter(
+            sprintf(
+                '%s.title',
+                $productOptionTitleAliasName
+            ),
+            $condition
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionValueColumn(
+        string $valueFieldName,
+        string $label
+    ): void {
+        $this->gridHelper->addProductOptionValueColumn(
+            $this,
+            $valueFieldName,
+            $label
+        );
+    }
+
     public function filterProductOptionValue(AbstractCollection $collection, Column $column): void
     {
         $filter = $column->getFilter();
