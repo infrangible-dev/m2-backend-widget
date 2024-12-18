@@ -2566,6 +2566,110 @@ class Form
         );
     }
 
+    public function addProductNameFieldWithProductOptionValues(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        string $objectName,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateProductOptionValuesFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId
+            );
+        }
+
+        $this->addProductNameField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $object,
+            $required,
+            implode(
+                ';',
+                $onChange
+            )
+        );
+    }
+
+    public function addProductNameFieldWithProductOptionsAndValues(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $optionTargetFieldNames,
+        array $optionValueTargetFieldNames,
+        string $objectName,
+        ?AbstractModel $object = null,
+        bool $required = false
+    ): void {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($optionTargetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateProductOptionsFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId
+            );
+        }
+
+        foreach ($optionValueTargetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateProductOptionValuesFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId
+            );
+        }
+
+        $this->addProductNameField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $object,
+            $required,
+            implode(
+                ';',
+                $onChange
+            )
+        );
+    }
+
     public function addPriceField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2642,6 +2746,18 @@ class Form
     }
 
     protected function getUpdateProductOptionsFormElementJs(
+        string $sourceElementId,
+        string $targetElementId
+    ): string {
+        return sprintf(
+            'updateProductOptionsFormElement(\'%s\', \'%s\', \'%s\');',
+            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/product_option')),
+            $sourceElementId,
+            $targetElementId
+        );
+    }
+
+    protected function getUpdateProductOptionValuesFormElementJs(
         string $sourceElementId,
         string $targetElementId
     ): string {

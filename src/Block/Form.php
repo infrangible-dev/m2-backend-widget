@@ -1287,6 +1287,46 @@ abstract class Form extends Generic
         );
     }
 
+    public function addProductNameFieldWithProductOptionValues(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductNameFieldWithProductOptionValues(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $targetFieldNames,
+            $this->objectName,
+            $this->getObject(),
+            $required
+        );
+    }
+
+    public function addProductNameFieldWithProductOptionsAndValues(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $optionTargetFieldNames,
+        array $optionValueTargetFieldNames,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductNameFieldWithProductOptionsAndValues(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $optionTargetFieldNames,
+            $optionValueTargetFieldNames,
+            $this->objectName,
+            $this->getObject(),
+            $required
+        );
+    }
+
     public function addPriceField(
         Fieldset $fieldSet,
         string $objectFieldName,
