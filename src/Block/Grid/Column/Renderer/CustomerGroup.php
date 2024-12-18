@@ -15,8 +15,7 @@ use Magento\Framework\DataObject;
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class CustomerGroup
-    extends AbstractRenderer
+class CustomerGroup extends AbstractRenderer
 {
     /** @var Variables */
     protected $variables;
@@ -24,28 +23,23 @@ class CustomerGroup
     /** @var Customer */
     protected $customerHelper;
 
-    /**
-     * @param Context   $context
-     * @param Variables $variables
-     * @param Customer  $customerHelper
-     * @param array     $data
-     */
     public function __construct(
         Context $context,
         Variables $variables,
         Customer $customerHelper,
         array $data = []
     ) {
-        parent::__construct($context, $data);
+        parent::__construct(
+            $context,
+            $data
+        );
 
         $this->variables = $variables;
         $this->customerHelper = $customerHelper;
     }
 
     /**
-     * @param DataObject $row
-     *
-     * @return string
+     * @throws \Exception
      */
     public function render(DataObject $row): string
     {
@@ -55,11 +49,14 @@ class CustomerGroup
 
         $categoryGroupCodes = [];
 
-        if (!$this->variables->isEmpty($customerGroupIds)) {
-            $customerGroupIds = explode(',', $customerGroupIds);
+        if (! $this->variables->isEmpty($customerGroupIds)) {
+            $customerGroupIds = explode(
+                ',',
+                $customerGroupIds
+            );
 
             foreach ($customerGroupIds as $customerGroupId) {
-                $customerGroup = $this->customerHelper->loadCustomerGroup($customerGroupId);
+                $customerGroup = $this->customerHelper->loadCustomerGroup($this->variables->intValue($customerGroupId));
 
                 if ($customerGroup->getCode()) {
                     $categoryGroupCodes[] = $customerGroup->getCode();
@@ -69,6 +66,9 @@ class CustomerGroup
 
         natcasesort($categoryGroupCodes);
 
-        return implode('<br />', $categoryGroupCodes);
+        return implode(
+            '<br />',
+            $categoryGroupCodes
+        );
     }
 }
