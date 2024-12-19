@@ -15,8 +15,7 @@ use Magento\Framework\DataObject;
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class Categories
-    extends AbstractRenderer
+class Categories extends AbstractRenderer
 {
     /** @var Variables */
     protected $variables;
@@ -24,28 +23,23 @@ class Categories
     /** @var Category */
     protected $categoryHelper;
 
-    /**
-     * @param Context   $context
-     * @param Variables $variables
-     * @param Category  $categoryHelper
-     * @param array     $data
-     */
     public function __construct(
         Context $context,
         Variables $variables,
         Category $categoryHelper,
         array $data = []
     ) {
-        parent::__construct($context, $data);
+        parent::__construct(
+            $context,
+            $data
+        );
 
         $this->variables = $variables;
         $this->categoryHelper = $categoryHelper;
     }
 
     /**
-     * @param DataObject $row
-     *
-     * @return string
+     * @throws \Exception
      */
     public function render(DataObject $row): string
     {
@@ -55,11 +49,16 @@ class Categories
 
         $categoryNames = [];
 
-        if (!$this->variables->isEmpty($categoryIds)) {
-            $categoryIds = explode(',', $categoryIds);
+        if (! $this->variables->isEmpty($categoryIds)) {
+            if (! is_array($categoryIds)) {
+                $categoryIds = explode(
+                    ',',
+                    $categoryIds
+                );
+            }
 
             foreach ($categoryIds as $categoryId) {
-                $category = $this->categoryHelper->loadCategory($categoryId);
+                $category = $this->categoryHelper->loadCategory($this->variables->intValue($categoryId));
 
                 $categoryPathIds = $category->getPathIds();
                 array_shift($categoryPathIds);
@@ -75,10 +74,16 @@ class Categories
 
                 $categoryName[] = $category->getName();
 
-                $categoryNames[] = implode(' > ', $categoryName);
+                $categoryNames[] = implode(
+                    ' > ',
+                    $categoryName
+                );
             }
         }
 
-        return implode('<br />', $categoryNames);
+        return implode(
+            '<br />',
+            $categoryNames
+        );
     }
 }
