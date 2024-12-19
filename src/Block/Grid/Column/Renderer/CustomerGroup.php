@@ -50,10 +50,12 @@ class CustomerGroup extends AbstractRenderer
         $categoryGroupCodes = [];
 
         if (! $this->variables->isEmpty($customerGroupIds)) {
-            $customerGroupIds = explode(
-                ',',
-                $customerGroupIds
-            );
+            if (! is_array($customerGroupIds)) {
+                $customerGroupIds = explode(
+                    ',',
+                    $customerGroupIds
+                );
+            }
 
             foreach ($customerGroupIds as $customerGroupId) {
                 $customerGroup = $this->customerHelper->loadCustomerGroup($this->variables->intValue($customerGroupId));
