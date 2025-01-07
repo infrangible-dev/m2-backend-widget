@@ -1,0 +1,140 @@
+<?php
+
+declare(strict_types=1);
+
+use Infrangible\BackendWidget\Block\Form\Tab\Form;
+use Magento\Framework\View\TemplateEngine\Php;
+
+/**
+ * @author      Andreas Knollmann
+ * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+/** @var Php $this */
+/** @var Form $block */
+?>
+
+<?= $block->getFormHtml(); ?>
+
+<script type="text/javascript">
+require([
+    'jquery',
+    'mage/mage',
+    'mage/backend/notification'
+], function($) {
+    'use strict';
+    var tab = $('#tab_<?= $block->getObjectName(); ?>');
+    console.log(tab);
+    tab.notification({
+        templates: {
+            global: '<div data-role="messages" id="messages">' +
+                '<div class="messages"><div class="message message-success success">' +
+                '<div data-ui-id="messages-message-success"><%- data.message %></div></div>' +
+                '</div></div>'
+        }
+    });
+    tab.notification('clear');
+    var editForm_<?= $block->getFormId(); ?> = $('#<?= $block->getFormId(); ?>');
+    console.log(editForm_<?= $block->getFormId(); ?>);
+    editForm_<?= $block->getFormId(); ?>.mage('form').mage('validation', {
+        validationUrl: '',
+        highlight: function(element) {
+            var detailsElement = $(element).closest('details');
+            if (detailsElement.length && detailsElement.is('.details')) {
+                var summaryElement = detailsElement.find('summary');
+                if (summaryElement.length && summaryElement.attr('aria-expanded') === 'false') {
+                    summaryElement.trigger('click');
+                }
+            }
+            $(element).trigger('highlight.validate');
+        },
+        submitHandler: function(form) {
+            form = $(form);
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                showLoader: true,
+                cache: false,
+                success: function(response) {
+                    console.log(response);
+                    if (! response.responseJSON) {
+                        response.responseJSON = response;
+                    }
+                    console.log(response.responseJSON);
+                    tab.notification('clear');
+                    if (response.responseJSON.message) {
+                        tab.notification('add', {
+                            error: response.responseJSON.error ? response.responseJSON : false,
+                            message: response.responseJSON.message
+                        });
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                    if (! response.responseJSON) {
+                        response.responseJSON = response;
+                    }
+                    console.log(response.responseJSON);
+                    tab.notification('clear');
+                    if (response.status === 302) {
+                        if (response.responseJSON.message) {
+                            tab.notification('add', {
+                                error: response.responseJSON.error ? response.responseJSON : false,
+                                message: response.responseJSON.message
+                            });
+                        }
+                        editForm_<?= $block->getFormId(); ?>.off('save saveAndContinueEdit preview');
+                        var editFormParent_<?= $block->getFormId(); ?> = editForm_<?= $block->getFormId(); ?>.parent().parent();
+                        $.ajax({
+                            url: response.responseJSON.location,
+                            method: 'get',
+                            dataType: 'html',
+                            showLoader: true,
+                            context: editFormParent_<?= $block->getFormId(); ?>[0],
+                            success: function (data) {
+                                var targetNode = editFormParent_<?= $block->getFormId(); ?>;
+                                targetNode.html(data);
+                                targetNode.trigger('contentUpdated');
+                            }
+                        });
+                    } else {
+                        if (response.responseJSON.message) {
+                            tab.notification('add', {
+                                error: true,
+                                message: response.responseJSON.message
+                            });
+                        }
+                    }
+                    window.scrollTo({
+                        top: editForm_<?= $block->getFormId(); ?>.find('[data-role=messages] :first'),
+                        behavior: 'instant'
+                    });
+                },
+                complete: function(response) {
+                    console.log(response);
+                    if (! response.responseJSON) {
+                        response.responseJSON = response;
+                    }
+                    console.log(response.responseJSON);
+                    if (response.responseJSON.ajaxExpired === 1) {
+                        window.location.href = response.responseJSON.ajaxRedirect;
+                    }
+                }
+            });
+        }
+    });
+    editForm_<?= $block->getFormId(); ?>.on('submit', function() {
+        $(this).find(':submit').attr('disabled', 'disabled');
+        if (this.isValid === false) {
+            $(this).find(':submit').prop('disabled', false);
+        }
+        this.isValid = true;
+    });
+    editForm_<?= $block->getFormId(); ?>.on('invalid-form.validate', function() {
+        $(this).find(':submit').prop('disabled', false);
+        this.isValid = false;
+    });
+});
+</script>

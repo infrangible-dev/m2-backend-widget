@@ -5,59 +5,65 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
-use Magento\Backend\App\Action\Context;
-use Magento\Framework\Model\AbstractModel;
-use Psr\Log\LoggerInterface;
 use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Instances;
 use Infrangible\Core\Helper\Registry;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\Model\AbstractModel;
+use Psr\Log\LoggerInterface;
 
 /**
  * @author      Andreas Knollmann
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-abstract class Delete
-    extends Edit
+abstract class Delete extends Edit
 {
     /** @var LoggerInterface */
     protected $logging;
 
-    /**
-     * @param Registry        $registryHelper
-     * @param Context         $context
-     * @param Instances       $instanceHelper
-     * @param LoggerInterface $logging
-     * @param Session         $session
-     */
     public function __construct(
         Registry $registryHelper,
         Context $context,
         Instances $instanceHelper,
         LoggerInterface $logging,
-        Session $session)
-    {
-        parent::__construct($registryHelper, $instanceHelper, $context, $session);
+        Session $session
+    ) {
+        parent::__construct(
+            $registryHelper,
+            $instanceHelper,
+            $context,
+            $session
+        );
 
         $this->logging = $logging;
     }
 
     /**
-     * @return void
      * @throws Exception
      */
-    public function execute()
+    public function execute(): void
     {
-        if ( ! $this->allowDelete()) {
-            $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        if (! $this->allowDelete()) {
+            $this->redirect(
+                $this->getRedirectUrlRoute(),
+                $this->getRedirectUrlParams()
+            );
+
+            $this->prepareResponse();
 
             return;
         }
 
         $object = $this->initObject();
 
-        if ( ! $object) {
-            $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        if (! $object) {
+            $this->redirect(
+                $this->getRedirectUrlRoute(),
+                $this->getRedirectUrlParams()
+            );
+
+            $this->prepareResponse();
 
             return;
         }
@@ -71,32 +77,38 @@ abstract class Delete
 
             $this->afterDelete($object);
 
-            $this->getMessageManager()->addSuccessMessage($this->getObjectDeletedMessage());
+            $this->addSuccessMessage($this->getObjectDeletedMessage());
         } catch (Exception $exception) {
             $this->logging->error($exception);
 
-            $this->getMessageManager()->addErrorMessage($exception->getMessage());
+            $this->addErrorMessage($exception->getMessage());
         }
 
-        $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        $this->redirect(
+            $this->getRedirectUrlRoute(),
+            $this->getRedirectUrlParams()
+        );
+
+        $this->prepareResponse();
     }
 
-    /**
-     * @param AbstractModel $object
-     */
+    protected function getRedirectUrlRoute(): string
+    {
+        return $this->getIndexUrlRoute();
+    }
+
+    protected function getRedirectUrlParams(): array
+    {
+        return $this->getIndexUrlParams();
+    }
+
     protected function beforeDelete(AbstractModel $object)
     {
     }
 
-    /**
-     * @param AbstractModel $object
-     */
     protected function afterDelete(AbstractModel $object)
     {
     }
 
-    /**
-     * @return string
-     */
     abstract protected function getObjectDeletedMessage(): string;
 }

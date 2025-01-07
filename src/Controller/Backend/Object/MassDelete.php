@@ -23,13 +23,6 @@ abstract class MassDelete
     /** @var LoggerInterface */
     protected $logging;
 
-    /**
-     * @param Registry        $registryHelper
-     * @param Instances       $instanceHelper
-     * @param Context         $context
-     * @param LoggerInterface $logging
-     * @param Session         $session
-     */
     public function __construct(
         Registry $registryHelper,
         Instances $instanceHelper,
@@ -42,10 +35,7 @@ abstract class MassDelete
         $this->logging = $logging;
     }
 
-    /**
-     * @return void
-     */
-    public function execute()
+    public function execute(): void
     {
         $paramName = $this->getObjectField();
 
@@ -86,37 +76,29 @@ abstract class MassDelete
                     }
                 }
 
-                $this->messageManager->addSuccessMessage(sprintf($this->getObjectsDeletedMessage(), $counter));
+                $this->addSuccessMessage(sprintf($this->getObjectsDeletedMessage(), $counter));
             } catch (Exception $exception) {
-                $this->messageManager->addErrorMessage($exception->getMessage());
+                $this->addErrorMessage($exception->getMessage());
 
                 $this->logging->error($exception);
             }
         } else {
-            $this->messageManager->addErrorMessage(__('Please select at least one item.'));
+            $this->addErrorMessage(__('Please select at least one item.')->render());
         }
 
-        $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        $this->redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
     }
 
-    /**
-     * @param AbstractModel $object
-     */
     protected function beforeDelete(AbstractModel $object)
     {
     }
 
     /**
-     * @param AbstractModel $object
-     *
      * @throws Exception
      */
     protected function afterDelete(AbstractModel $object)
     {
     }
 
-    /**
-     * @return string
-     */
     abstract protected function getObjectsDeletedMessage(): string;
 }

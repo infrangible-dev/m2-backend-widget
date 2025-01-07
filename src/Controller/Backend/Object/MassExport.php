@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
+use Infrangible\BackendWidget\Model\Backend\Session;
+use Infrangible\Core\Helper\Instances;
+use Infrangible\Core\Helper\Registry;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Framework\Model\AbstractModel;
 use Psr\Log\LoggerInterface;
-use Infrangible\BackendWidget\Model\Backend\Session;
-use Infrangible\Core\Helper\Instances;
-use Infrangible\Core\Helper\Registry;
 
 /**
  * @author      Philipp Adler
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-abstract class MassExport
-    extends Edit
+abstract class MassExport extends Edit
 {
     /** @var LoggerInterface */
     protected $logging;
@@ -28,23 +27,20 @@ abstract class MassExport
     /** @var RawFactory */
     protected $rawFactory;
 
-    /**
-     * @param Registry        $registryHelper
-     * @param Instances       $instanceHelper
-     * @param Context         $context
-     * @param Session         $session
-     * @param LoggerInterface $logging
-     * @param RawFactory      $rawFactory
-     */
     public function __construct(
         Registry $registryHelper,
         Instances $instanceHelper,
         Context $context,
         Session $session,
         LoggerInterface $logging,
-        RawFactory $rawFactory)
-    {
-        parent::__construct($registryHelper, $instanceHelper, $context, $session);
+        RawFactory $rawFactory
+    ) {
+        parent::__construct(
+            $registryHelper,
+            $instanceHelper,
+            $context,
+            $session
+        );
 
         $this->logging = $logging;
         $this->rawFactory = $rawFactory;
@@ -67,11 +63,17 @@ abstract class MassExport
         if (is_array($ids)) {
             $ids = array_unique($ids);
 
-            $dataSink = fopen('php://temp', 'w+');
+            $dataSink = fopen(
+                'php://temp',
+                'w+'
+            );
 
             $header = $this->getExportHeader();
             if (count($header) > 0) {
-                fputcsv($dataSink, $header);
+                fputcsv(
+                    $dataSink,
+                    $header
+                );
             }
 
             $fields = $this->getExportFields();
@@ -82,9 +84,16 @@ abstract class MassExport
                     $objectResource = $this->getObjectResourceInstance();
 
                     if ($this->initObjectWithObjectField()) {
-                        $objectResource->load($object, $id, $this->getObjectField());
+                        $objectResource->load(
+                            $object,
+                            $id,
+                            $this->getObjectField()
+                        );
                     } else {
-                        $objectResource->load($object, $id);
+                        $objectResource->load(
+                            $object,
+                            $id
+                        );
                     }
 
                     if ($object->getId() == $id) {
@@ -94,7 +103,10 @@ abstract class MassExport
                         foreach ($fields as $key) {
                             $data[] = $object->getData($key);
                         }
-                        fputcsv($dataSink, $data);
+                        fputcsv(
+                            $dataSink,
+                            $data
+                        );
 
                         $this->afterExport($object);
                     }
@@ -104,25 +116,30 @@ abstract class MassExport
                 $rawData = $this->rawFactory->create();
                 rewind($dataSink);
                 $rawData->setContents(stream_get_contents($dataSink));
-                $rawData->setHeader('Content-Type:', 'text/csv; charset=UTF-8', true);
+                $rawData->setHeader(
+                    'Content-Type:',
+                    'text/csv; charset=UTF-8',
+                    true
+                );
                 fclose($dataSink);
 
                 return $rawData;
             } catch (Exception $exception) {
-                $this->messageManager->addErrorMessage($exception->getMessage());
+                $this->addErrorMessage($exception->getMessage());
                 $this->logging->error($exception);
             }
         } else {
-            $this->messageManager->addErrorMessage(__('Please select at least one item.'));
+            $this->addErrorMessage(__('Please select at least one item.')->render());
         }
 
-        $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        $this->redirect(
+            $this->getIndexUrlRoute(),
+            $this->getIndexUrlParams()
+        );
     }
 
     /**
      * modify object fields/data before export
-     *
-     * @param AbstractModel $object
      */
     protected function beforeExport(AbstractModel $object)
     {
@@ -131,8 +148,6 @@ abstract class MassExport
     /**
      * modify object after export (ie set export status)
      * if object was changed in beforeExport() it should be restored (ie $object->setData($object->getOrigData()))
-     *
-     * @param AbstractModel $object
      */
     protected function afterExport(AbstractModel $object)
     {
@@ -141,7 +156,6 @@ abstract class MassExport
     /**
      * list of export fields, used to get data via getData
      *
-     * @return array
      * @throws Exception
      */
     protected function getExportFields(): array
@@ -154,7 +168,6 @@ abstract class MassExport
     /**
      * list of header fields (should match export fields, can be used for translations)
      *
-     * @return array
      * @throws Exception
      */
     protected function getExportHeader(): array

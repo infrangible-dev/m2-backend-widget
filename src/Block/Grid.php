@@ -9,6 +9,7 @@ use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Variables;
 use Infrangible\BackendWidget\Block\Grid\Fields;
 use Infrangible\BackendWidget\Block\Grid\MassAction;
+use Infrangible\BackendWidget\Block\Grid\Tab\Add;
 use Infrangible\BackendWidget\Helper\Session;
 use Infrangible\Core\Helper\Database;
 use Infrangible\Core\Helper\Registry;
@@ -75,6 +76,9 @@ abstract class Grid extends Extended
     protected $objectRegistryKey;
 
     /** @var bool */
+    protected $allowAdd = true;
+
+    /** @var bool */
     protected $allowEdit = true;
 
     /** @var bool */
@@ -84,7 +88,13 @@ abstract class Grid extends Extended
     protected $allowDelete = true;
 
     /** @var bool */
+    protected $allowMassDelete = false;
+
+    /** @var bool */
     protected $allowExport = true;
+
+    /** @var bool */
+    protected $addRowAction = true;
 
     /** @var string */
     protected $modelClass;
@@ -97,6 +107,12 @@ abstract class Grid extends Extended
 
     /** @var array */
     protected $gridUrlParams;
+
+    /** @var string */
+    protected $addUrlRoute;
+
+    /** @var array */
+    protected $addUrlParams;
 
     /** @var string */
     protected $editUrlRoute;
@@ -127,6 +143,12 @@ abstract class Grid extends Extended
 
     /** @var array */
     protected $massExportUrlParams;
+
+    /** @var bool */
+    protected $showFiltersButton = true;
+
+    /** @var bool */
+    protected $showColumnsButton = true;
 
     /** @var array */
     private $actions = [];
@@ -178,6 +200,11 @@ abstract class Grid extends Extended
             $data,
             'object_registry_key'
         );
+        $this->allowAdd = $arrays->getValue(
+            $data,
+            'allow_add',
+            false
+        );
         $this->allowEdit = $arrays->getValue(
             $data,
             'allow_edit',
@@ -186,16 +213,26 @@ abstract class Grid extends Extended
         $this->allowView = $arrays->getValue(
             $data,
             'allow_view',
-            true
+            false
         );
         $this->allowDelete = $arrays->getValue(
             $data,
             'allow_delete',
             true
         );
+        $this->allowMassDelete = $arrays->getValue(
+            $data,
+            'allow_mass_delete',
+            false
+        );
         $this->allowExport = $arrays->getValue(
             $data,
             'allow_export',
+            false
+        );
+        $this->addRowAction = $arrays->getValue(
+            $data,
+            'add_row_action',
             true
         );
         $this->modelClass = $arrays->getValue(
@@ -214,6 +251,16 @@ abstract class Grid extends Extended
         $this->gridUrlParams = $arrays->getValue(
             $data,
             'grid_url_params',
+            []
+        );
+        $this->addUrlRoute = $arrays->getValue(
+            $data,
+            'add_url_route',
+            '*/*/add'
+        );
+        $this->addUrlParams = $arrays->getValue(
+            $data,
+            'add_url_params',
             []
         );
         $this->editUrlRoute = $arrays->getValue(
@@ -266,6 +313,16 @@ abstract class Grid extends Extended
             'mass_export_url_params',
             []
         );
+        $this->showFiltersButton = $arrays->getValue(
+            $data,
+            'show_filters_button',
+            true
+        );
+        $this->showColumnsButton = $arrays->getValue(
+            $data,
+            'show_columns_button',
+            true
+        );
 
         parent::__construct(
             $context,
@@ -294,15 +351,7 @@ abstract class Grid extends Extended
 
         $this->setData(
             'id',
-            sprintf(
-                'adminhtml_%s_%s_grid',
-                $this->moduleKey,
-                preg_replace(
-                    '/[^a-z0-9_]*/i',
-                    '',
-                    $this->objectName
-                )
-            )
+            $this->getGridId()
         );
 
         $this->setSaveParametersInSession(true);
@@ -315,37 +364,70 @@ abstract class Grid extends Extended
         $this->setMassactionBlockName(MassAction::class);
     }
 
+    protected function getGridId(): string
+    {
+        return sprintf(
+            'adminhtml_%s_%s_grid',
+            $this->moduleKey,
+            preg_replace(
+                '/[^a-z0-9_]*/i',
+                '',
+                $this->objectName
+            )
+        );
+    }
+
     /**
      * @throws LocalizedException
      */
     protected function _prepareFilterButtons(): void
     {
-        /** @var Button $filtersButton */
-        $filtersButton = $this->getLayout()->createBlock(Button::class);
+        if ($this->allowAdd) {
+            /** @var Button $addButton */
+            $addButton = $this->getLayout()->createBlock(Button::class);
 
-        $filtersButton->setData([
-            'label' => __('Show filters'),
-            'class' => 'action-filters action-tertiary'
-        ]);
+            $addButton->addData([
+                'label'      => __('Add'),
+                'class'      => 'action-columns action-primary',
+                'after_html' => $this->getAddButtonBlock($addButton)->toHtml()
+            ]);
 
-        $this->setChild(
-            'filters_button',
-            $filtersButton
-        );
+            $this->setChild(
+                'add_button',
+                $addButton
+            );
+        }
 
-        /** @var Button $columnsButton */
-        $columnsButton = $this->getLayout()->createBlock(Button::class);
+        if ($this->showFiltersButton) {
+            /** @var Button $filtersButton */
+            $filtersButton = $this->getLayout()->createBlock(Button::class);
 
-        $columnsButton->setData([
-            'label'      => __('Show columns'),
-            'class'      => 'action-columns action-tertiary',
-            'after_html' => $this->getFieldsBlock()->toHtml()
-        ]);
+            $filtersButton->setData([
+                'label' => __('Show filters'),
+                'class' => 'action-filters action-tertiary'
+            ]);
 
-        $this->setChild(
-            'columns_button',
-            $columnsButton
-        );
+            $this->setChild(
+                'filters_button',
+                $filtersButton
+            );
+        }
+
+        if ($this->showColumnsButton) {
+            /** @var Button $columnsButton */
+            $columnsButton = $this->getLayout()->createBlock(Button::class);
+
+            $columnsButton->setData([
+                'label'      => __('Show columns'),
+                'class'      => 'action-columns action-tertiary',
+                'after_html' => $this->getFieldsBlock()->toHtml()
+            ]);
+
+            $this->setChild(
+                'columns_button',
+                $columnsButton
+            );
+        }
 
         parent::_prepareFilterButtons();
     }
@@ -388,6 +470,26 @@ abstract class Grid extends Extended
         }
 
         return $fieldList;
+    }
+
+    /**
+     * @throws LocalizedException
+     */
+    protected function getAddButtonBlock(Button $addButton): Add
+    {
+        /** @var Add $add */
+        $add = $this->getLayout()->createBlock(Add::class);
+
+        $add->setButtonId($addButton->getId());
+        $add->setButtonUrl(
+            $this->getUrl(
+                $this->addUrlRoute,
+                $this->addUrlParams
+            )
+        );
+        $add->setGridId($this->getId());
+
+        return $add;
     }
 
     /**
@@ -1365,22 +1467,24 @@ abstract class Grid extends Extended
      */
     protected function addActionColumn(): void
     {
-        if ($this->allowEdit) {
-            $this->addAction(
-                'edit',
-                __('Edit')->render(),
-                $this->editUrlRoute,
-                false,
-                $this->editUrlParams
-            );
-        } elseif ($this->allowView) {
-            $this->addAction(
-                'view',
-                __('View')->render(),
-                $this->viewUrlRoute,
-                false,
-                $this->viewUrlParams
-            );
+        if ($this->addRowAction) {
+            if ($this->allowEdit) {
+                $this->addAction(
+                    'edit',
+                    __('Edit')->render(),
+                    $this->editUrlRoute,
+                    false,
+                    $this->editUrlParams
+                );
+            } elseif ($this->allowView) {
+                $this->addAction(
+                    'view',
+                    __('View')->render(),
+                    $this->viewUrlRoute,
+                    false,
+                    $this->viewUrlParams
+                );
+            }
         }
 
         if ($this->allowDelete) {
@@ -1522,7 +1626,7 @@ abstract class Grid extends Extended
 
     protected function _prepareMassaction(): Grid
     {
-        if ($this->allowDelete) {
+        if ($this->allowMassDelete) {
             $this->addMassAction(
                 'delete',
                 __('Delete')->render(),
@@ -1955,7 +2059,9 @@ abstract class Grid extends Extended
 
     public function getMainButtonsHtml(): string
     {
-        $html = parent::getMainButtonsHtml();
+        $html = $this->getChildHtml('add_button');
+
+        $html .= parent::getMainButtonsHtml();
 
         if ($this->getFilterVisibility()) {
             $html .= $this->getChildHtml('filters_button');

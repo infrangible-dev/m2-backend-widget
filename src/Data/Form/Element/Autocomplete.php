@@ -203,7 +203,17 @@ class Autocomplete extends Text
                 minLength: 2,
                 create: function() {
                     $(this).data('ui-autocomplete')._renderItem = function (ul, item) {
-                        var itemNode = $('<li>');
+                        var itemId = item.id;
+                        var itemValue = item.value;
+                        var itemNode = $('<li>', {
+                            click: function() {
+                                $('#$valueHtmlId').val(itemId);
+                                $('#$valueHtmlId').trigger('change');
+                                $('#$htmlId').val(itemValue);
+                                $('#$htmlId').addClass('selected');
+                                $('#$htmlId').autocomplete('close');
+                            }
+                        });
                         itemNode.addClass('ui-menu-item');
                         itemNode.data('ui-autocomplete-item', item);
                         itemNode.appendTo(ul);

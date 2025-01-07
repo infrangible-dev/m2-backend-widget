@@ -1,4 +1,3 @@
-// noinspection JSUnresolvedVariable,JSUnresolvedFunction,JSUnusedGlobalSymbols
 
 /**
  * @author      Andreas Knollmann
@@ -188,7 +187,7 @@ define([
                 data_grid_id: this.options.dataGridId,
                 form_key: this.options.formKey,
                 hidden_field_list: hiddenFieldList
-            }
+            };
 
             $.ajax({
                 url: this.options.ajaxUrl,

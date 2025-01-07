@@ -40,6 +40,12 @@ abstract class Form extends Generic
     protected $objectRegistryKey;
 
     /** @var string */
+    protected $gridUrlRoute;
+
+    /** @var array */
+    protected $gridUrlParams;
+
+    /** @var string */
     protected $saveUrlRoute;
 
     /** @var array */
@@ -53,6 +59,9 @@ abstract class Form extends Generic
 
     /** @var bool */
     protected $allowView = false;
+
+    /** @var string */
+    protected $editFormId;
 
     /** @var AbstractModel */
     private $object;
@@ -91,6 +100,16 @@ abstract class Form extends Generic
             $data,
             'object_registry_key'
         );
+        $this->gridUrlRoute = $arrays->getValue(
+            $data,
+            'grid_url_route',
+            '*/*/grid'
+        );
+        $this->gridUrlParams = $arrays->getValue(
+            $data,
+            'grid_url_params',
+            []
+        );
         $this->saveUrlRoute = $arrays->getValue(
             $data,
             'save_url_route',
@@ -115,6 +134,17 @@ abstract class Form extends Generic
             $data,
             'allow_view',
             false
+        );
+        $this->editFormId = $arrays->getValue(
+            $data,
+            'edit_form_id',
+            sprintf(
+                'edit_form_%d',
+                rand(
+                    1000000,
+                    9999999
+                )
+            )
         );
 
         $this->registryHelper = $registryHelper;
@@ -165,6 +195,7 @@ abstract class Form extends Generic
         $form = $this->createForm();
 
         $this->prepareFields($form);
+        $this->followUpFields($form);
 
         $this->setForm($form);
 
@@ -172,6 +203,10 @@ abstract class Form extends Generic
     }
 
     abstract protected function prepareFields(\Magento\Framework\Data\Form $form);
+
+    protected function followUpFields(\Magento\Framework\Data\Form $form)
+    {
+    }
 
     /**
      * @throws LocalizedException
@@ -182,7 +217,7 @@ abstract class Form extends Generic
             $this->allowAdd || $this->allowEdit ? $this->saveUrlRoute : '',
             $this->allowAdd || $this->allowEdit ? $this->saveUrlParams : [],
             $this->isUploadForm(),
-            'edit_form',
+            $this->editFormId,
             preg_replace(
                 '/[^a-z0-9_]*/i',
                 '',

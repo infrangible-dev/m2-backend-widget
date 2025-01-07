@@ -5,24 +5,23 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
+use Infrangible\BackendWidget\Block\Form\Container;
+use Infrangible\BackendWidget\Model\Backend\Session;
+use Infrangible\Core\Helper\Instances;
+use Infrangible\Core\Helper\Registry;
 use Magento\Backend\App\Action\Context;
 use Magento\Eav\Model\Entity\AbstractEntity;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Result\Page;
-use Infrangible\BackendWidget\Block\Form\Container;
-use Infrangible\BackendWidget\Model\Backend\Session;
-use Infrangible\Core\Helper\Instances;
-use Infrangible\Core\Helper\Registry;
 
 /**
  * @author      Andreas Knollmann
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-abstract class Edit
-    extends Base
+abstract class Edit extends Base
 {
     /** @var Registry */
     protected $registryHelper;
@@ -33,18 +32,12 @@ abstract class Edit
     /** @var Session */
     protected $session;
 
-    /**
-     * @param Registry  $registryHelper
-     * @param Instances $instanceHelper
-     * @param Context   $context
-     * @param Session   $session
-     */
     public function __construct(
         Registry $registryHelper,
         Instances $instanceHelper,
         Context $context,
-        Session $session)
-    {
+        Session $session
+    ) {
         parent::__construct($context);
 
         $this->registryHelper = $registryHelper;
@@ -61,14 +54,20 @@ abstract class Edit
     {
         $object = $this->initObject();
 
-        if ( ! $object) {
-            $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+        if (! $object) {
+            $this->redirect(
+                $this->getIndexUrlRoute(),
+                $this->getIndexUrlParams()
+            );
 
             return;
         }
 
         if ($object->getId() && ! $this->allowEdit() && ! $this->allowView()) {
-            $this->_redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+            $this->redirect(
+                $this->getIndexUrlRoute(),
+                $this->getIndexUrlParams()
+            );
 
             return;
         }
@@ -76,33 +75,39 @@ abstract class Edit
         $this->initAction();
 
         /** @var AbstractBlock $block */
-        $block = $this->_view->getLayout()->createBlock($this->getFormBlockType(), '', [
-            'data' => [
-                'module_key'              => $this->getModuleKey(),
-                'object_name'             => $this->getObjectName(),
-                'object_field'            => $this->getObjectField(),
-                'object_registry_key'     => $this->getObjectRegistryKey(),
-                'title'                   => $this->getTitle(),
-                'allow_add'               => $this->allowAdd(),
-                'allow_edit'              => $this->allowEdit(),
-                'allow_view'              => $this->allowView(),
-                'allow_delete'            => $this->allowDelete(),
-                'allow_export'            => $this->allowExport(),
-                'save_url_route'          => $this->getSaveUrlRoute(),
-                'save_url_params'         => $this->getSaveUrlParams(),
-                'delete_url_route'        => $this->getDeleteUrlRoute(),
-                'delete_url_params'       => $this->getDeleteUrlParams(),
-                'index_url_route'         => $this->getIndexUrlRoute(),
-                'index_url_params'        => $this->getIndexUrlParams(),
-                'form_content_block_type' => $this->getFormContentBlockType()
+        $block = $this->_view->getLayout()->createBlock(
+            $this->getFormBlockType(),
+            '',
+            [
+                'data' => [
+                    'module_key'              => $this->getModuleKey(),
+                    'object_name'             => $this->getObjectName(),
+                    'object_field'            => $this->getObjectField(),
+                    'object_registry_key'     => $this->getObjectRegistryKey(),
+                    'title'                   => $this->getTitle(),
+                    'allow_add'               => $this->allowAdd(),
+                    'allow_edit'              => $this->allowEdit(),
+                    'allow_view'              => $this->allowView(),
+                    'allow_delete'            => $this->allowDelete(),
+                    'allow_export'            => $this->allowExport(),
+                    'grid_url_route'          => $this->getGridUrlRoute(),
+                    'grid_url_params'         => $this->getGridUrlParams(),
+                    'save_url_route'          => $this->getSaveUrlRoute(),
+                    'save_url_params'         => $this->getSaveUrlParams(),
+                    'delete_url_route'        => $this->getDeleteUrlRoute(),
+                    'delete_url_params'       => $this->getDeleteUrlParams(),
+                    'index_url_route'         => $this->getIndexUrlRoute(),
+                    'index_url_params'        => $this->getIndexUrlParams(),
+                    'form_content_block_type' => $this->getFormContentBlockType()
+                ]
             ]
-        ]);
+        );
 
         $this->_addContent($block);
 
         if ($this->allowEdit()) {
             $this->finishAction($object->getId() ? __('Edit')->render() : __('Add')->render());
-        } else if ($this->allowView()) {
+        } elseif ($this->allowView()) {
             $this->finishAction(__('View')->render());
         }
 
@@ -113,15 +118,13 @@ abstract class Edit
         return $page;
     }
 
-    /**
-     * @param AbstractModel|null $object
-     *
-     * @return string
-     */
-    protected function getFormSessionKey(AbstractModel $object = null): string
+    protected function getFormSessionKey(?AbstractModel $object = null): string
     {
-        return sprintf('%s_form_%s', $this->getObjectRegistryKey(),
-            $object && $object->getId() ? $object->getId() : 'add');
+        return sprintf(
+            '%s_form_%s',
+            $this->getObjectRegistryKey(),
+            $object && $object->getId() ? $object->getId() : 'add'
+        );
     }
 
     /**
@@ -137,7 +140,6 @@ abstract class Edit
     }
 
     /**
-     * @return AbstractModel|null
      * @throws Exception
      */
     protected function initObject(): ?AbstractModel
@@ -155,50 +157,68 @@ abstract class Edit
 
         if ($id) {
             if ($this->initObjectWithObjectField() && ! $objectResource instanceof AbstractEntity) {
-                $objectResource->load($object, $id, $this->getObjectField());
+                $objectResource->load(
+                    $object,
+                    $id,
+                    $this->getObjectField()
+                );
             } else {
-                $objectResource->load($object, $id);
+                $objectResource->load(
+                    $object,
+                    $id
+                );
             }
 
-            if ( ! $object->getId()) {
-                $message = sprintf($this->getObjectNotFoundMessage(), $id);
+            if (! $object->getId()) {
+                $message = sprintf(
+                    $this->getObjectNotFoundMessage(),
+                    $id
+                );
 
-                $this->getMessageManager()->addErrorMessage($message);
+                $this->addErrorMessage($message);
 
                 return null;
             }
         }
 
-        $this->registryHelper->register($this->getObjectRegistryKey(), $object);
+        $this->registryHelper->register(
+            $this->getObjectRegistryKey(),
+            $object
+        );
 
         return $object;
     }
 
-    /**
-     * @return bool
-     */
     protected function initObjectWithObjectField(): bool
     {
         return true;
     }
 
     /**
-     * @return AbstractModel
      * @throws Exception
      */
     protected function getObjectInstance(): AbstractModel
     {
         $modelClass = $this->getModelClass();
 
-        if ( ! class_exists($modelClass)) {
-            throw new Exception(sprintf('Could not find model class: %s', $modelClass));
+        if (! class_exists($modelClass)) {
+            throw new Exception(
+                sprintf(
+                    'Could not find model class: %s',
+                    $modelClass
+                )
+            );
         }
 
         $object = $this->instanceHelper->getInstance($modelClass);
 
-        if ( ! $object instanceof AbstractModel) {
-            throw new Exception(sprintf('Class muss be instance of Magento\Framework\Model\AbstractModel: %s',
-                $modelClass));
+        if (! $object instanceof AbstractModel) {
+            throw new Exception(
+                sprintf(
+                    'Class muss be instance of Magento\Framework\Model\AbstractModel: %s',
+                    $modelClass
+                )
+            );
         }
 
         return $object;
@@ -212,96 +232,97 @@ abstract class Edit
     {
         $modelResourceClass = $this->getModelResourceClass();
 
-        if ( ! class_exists($modelResourceClass)) {
-            throw new Exception(sprintf('Could not find model resource class: %s', $modelResourceClass));
+        if (! class_exists($modelResourceClass)) {
+            throw new Exception(
+                sprintf(
+                    'Could not find model resource class: %s',
+                    $modelResourceClass
+                )
+            );
         }
 
         $objectResource = $this->instanceHelper->getInstance($modelResourceClass);
 
-        if ( ! $objectResource instanceof AbstractDb && ! $objectResource instanceof AbstractEntity) {
-            throw new Exception(sprintf('Class muss be instance of Magento\Framework\Model\ResourceModel\Db\AbstractModel or Magento\Eav\Model\Entity\AbstractEntity: %s',
-                $modelResourceClass));
+        if (! $objectResource instanceof AbstractDb && ! $objectResource instanceof AbstractEntity) {
+            throw new Exception(
+                sprintf(
+                    'Class muss be instance of Magento\Framework\Model\ResourceModel\Db\AbstractModel or Magento\Eav\Model\Entity\AbstractEntity: %s',
+                    $modelResourceClass
+                )
+            );
         }
 
         return $objectResource;
     }
 
-    /**
-     * @return string
-     */
     abstract protected function getObjectNotFoundMessage(): string;
 
-    /**
-     * @return string
-     */
     protected function getFormBlockType(): string
     {
         return Container::class;
     }
 
-    /**
-     * @return string|null
-     */
     protected function getFormContentBlockType(): ?string
     {
-        return null;
+        return sprintf(
+            '%s\Block\Adminhtml\%s\%s',
+            str_replace(
+                '_',
+                '\\',
+                $this->getModuleKey()
+            ),
+            str_replace(
+                '_',
+                '\\',
+                $this->getObjectName()
+            ),
+            $this->getFormType()
+        );
     }
 
-    /**
-     * @return bool
-     */
+    protected function getFormType(): string
+    {
+        return $this->allowEdit() ? 'Form' : 'View';
+    }
+
     abstract protected function allowAdd(): bool;
 
-    /**
-     * @return bool
-     */
     abstract protected function allowEdit(): bool;
 
-    /**
-     * @return bool
-     */
     abstract protected function allowView(): bool;
 
-    /**
-     * @return bool
-     */
     abstract protected function allowDelete(): bool;
 
-    /**
-     * @return bool
-     */
     protected function allowExport(): bool
     {
         return false;
     }
 
-    /**
-     * @return string
-     */
+    protected function getGridUrlRoute(): string
+    {
+        return '*/*/grid';
+    }
+
+    protected function getGridUrlParams(): array
+    {
+        return [];
+    }
+
     protected function getSaveUrlRoute(): string
     {
         return '*/*/save';
     }
 
-    /**
-     * @return array
-     */
     protected function getSaveUrlParams(): array
     {
         return [];
     }
 
-    /**
-     * @return string
-     */
     protected function getIndexUrlRoute(): string
     {
         return '*/*/index';
     }
 
-    /**
-     * @return array
-     */
     protected function getIndexUrlParams(): array
     {
         return [];

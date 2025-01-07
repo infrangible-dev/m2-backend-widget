@@ -9,4 +9,7 @@
     <type name="Magento\Backend\Block\System\Account\Edit">
         <plugin name="infrangible_backendwidget" type="Infrangible\BackendWidget\Plugin\Backend\Block\System\Account\Edit"/>
     </type>
+    <type name="Magento\Backend\Block\Widget\Grid\Column\Renderer\Action">
+        <plugin name="infrangible_backendwidget" type="Infrangible\BackendWidget\Plugin\Backend\Block\Widget\Grid\Column\Renderer\Action"/>
+    </type>
 </config>
