@@ -25,7 +25,7 @@ require([
 ], function($) {
     'use strict';
     var tab = $('#tab_<?= $block->getObjectName(); ?>');
-    console.log(tab);
+    console.debug(tab);
     tab.notification({
         templates: {
             global: '<div data-role="messages" id="messages">' +
@@ -36,7 +36,7 @@ require([
     });
     tab.notification('clear');
     var editForm_<?= $block->getFormId(); ?> = $('#<?= $block->getFormId(); ?>');
-    console.log(editForm_<?= $block->getFormId(); ?>);
+    console.debug(editForm_<?= $block->getFormId(); ?>);
     editForm_<?= $block->getFormId(); ?>.mage('form').mage('validation', {
         validationUrl: '',
         highlight: function(element) {
@@ -58,11 +58,11 @@ require([
                 showLoader: true,
                 cache: false,
                 success: function(response) {
-                    console.log(response);
+                    console.debug(response);
                     if (! response.responseJSON) {
                         response.responseJSON = response;
                     }
-                    console.log(response.responseJSON);
+                    console.debug(response.responseJSON);
                     tab.notification('clear');
                     if (response.responseJSON.message) {
                         tab.notification('add', {
@@ -72,11 +72,11 @@ require([
                     }
                 },
                 error: function(response) {
-                    console.log(response);
+                    console.debug(response);
                     if (! response.responseJSON) {
                         response.responseJSON = response;
                     }
-                    console.log(response.responseJSON);
+                    console.debug(response.responseJSON);
                     tab.notification('clear');
                     if (response.status === 302) {
                         if (response.responseJSON.message) {
@@ -101,23 +101,25 @@ require([
                         });
                     } else {
                         if (response.responseJSON.message) {
+                            console.debug(tab);
                             tab.notification('add', {
                                 error: true,
                                 message: response.responseJSON.message
                             });
                         }
                     }
+                    console.debug(tab.find('[data-role=messages] :first'));
                     window.scrollTo({
-                        top: editForm_<?= $block->getFormId(); ?>.find('[data-role=messages] :first'),
+                        top: tab.find('[data-role=messages] :first').offset().top - 100,
                         behavior: 'instant'
                     });
                 },
                 complete: function(response) {
-                    console.log(response);
+                    console.debug(response);
                     if (! response.responseJSON) {
                         response.responseJSON = response;
                     }
-                    console.log(response.responseJSON);
+                    console.debug(response.responseJSON);
                     if (response.responseJSON.ajaxExpired === 1) {
                         window.location.href = response.responseJSON.ajaxRedirect;
                     }

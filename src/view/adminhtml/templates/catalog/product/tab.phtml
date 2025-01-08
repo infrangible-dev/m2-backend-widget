@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+use Infrangible\BackendWidget\Block\Adminhtml\Product\Tab;
+
+/** @var Tab $block */
+?>
+
+<div id="<?= $block->getTabId(); ?>"></div>
+
+<script type="text/javascript">
+    require(['jquery'], function ($) {
+        var productTab = $('#<?= $block->getTabId(); ?>');
+        $.ajax({
+            url: '<?= $block->getTabUrl(); ?>',
+            method: 'get',
+            dataType: 'html',
+            showLoader: true,
+            context: productTab[0],
+            success: function (data) {
+                var targetNode = productTab;
+                targetNode.html(data);
+                targetNode.trigger('contentUpdated');
+            }
+        });
+    });
+</script>

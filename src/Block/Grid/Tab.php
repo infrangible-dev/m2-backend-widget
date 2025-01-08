@@ -85,12 +85,12 @@ abstract class Tab extends Grid
     {
         $this->setRowClickCallback(
             "function(grid, event) {
-                console.log(event);
+                console.debug(event);
                 event.preventDefault();
                 require(['jquery'], function ($) {
-                    console.log(event.target);
+                    console.debug(event.target);
                     var tab = $('#tab_" . $this->objectName . "');
-                    console.log(tab);
+                    console.debug(tab);
                     tab.notification({
                         templates: {
                             global: '<div data-role=\"messages\" id=\"messages\">' +
@@ -100,7 +100,7 @@ abstract class Tab extends Grid
                         }
                     });
                     var grid = $('#" . $this->getGridId() . "');
-                    console.log(grid);
+                    console.debug(grid);
                     var gridParent = grid.parent();
                     if (event.target.tagName === 'A') {
                         var url = $(event.target).attr('href');
@@ -110,11 +110,11 @@ abstract class Tab extends Grid
                             showLoader: true,
                             dataType: 'json',
                             success: function(response) {
-                                console.log(response);
+                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.log(response.responseJSON);
+                                console.debug(response.responseJSON);
                                 tab.notification('clear');
                                 if (response.responseJSON.message) {
                                     tab.notification('add', {
@@ -124,11 +124,11 @@ abstract class Tab extends Grid
                                 }
                             },
                             error: function(response) {
-                                console.log(response);
+                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.log(response.responseJSON);
+                                console.debug(response.responseJSON);
                                 tab.notification('clear');
                                 if (response.status === 302) {
                                     if (response.responseJSON.message) {
@@ -158,16 +158,16 @@ abstract class Tab extends Grid
                                     }
                                 }
                                 window.scrollTo({
-                                    top: grid.find('[data-role=messages] :first'),
+                                    top: grid.find('[data-role=messages] :first').offset().top - 100,
                                     behavior: 'instant'
                                 });
                             },
                             complete: function(response) {
-                                console.log(response);
+                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.log(response.responseJSON);
+                                console.debug(response.responseJSON);
                                 if (response.responseJSON.ajaxExpired === 1) {
                                     window.location.href = response.responseJSON.ajaxRedirect;
                                 }
@@ -175,7 +175,7 @@ abstract class Tab extends Grid
                         });
                     } else {
                         var url = $(event.target.parentNode).attr('title');
-                        console.log(url);
+                        console.debug(url);
                         $.ajax({
                             url: url,
                             method: 'get',

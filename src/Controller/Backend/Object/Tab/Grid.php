@@ -27,6 +27,11 @@ abstract class Grid extends \Infrangible\BackendWidget\Controller\Backend\Object
 
     abstract protected function allowAdd(): bool;
 
+    protected function allowMassDelete(): bool
+    {
+        return false;
+    }
+
     protected function addRowAction(): bool
     {
         return false;
