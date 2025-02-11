@@ -44,6 +44,7 @@ use Magento\Catalog\Model\Product\Visibility;
 use Magento\Cms\Model\Wysiwyg\Config;
 use Magento\Config\Model\Config\Source\Website;
 use Magento\Config\Model\Config\Source\Yesno;
+use Magento\Customer\Model\Config\Source\FilterConditionType;
 use Magento\Customer\Model\Group;
 use Magento\Customer\Model\ResourceModel\Group\Collection;
 use Magento\Directory\Model\Config\Source\Country;
@@ -164,6 +165,9 @@ class Form
     /** @var Collection */
     protected $customerGroupCollection;
 
+    /** @var TimezoneInterface */
+    protected $localeDate;
+
     /** @var string */
     protected $dateFormatIso;
 
@@ -178,6 +182,9 @@ class Form
 
     /** @var ProductOption */
     protected $productOptionHelper;
+
+    /** @var FilterConditionType */
+    protected $sourceFilterConditionType;
 
     public function __construct(
         Variables $variables,
@@ -216,7 +223,8 @@ class Form
         Type $productType,
         Config $wysiwygConfig,
         Escaper $escaper,
-        ProductOption $productOptionHelper
+        ProductOption $productOptionHelper,
+        FilterConditionType $sourceFilterConditionType
     ) {
         $this->variables = $variables;
         $this->arrays = $arrays;
@@ -251,11 +259,26 @@ class Form
         $this->sourceAttributeProduct = $sourceAttributeProduct;
         $this->sourceAttributeProductFilterable = $sourceAttributeProductFilterable;
         $this->customerGroupCollection = $this->customerHelper->getCustomerGroupCollection();
+        $this->localeDate = $localeDate;
         $this->dateFormatIso = $localeDate->getDateTimeFormat(IntlDateFormatter::MEDIUM);
         $this->productType = $productType;
         $this->wysiwygConfig = $wysiwygConfig;
         $this->escaper = $escaper;
         $this->productOptionHelper = $productOptionHelper;
+        $this->sourceFilterConditionType = $sourceFilterConditionType;
+    }
+
+    /**
+     * @throws LocalizedException
+     */
+    public function createSimpleForm(
+        string $formId,
+        ?string $action = null,
+        string $method = 'post'
+    ): \Magento\Framework\Data\Form {
+        return $this->formFactory->create(
+            ['data' => ['id' => $formId, 'action' => $action, 'method' => $method]]
+        );
     }
 
     /**
@@ -274,27 +297,18 @@ class Form
             $objectField = 'id';
         }
 
-        $form = $this->formFactory->create();
-
         if ($object && $object->getId()) {
             $saveUrlParams[ $objectField ] = $object->getId();
         }
 
-        $form->setData(
-            'id',
-            $formId
-        );
-        $form->setData(
-            'action',
+        $form = $this->createSimpleForm(
+            $formId,
             $this->urlHelper->getBackendUrl(
                 $saveUrlRoute,
                 $saveUrlParams
             )
         );
-        $form->setData(
-            'method',
-            'post'
-        );
+
         $form->setData(
             'use_container',
             true
@@ -386,17 +400,165 @@ class Form
         bool $disabled = false,
         $after = false
     ): void {
-        $config = [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue(
+        $this->addSimpleTextFieldWithValue(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->getFieldValue(
                 $objectRegistryKey,
                 $objectFieldName,
                 '',
                 $object
             ),
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleTextField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleTextFieldWithValueAndNoteAndClass(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            null,
+            null,
+            null,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleTextFieldWithValue(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleTextFieldWithValueAndNoteAndClass(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $value,
+            null,
+            null,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleTextFieldWithValueAndNote(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        ?string $note = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleTextFieldWithValueAndNoteAndClass(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $value,
+            $note,
+            null,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleTextFieldWithNoteAndClass(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        ?string $note = null,
+        ?string $class = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleTextFieldWithValueAndNoteAndClass(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            null,
+            $note,
+            $class,
+            $required,
+            $readOnly,
+            $disabled,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleTextFieldWithValueAndNoteAndClass(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value = null,
+        ?string $note = null,
+        ?string $class = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $config = [
+            'name'     => $objectFieldName,
+            'label'    => $label,
+            'title'    => $label,
             'required' => $required
         ];
+
+        if ($value) {
+            $config[ 'value' ] = $value;
+        }
+
+        if ($note) {
+            $config[ 'note' ] = $note;
+        }
+
+        if ($class) {
+            $config[ 'class' ] = $class;
+        }
 
         if ($readOnly) {
             $config[ 'readonly' ] = true;
@@ -464,17 +626,41 @@ class Form
         bool $readOnly = false,
         bool $disabled = false
     ): void {
-        $config = [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'value'    => $this->getFieldValue(
+        $this->addSimpleTextareaFieldWithValue(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->getFieldValue(
                 $objectRegistryKey,
                 $objectFieldName,
                 '',
                 $object
             ),
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    public function addSimpleTextareaFieldWithValue(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ): void {
+        $config = [
+            'name'     => $objectFieldName,
+            'label'    => $label,
+            'title'    => $label,
             'required' => $required
         ];
+
+        if ($value) {
+            $config[ 'value' ] = $value;
+        }
 
         if ($readOnly) {
             $config[ 'readonly' ] = true;
@@ -629,6 +815,117 @@ class Form
 
     /**
      * @param bool|string|null $after
+     */
+    public function addSimpleOptionsField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $options,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $config = [
+            'name'     => $objectFieldName,
+            'label'    => $label,
+            'title'    => $label,
+            'values'   => $options,
+            'required' => $required
+        ];
+
+        if ($readOnly) {
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
+            } else {
+                $config[ 'css_class' ] = 'read-only';
+            }
+        }
+
+        if ($disabled) {
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
+            } else {
+                $config[ 'css_class' ] = 'disabled';
+            }
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            $config,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
+    public function addSimpleOptionsFieldWithNote(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $options,
+        ?string $note = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $config = [
+            'name'     => $objectFieldName,
+            'label'    => $label,
+            'title'    => $label,
+            'values'   => $options,
+            'required' => $required
+        ];
+
+        if ($note) {
+            $config[ 'note' ] = $note;
+        }
+
+        if ($readOnly) {
+            $config[ 'readonly' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' read-only';
+            } else {
+                $config[ 'css_class' ] = 'read-only';
+            }
+        }
+
+        if ($disabled) {
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
+            } else {
+                $config[ 'css_class' ] = 'disabled';
+            }
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            $config,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
      *
      * @throws Exception
      */
@@ -689,16 +986,38 @@ class Form
         bool $readOnly = false,
         bool $disabled = false
     ): void {
-        $config = [
-            'name'     => $objectFieldName,
-            'label'    => $label,
-            'title'    => $label,
-            'value'    => $this->getFieldValue(
+        $this->addSimpleOptionsMultiSelectField(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $options,
+            $this->getFieldValue(
                 $objectRegistryKey,
                 $objectFieldName,
                 $defaultValue,
                 $object
             ),
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    public function addSimpleOptionsMultiSelectField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        array $options,
+        $value = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ): void {
+        $config = [
+            'name'     => $objectFieldName,
+            'label'    => $label,
+            'title'    => $label,
+            'value'    => $value,
             'values'   => $options,
             'required' => $required
         ];
@@ -755,6 +1074,27 @@ class Form
             $required,
             $readOnly,
             $disabled
+        );
+    }
+
+    public function addSimpleYesNoField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleOptionsField(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toOptionArray(),
+            $required,
+            $readOnly,
+            $disabled,
+            $after
         );
     }
 
@@ -2728,6 +3068,27 @@ class Form
         ?AbstractModel $object = null,
         bool $required = false
     ): void {
+        $this->addSimpleIntegerField(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->getFieldValue(
+                $objectRegistryKey,
+                $objectFieldName,
+                '',
+                $object
+            ),
+            $required
+        );
+    }
+
+    public function addSimpleIntegerField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value = null,
+        bool $required = false
+    ): void {
         $fieldSet->addField(
             $objectFieldName,
             Integer::class,
@@ -2735,12 +3096,7 @@ class Form
                 'name'     => $objectFieldName,
                 'label'    => $label,
                 'required' => $required,
-                'value'    => $this->getFieldValue(
-                    $objectRegistryKey,
-                    $objectFieldName,
-                    '',
-                    $object
-                )
+                'value'    => $value
             ]
         );
     }
@@ -2835,6 +3191,109 @@ class Form
             null,
             $object,
             $required
+        );
+    }
+
+    public function addSimpleDateFieldWithValue(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        bool $required = false
+    ): void {
+        $dateFormat = $this->localeDate->getDateFormat();
+
+        $config = [
+            'name'        => $objectFieldName,
+            'label'       => $label,
+            'title'       => $label,
+            'date_format' => $dateFormat,
+            'required'    => $required
+        ];
+
+        if ($value) {
+            $config[ 'value' ] = $value;
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'date',
+            $config
+        );
+    }
+
+    public function addSimpleDateTimeFieldWithValue(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        bool $required = false
+    ): void {
+        $dateFormat = $this->localeDate->getDateFormat();
+        $timeFormat = $this->localeDate->getTimeFormat(IntlDateFormatter::SHORT);
+
+        $config = [
+            'name'        => $objectFieldName,
+            'label'       => $label,
+            'title'       => $label,
+            'date_format' => $dateFormat,
+            'time_format' => $timeFormat,
+            'required'    => $required
+        ];
+
+        if ($value) {
+            $config[ 'value' ] = $value;
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'date',
+            $config
+        );
+    }
+
+    public function addFilterConditionTypeField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        ?AbstractModel $object = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ): void {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceFilterConditionType->toOptionArray(),
+            0,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
+    public function addSimpleFilterConditionTypeField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $this->addSimpleOptionsField(
+            $fieldSet,
+            $objectFieldName,
+            $label,
+            $this->sourceFilterConditionType->toOptionArray(),
+            $required,
+            $readOnly,
+            $disabled,
+            $after
         );
     }
 }

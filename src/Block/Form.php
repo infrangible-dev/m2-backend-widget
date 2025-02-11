@@ -1451,4 +1451,24 @@ abstract class Form extends Generic
             $required
         );
     }
+
+    protected function addFilterConditionTypeField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->formHelper->addFilterConditionTypeField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->getObject(),
+            $required,
+            $this->isReadOnlyAll() ? true : $readOnly,
+            $this->isDisableAll() ? true : $disabled
+        );
+    }
 }
