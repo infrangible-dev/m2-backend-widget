@@ -62,4 +62,9 @@ abstract class Grid extends Table
                 )
             ) . '.grid';
     }
+
+    protected function isTab(): bool
+    {
+        return false;
+    }
 }

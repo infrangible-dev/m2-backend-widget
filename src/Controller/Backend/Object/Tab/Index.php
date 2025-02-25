@@ -21,4 +21,9 @@ abstract class Index extends Grid
             $block->toHtml()
         );
     }
+
+    protected function isTab(): bool
+    {
+        return true;
+    }
 }

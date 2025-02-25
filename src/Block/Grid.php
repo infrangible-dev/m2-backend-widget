@@ -150,6 +150,9 @@ abstract class Grid extends Extended
     /** @var bool */
     protected $showColumnsButton = true;
 
+    /** @var bool */
+    protected $isTab = false;
+
     /** @var array */
     private $actions = [];
 
@@ -323,6 +326,11 @@ abstract class Grid extends Extended
             'show_columns_button',
             true
         );
+        $this->isTab = $arrays->getValue(
+            $data,
+            'is_tab',
+            true
+        );
 
         parent::__construct(
             $context,
@@ -386,11 +394,13 @@ abstract class Grid extends Extended
             /** @var Button $addButton */
             $addButton = $this->getLayout()->createBlock(Button::class);
 
-            $addButton->addData([
-                'label'      => __('Add'),
-                'class'      => 'action-columns action-primary',
-                'after_html' => $this->getAddButtonBlock($addButton)->toHtml()
-            ]);
+            $addButton->addData(
+                [
+                    'label'      => __('Add'),
+                    'class'      => 'action-columns action-primary',
+                    'after_html' => $this->getAddButtonBlock($addButton)->toHtml()
+                ]
+            );
 
             $this->setChild(
                 'add_button',
@@ -402,10 +412,12 @@ abstract class Grid extends Extended
             /** @var Button $filtersButton */
             $filtersButton = $this->getLayout()->createBlock(Button::class);
 
-            $filtersButton->setData([
-                'label' => __('Show filters'),
-                'class' => 'action-filters action-tertiary'
-            ]);
+            $filtersButton->setData(
+                [
+                    'label' => __('Show filters'),
+                    'class' => 'action-filters action-tertiary'
+                ]
+            );
 
             $this->setChild(
                 'filters_button',
@@ -417,11 +429,13 @@ abstract class Grid extends Extended
             /** @var Button $columnsButton */
             $columnsButton = $this->getLayout()->createBlock(Button::class);
 
-            $columnsButton->setData([
-                'label'      => __('Show columns'),
-                'class'      => 'action-columns action-tertiary',
-                'after_html' => $this->getFieldsBlock()->toHtml()
-            ]);
+            $columnsButton->setData(
+                [
+                    'label'      => __('Show columns'),
+                    'class'      => 'action-columns action-tertiary',
+                    'after_html' => $this->getFieldsBlock()->toHtml()
+                ]
+            );
 
             $this->setChild(
                 'columns_button',
@@ -430,6 +444,17 @@ abstract class Grid extends Extended
         }
 
         parent::_prepareFilterButtons();
+
+        if (! $this->showFiltersButton && ! $this->isTab) {
+            $this->getLayout()->unsetChild(
+                $this->getNameInLayout(),
+                'reset_filter_button'
+            );
+            $this->getLayout()->unsetChild(
+                $this->getNameInLayout(),
+                'search_button'
+            );
+        }
     }
 
     /**
@@ -533,18 +558,20 @@ abstract class Grid extends Extended
             $collection = $model->getCollection();
         }
 
-        if (! $collection instanceof AbstractDb) {
-            throw new Exception(
-                sprintf(
-                    'Collection class: %s does not implement class: %s',
-                    get_class($collection),
-                    AbstractDb::class
-                )
-            );
-        }
+        if ($collection instanceof AbstractDb) {
+            /**
+             * throw new Exception(
+             * sprintf(
+             * 'Collection class: %s does not implement class: %s',
+             * get_class($collection),
+             * AbstractDb::class
+             * )
+             * );
+             */
 
-        $this->prepareCollection($collection);
-        $this->followUpCollection($collection);
+            $this->prepareCollection($collection);
+            $this->followUpCollection($collection);
+        }
 
         $this->setCollection($collection);
 
@@ -735,19 +762,23 @@ abstract class Grid extends Extended
 
                 if ($required) {
                     /** @noinspection PhpParamsInspection, RedundantSuppression, PhpPossiblePolymorphicInvocationInspection */
-                    $collection->join([$tableAlias => $tableName],
+                    $collection->join(
+                        [$tableAlias => $tableName],
                         implode(
                             ' AND ',
                             $joinConditions
                         ),
-                        $resultFields);
+                        $resultFields
+                    );
                 } else {
-                    $collection->getSelect()->joinLeft([$tableAlias => $tableName],
+                    $collection->getSelect()->joinLeft(
+                        [$tableAlias => $tableName],
                         implode(
                             ' AND ',
                             $joinConditions
                         ),
-                        $resultFields);
+                        $resultFields
+                    );
                 }
 
                 if ($conditions && is_array($conditions)) {
@@ -786,9 +817,11 @@ abstract class Grid extends Extended
     ): void {
         $select = $collection->getSelect();
 
-        $select->join(['product' => $this->databaseHelper->getTableName('catalog_product_entity')],
+        $select->join(
+            ['product' => $this->databaseHelper->getTableName('catalog_product_entity')],
             'main_table.product_id = product.entity_id',
-            ['attribute_set_id', 'type_id', 'sku']);
+            ['attribute_set_id', 'type_id', 'sku']
+        );
 
         foreach ($eavAttributes as $eavAttributeName) {
             $eavAttribute = $this->eavConfig->getAttribute(
@@ -801,7 +834,8 @@ abstract class Grid extends Extended
                 $eavAttributeName
             );
 
-            $select->join([$tableAlias => $eavAttribute->getBackendTable()],
+            $select->join(
+                [$tableAlias => $eavAttribute->getBackendTable()],
                 sprintf(
                     'main_table.product_id = %s.entity_id AND %s.attribute_id = %d AND %s.store_id = 0',
                     $tableAlias,
@@ -814,7 +848,8 @@ abstract class Grid extends Extended
                         'product_%s',
                         $eavAttributeName
                     ) => 'value'
-                ]);
+                ]
+            );
         }
     }
 

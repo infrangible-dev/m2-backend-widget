@@ -113,6 +113,9 @@ class Container extends Grid\Container
     /** @var bool */
     protected $showColumnsButton = true;
 
+    /** @var bool */
+    protected $isTab = false;
+
     public function __construct(Context $context, Arrays $arrays, array $data = [])
     {
         $this->gridContentBlockClassName = $arrays->getValue(
@@ -270,6 +273,11 @@ class Container extends Grid\Container
             'show_columns_button',
             true
         );
+        $this->isTab = $arrays->getValue(
+            $data,
+            'is_tab',
+            false
+        );
 
         $this->_blockGroup = $this->moduleKey;
         $this->_controller = sprintf(
@@ -348,7 +356,8 @@ class Container extends Grid\Container
                     'mass_export_url_route'  => $this->massExportUrlRoute,
                     'mass_export_url_params' => $this->massExportUrlParams,
                     'show_filters_button'    => $this->showFiltersButton,
-                    'show_columns_button'    => $this->showColumnsButton
+                    'show_columns_button'    => $this->showColumnsButton,
+                    'is_tab'                 => $this->isTab
                 ]
             ]
         );

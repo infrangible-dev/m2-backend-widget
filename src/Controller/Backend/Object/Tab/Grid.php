@@ -105,4 +105,9 @@ abstract class Grid extends \Infrangible\BackendWidget\Controller\Backend\Object
             parent::getGridType()
         );
     }
+
+    protected function isTab(): bool
+    {
+        return true;
+    }
 }

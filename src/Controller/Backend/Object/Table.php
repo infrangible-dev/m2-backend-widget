@@ -39,7 +39,8 @@ abstract class Table extends Base
             'mass_export_url_route'  => $this->getMassExportUrlRoute(),
             'mass_export_url_params' => $this->getMassExportUrlParams(),
             'show_filters_button'    => $this->showFiltersButton(),
-            'show_columns_button'    => $this->showColumnsButton()
+            'show_columns_button'    => $this->showColumnsButton(),
+            'is_tab'                 => $this->isTab()
         ];
     }
 
@@ -151,4 +152,6 @@ abstract class Table extends Base
     {
         return 'Grid';
     }
+
+    abstract protected function isTab(): bool;
 }

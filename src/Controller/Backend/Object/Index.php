@@ -88,4 +88,9 @@ abstract class Index extends Table
     {
         return [];
     }
+
+    protected function isTab(): bool
+    {
+        return false;
+    }
 }
