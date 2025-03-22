@@ -16,7 +16,7 @@ use Magento\Framework\Registry;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 abstract class Form extends Generic
@@ -62,6 +62,12 @@ abstract class Form extends Generic
 
     /** @var string */
     protected $editFormId;
+
+    /** @var string */
+    protected $parentObjectKey;
+
+    /** @var string */
+    protected $parentObjectValue;
 
     /** @var AbstractModel */
     private $object;
@@ -145,6 +151,14 @@ abstract class Form extends Generic
                     9999999
                 )
             )
+        );
+        $this->parentObjectKey = $arrays->getValue(
+            $data,
+            'parent_object_key'
+        );
+        $this->parentObjectValue = $arrays->getValue(
+            $data,
+            'parent_object_value'
         );
 
         $this->registryHelper = $registryHelper;
@@ -1308,7 +1322,8 @@ abstract class Form extends Generic
         string $objectFieldName,
         string $label,
         array $targetFieldNames,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false
     ) {
         $this->formHelper->addProductNameFieldWithProductOptions(
             $fieldSet,
@@ -1318,7 +1333,8 @@ abstract class Form extends Generic
             $targetFieldNames,
             $this->objectName,
             $this->getObject(),
-            $required
+            $required,
+            $includeWithValues
         );
     }
 
@@ -1347,7 +1363,8 @@ abstract class Form extends Generic
         string $label,
         array $optionTargetFieldNames,
         array $optionValueTargetFieldNames,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false
     ) {
         $this->formHelper->addProductNameFieldWithProductOptionsAndValues(
             $fieldSet,
@@ -1358,7 +1375,8 @@ abstract class Form extends Generic
             $optionValueTargetFieldNames,
             $this->objectName,
             $this->getObject(),
-            $required
+            $required,
+            $includeWithValues
         );
     }
 
@@ -1418,15 +1436,43 @@ abstract class Form extends Generic
         string $objectProductIdFieldName,
         string $objectFieldName,
         string $label,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false
     ) {
         $this->formHelper->addProductOptionField(
             $this->getObject(),
             $fieldSet,
             $this->objectRegistryKey,
+            $this->parentObjectValue,
             $objectProductIdFieldName,
             $objectFieldName,
             $label,
+            $required,
+            $includeWithValues
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionFieldWithTypeValues(
+        Fieldset $fieldSet,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductOptionFieldWithTypeValues(
+            $this->getObject(),
+            $fieldSet,
+            $this->objectRegistryKey,
+            $this->parentObjectValue,
+            $objectProductIdFieldName,
+            $objectFieldName,
+            $label,
+            $targetFieldNames,
+            $this->objectName,
             $required
         );
     }
@@ -1446,6 +1492,27 @@ abstract class Form extends Generic
             $fieldSet,
             $this->objectRegistryKey,
             $objectProductIdFieldName,
+            $objectFieldName,
+            $label,
+            $required
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function addProductOptionTypeValueField(
+        Fieldset $fieldSet,
+        string $objectOptionIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ) {
+        $this->formHelper->addProductOptionTypeValueField(
+            $this->getObject(),
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectOptionIdFieldName,
             $objectFieldName,
             $label,
             $required

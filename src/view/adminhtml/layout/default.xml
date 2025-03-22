@@ -9,5 +9,6 @@
     <head>
         <script src="Infrangible_BackendWidget::js/eav.js"/>
         <script src="Infrangible_BackendWidget::js/product-options.js"/>
+        <script src="Infrangible_BackendWidget::js/product-option-values.js"/>
     </head>
 </page>

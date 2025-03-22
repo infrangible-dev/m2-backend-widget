@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class Index extends Ajax
+class TypeValues extends Ajax
 {
     /** @var Variables */
     protected $variables;
@@ -50,25 +50,9 @@ class Index extends Ajax
      */
     public function execute(): ResponseInterface
     {
-        $productId = $this->getRequest()->getParam('product_id');
-        $includeWithValues = boolval(
-            $this->getRequest()->getParam(
-                'include_with_values',
-                0
-            )
-        );
-        $excludeWithoutValues = boolval(
-            $this->getRequest()->getParam(
-                'exclude_without_values',
-                0
-            )
-        );
+        $optionId = $this->getRequest()->getParam('option_id');
 
-        $options = $this->productOptionHelper->getProductOptions(
-            $this->variables->intValue($productId),
-            $includeWithValues,
-            $excludeWithoutValues
-        );
+        $options = $this->productOptionHelper->getProductOptionTypeValues($this->variables->intValue($optionId));
 
         $this->addResponseValue(
             'options',

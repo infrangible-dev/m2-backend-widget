@@ -61,7 +61,7 @@ use Magento\Theme\Model\Theme\Source\Theme;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 class Form
@@ -765,7 +765,8 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        $after = false,
+        $onChange = null
     ): void {
         $config = [
             'name'     => $objectFieldName,
@@ -803,6 +804,10 @@ class Form
             } else {
                 $config[ 'css_class' ] = 'disabled';
             }
+        }
+
+        if (! $this->variables->isEmpty($onChange)) {
+            $config[ 'onchange' ] = $onChange;
         }
 
         $fieldSet->addField(
@@ -2733,20 +2738,22 @@ class Form
         }
 
         $dataMageInit = $this->escaper->escapeHtml(
-            json_encode([
-                'infrangible/iframe-button' => [
-                    'buttonId' => sprintf(
-                        '%s_%s',
-                        $objectName,
-                        $objectFieldName
-                    ),
-                    'src'      => $this->urlHelper->getBackendUrl(
-                        $urlPath,
-                        $urlParameters
-                    ),
-                    'title'    => $label
-                ],
-            ])
+            json_encode(
+                [
+                    'infrangible/iframe-button' => [
+                        'buttonId' => sprintf(
+                            '%s_%s',
+                            $objectName,
+                            $objectFieldName
+                        ),
+                        'src'      => $this->urlHelper->getBackendUrl(
+                            $urlPath,
+                            $urlParameters
+                        ),
+                        'title'    => $label
+                    ],
+                ]
+            )
         );
 
         $this->addButtonField(
@@ -2869,7 +2876,8 @@ class Form
         array $targetFieldNames,
         string $objectName,
         ?AbstractModel $object = null,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false
     ): void {
         $onChangeFieldId = sprintf(
             '%s_%s',
@@ -2888,7 +2896,8 @@ class Form
 
             $onChange[] = $this->getUpdateProductOptionsFormElementJs(
                 $onChangeFieldId,
-                $targetFieldId
+                $targetFieldId,
+                $includeWithValues
             );
         }
 
@@ -2960,7 +2969,8 @@ class Form
         array $optionValueTargetFieldNames,
         string $objectName,
         ?AbstractModel $object = null,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false
     ): void {
         $onChangeFieldId = sprintf(
             '%s_%s',
@@ -2979,7 +2989,8 @@ class Form
 
             $onChange[] = $this->getUpdateProductOptionsFormElementJs(
                 $onChangeFieldId,
-                $targetFieldId
+                $targetFieldId,
+                $includeWithValues
             );
         }
 
@@ -3103,11 +3114,17 @@ class Form
 
     protected function getUpdateProductOptionsFormElementJs(
         string $sourceElementId,
-        string $targetElementId
+        string $targetElementId,
+        bool $includeWithValues
     ): string {
         return sprintf(
             'updateProductOptionsFormElement(\'%s\', \'%s\', \'%s\');',
-            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/product_option')),
+            urlencode(
+                $this->urlHelper->getBackendUrl(
+                    'infrangible_backendwidget/product_option',
+                    ['include_with_values' => $includeWithValues]
+                )
+            ),
             $sourceElementId,
             $targetElementId
         );
@@ -3132,19 +3149,31 @@ class Form
         AbstractModel $object,
         Fieldset $fieldSet,
         string $objectRegistryKey,
+        $parentObjectValue,
         string $objectProductIdFieldName,
         string $objectFieldName,
         string $label,
-        bool $required = false
+        bool $required = false,
+        bool $includeWithValues = false,
+        bool $excludeWithoutValues = false,
+        ?string $onChange = null
     ): void {
         $valueOptions = [];
 
         if ($object->getId()) {
             $productId = $object->getDataUsingMethod($objectProductIdFieldName);
+        } elseif ($parentObjectValue) {
+            $productId = $parentObjectValue;
+        } else {
+            $productId = null;
+        }
 
-            if ($productId) {
-                $valueOptions = $this->productOptionHelper->getProductOptions($this->variables->intValue($productId));
-            }
+        if ($productId) {
+            $valueOptions = $this->productOptionHelper->getProductOptions(
+                $this->variables->intValue($productId),
+                $includeWithValues,
+                $excludeWithoutValues
+            );
         }
 
         $this->addOptionsField(
@@ -3155,7 +3184,77 @@ class Form
             $valueOptions,
             null,
             $object,
-            $required
+            $required,
+            false,
+            false,
+            false,
+            $onChange
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionFieldWithTypeValues(
+        AbstractModel $object,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        $parentObjectValue,
+        string $objectProductIdFieldName,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        string $objectName,
+        bool $required = false
+    ): void {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateProductOptionTypeValuesFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId
+            );
+        }
+
+        $this->addProductOptionField(
+            $object,
+            $fieldSet,
+            $objectRegistryKey,
+            $parentObjectValue,
+            $objectProductIdFieldName,
+            $objectFieldName,
+            $label,
+            $required,
+            true,
+            true,
+            implode(
+                ';',
+                $onChange
+            )
+        );
+    }
+
+    protected function getUpdateProductOptionTypeValuesFormElementJs(
+        string $sourceElementId,
+        string $targetElementId
+    ): string {
+        return sprintf(
+            'updateOptionTypesFormElement(\'%s\', \'%s\', \'%s\');',
+            urlencode($this->urlHelper->getBackendUrl('infrangible_backendwidget/product_option/typeValues')),
+            $sourceElementId,
+            $targetElementId
         );
     }
 
@@ -3179,6 +3278,41 @@ class Form
             if ($productId) {
                 $valueOptions =
                     $this->productOptionHelper->getProductOptionValues($this->variables->intValue($productId));
+            }
+        }
+
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $valueOptions,
+            null,
+            $object,
+            $required
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addProductOptionTypeValueField(
+        AbstractModel $object,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectOptionIdFieldName,
+        string $objectFieldName,
+        string $label,
+        bool $required = false
+    ): void {
+        $valueOptions = [];
+
+        if ($object->getId()) {
+            $optionId = $object->getDataUsingMethod($objectOptionIdFieldName);
+
+            if ($optionId) {
+                $valueOptions =
+                    $this->productOptionHelper->getProductOptionTypeValues($this->variables->intValue($optionId));
             }
         }
 

@@ -34,12 +34,6 @@ abstract class Tab extends Form
     /** @var array */
     protected $indexUrlParams;
 
-    /** @var string */
-    protected $parentObjectKey;
-
-    /** @var string */
-    protected $parentObjectValue;
-
     public function __construct(
         Context $context,
         Registry $registry,
@@ -72,14 +66,6 @@ abstract class Tab extends Form
             $data,
             'index_url_params',
             []
-        );
-        $this->parentObjectKey = $arrays->getValue(
-            $data,
-            'parent_object_key'
-        );
-        $this->parentObjectValue = $arrays->getValue(
-            $data,
-            'parent_object_value'
         );
     }
 
