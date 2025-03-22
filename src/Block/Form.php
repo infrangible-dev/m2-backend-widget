@@ -220,6 +220,23 @@ abstract class Form extends Generic
 
     protected function followUpFields(\Magento\Framework\Data\Form $form)
     {
+        $this->_eventManager->dispatch(
+            ltrim(
+                strtolower(
+                    preg_replace(
+                        '/[A-Z]([A-Z](?![a-z]))*/',
+                        '_$0',
+                        sprintf(
+                            '%s_%s',
+                            $this->moduleKey,
+                            $this->objectName
+                        )
+                    )
+                ),
+                '_'
+            ),
+            ['block' => $this, 'form' => $form]
+        );
     }
 
     /**
@@ -252,7 +269,7 @@ abstract class Form extends Generic
         return $this->objectField;
     }
 
-    protected function addTextField(
+    public function addTextField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -272,7 +289,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addTextFieldAfter(
+    public function addTextFieldAfter(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -294,7 +311,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addTextareaField(
+    public function addTextareaField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -314,7 +331,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addTextareaWithCommentField(
+    public function addTextareaWithCommentField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -336,7 +353,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addOptionsField(
+    public function addOptionsField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -363,7 +380,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addOptionsClassField(
+    public function addOptionsClassField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -412,7 +429,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addYesNoField(
+    public function addYesNoField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -432,7 +449,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addYesNoFieldAfter(
+    public function addYesNoFieldAfter(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -454,7 +471,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addYesNoWithDefaultField(
+    public function addYesNoWithDefaultField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -476,7 +493,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addWebsiteSelectField(
+    public function addWebsiteSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -494,7 +511,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addWebsiteMultiselectField(
+    public function addWebsiteMultiselectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -512,7 +529,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addStoreSelectField(
+    public function addStoreSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -537,7 +554,7 @@ abstract class Form extends Generic
         }
     }
 
-    protected function addStoreMultiselectField(
+    public function addStoreMultiselectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -560,7 +577,7 @@ abstract class Form extends Generic
         }
     }
 
-    protected function addStoreWithAdminSelectField(
+    public function addStoreWithAdminSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -585,7 +602,7 @@ abstract class Form extends Generic
         }
     }
 
-    protected function addCmsBlockSelectField(
+    public function addCmsBlockSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -607,7 +624,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addCmsPageSelectField(
+    public function addCmsPageSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
@@ -629,7 +646,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addTypeIdField(
+    public function addTypeIdField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -651,7 +668,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addTemplateField(
+    public function addTemplateField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -691,7 +708,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addOperatorField(
+    public function addOperatorField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -711,7 +728,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addDateIsoField(
+    public function addDateIsoField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -731,7 +748,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addFileField(
+    public function addFileField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -745,7 +762,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addCountryField(
+    public function addCountryField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -765,7 +782,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addRegionField(
+    public function addRegionField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -785,7 +802,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addRegionAnyField(
+    public function addRegionAnyField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -805,7 +822,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addImageField(
+    public function addImageField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -908,7 +925,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addWysiwygField(Fieldset $fieldSet, string $objectFieldName, string $label)
+    public function addWysiwygField(Fieldset $fieldSet, string $objectFieldName, string $label)
     {
         $this->formHelper->addWysiwygField(
             $fieldSet,
@@ -919,7 +936,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEditorField(Fieldset $fieldSet, string $objectFieldName, string $label)
+    public function addEditorField(Fieldset $fieldSet, string $objectFieldName, string $label)
     {
         $this->formHelper->addEditorField(
             $fieldSet,
@@ -930,7 +947,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeField(
+    public function addEavAttributeField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -954,7 +971,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeFieldWithUpdate(
+    public function addEavAttributeFieldWithUpdate(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -975,7 +992,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeProductField(
+    public function addEavAttributeProductField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -995,7 +1012,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeProductFilterableField(
+    public function addEavAttributeProductFilterableField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1015,7 +1032,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeProductFieldWithUpdate(
+    public function addEavAttributeProductFieldWithUpdate(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1036,7 +1053,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeProductFilterableFieldWithUpdate(
+    public function addEavAttributeProductFilterableFieldWithUpdate(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1060,7 +1077,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addEavAttributeValueField(
+    public function addEavAttributeValueField(
         Fieldset $fieldSet,
         string $objectAttributeFieldName,
         string $objectFieldName,
@@ -1080,7 +1097,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavAttributeSetField(
+    public function addEavAttributeSetField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1104,7 +1121,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addEavEntityTypeField(
+    public function addEavEntityTypeField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1194,7 +1211,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addCheckboxField(
+    public function addCheckboxField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1212,7 +1229,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addValueField(
+    public function addValueField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label
@@ -1226,7 +1243,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addButtonField(
+    public function addButtonField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1244,7 +1261,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addIframeButtonField(
+    public function addIframeButtonField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
@@ -1431,7 +1448,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addProductOptionField(
+    public function addProductOptionField(
         Fieldset $fieldSet,
         string $objectProductIdFieldName,
         string $objectFieldName,
@@ -1455,7 +1472,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addProductOptionFieldWithTypeValues(
+    public function addProductOptionFieldWithTypeValues(
         Fieldset $fieldSet,
         string $objectProductIdFieldName,
         string $objectFieldName,
@@ -1480,7 +1497,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addProductOptionValueField(
+    public function addProductOptionValueField(
         Fieldset $fieldSet,
         string $objectProductIdFieldName,
         string $objectFieldName,
@@ -1501,7 +1518,7 @@ abstract class Form extends Generic
     /**
      * @throws Exception
      */
-    protected function addProductOptionTypeValueField(
+    public function addProductOptionTypeValueField(
         Fieldset $fieldSet,
         string $objectOptionIdFieldName,
         string $objectFieldName,
@@ -1519,7 +1536,7 @@ abstract class Form extends Generic
         );
     }
 
-    protected function addFilterConditionTypeField(
+    public function addFilterConditionTypeField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
