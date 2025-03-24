@@ -1082,6 +1082,31 @@ class Form
         );
     }
 
+    public function addYesNoDefaultField(
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        int $defaultValue = 1,
+        ?AbstractModel $object = null,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ): void {
+        $this->addOptionsField(
+            $fieldSet,
+            $objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $this->sourceYesNo->toOptionArray(),
+            $defaultValue,
+            $object,
+            $required,
+            $readOnly,
+            $disabled
+        );
+    }
+
     public function addSimpleYesNoField(
         Fieldset $fieldSet,
         string $objectFieldName,

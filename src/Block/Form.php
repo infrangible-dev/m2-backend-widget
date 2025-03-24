@@ -449,6 +449,28 @@ abstract class Form extends Generic
         );
     }
 
+    public function addYesNoDefaultField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        int $defaultValue = 1,
+        bool $required = false,
+        bool $readOnly = false,
+        bool $disabled = false
+    ) {
+        $this->formHelper->addYesNoDefaultField(
+            $fieldSet,
+            $this->objectRegistryKey,
+            $objectFieldName,
+            $label,
+            $defaultValue,
+            $this->getObject(),
+            $required,
+            $this->isReadOnlyAll() ? true : $readOnly,
+            $this->isDisableAll() ? true : $disabled
+        );
+    }
+
     public function addYesNoFieldAfter(
         Fieldset $fieldSet,
         string $objectFieldName,
