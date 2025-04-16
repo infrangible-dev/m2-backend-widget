@@ -2680,6 +2680,47 @@ class Form
     /**
      * @param bool|string|null $after
      */
+    public function addSimpleCheckboxField(
+        Fieldset $fieldSet,
+        string $objectFieldName,
+        string $label,
+        $value,
+        bool $checked = false,
+        bool $disabled = false,
+        $after = false
+    ): void {
+        $config = [
+            'name'      => $objectFieldName,
+            'label'     => $label,
+            'title'     => $label,
+            'value'     => $value,
+            'checked'   => $checked,
+            'css_class' => 'admin__field-checkbox'
+        ];
+
+        if ($disabled) {
+            $config[ 'disabled' ] = true;
+            if (array_key_exists(
+                'css_class',
+                $config
+            )) {
+                $config[ 'css_class' ] .= ' disabled';
+            } else {
+                $config[ 'css_class' ] = 'disabled';
+            }
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'checkbox',
+            $config,
+            $after
+        );
+    }
+
+    /**
+     * @param bool|string|null $after
+     */
     public function addValueField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
