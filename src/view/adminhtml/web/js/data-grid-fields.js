@@ -40,17 +40,17 @@ define([
                     buttons: []
                 }, this.dataGridColumnsList);
 
-                var dataGridColumns = this;
+                const dataGridColumns = this;
 
                 this.dataGridColumnsCheckboxes.each(function () {
-                    var columnCheckbox = $(this);
-                    var columnId = columnCheckbox.attr('id');
+                    const columnCheckbox = $(this);
+                    const columnId = columnCheckbox.attr('id');
 
                     if (columnId) {
-                        var fieldName = columnId.replace('data-grid-column-', '');
-                        var columnClassName = 'col-' + fieldName;
+                        const fieldName = columnId.replace('data-grid-column-', '');
+                        const columnClassName = 'col-' + fieldName;
 
-                        var columnHeader = $('th.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
+                        const columnHeader = $('th.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
                         if (columnHeader.length) {
                             if (!columnHeader.hasClass('hidden')) {
                                 columnCheckbox.attr('checked', true);
@@ -58,7 +58,7 @@ define([
                         }
 
                         columnCheckbox.on('change', function () {
-                            var columnList = $('.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
+                            const columnList = $('.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
 
                             if (columnList.length) {
                                 columnList.toggleClass('hidden');
@@ -70,8 +70,8 @@ define([
                     }
                 });
 
-                var dataGridColumnsButton = $('.action-columns', this.dataGrid);
-                var dataGridColumnsButtonText = $('span', dataGridColumnsButton);
+                const dataGridColumnsButton = $('.action-columns', this.dataGrid);
+                const dataGridColumnsButtonText = $('span', dataGridColumnsButton);
                 this.dataGridColumnsButtonTextValue = dataGridColumnsButtonText.text();
 
                 this._updateButtonText();
@@ -79,13 +79,13 @@ define([
         },
 
         _init: function initDataGridColumns() {
-            var dataGridColumns = this;
+            const dataGridColumns = this;
 
             $('.action-columns', this.dataGrid).on('click', function () {
                 dataGridColumns.dataGridColumnsList.modal('openModal');
             });
 
-            var observer = new MutationObserver(function () {
+            const observer = new MutationObserver(function () {
                 dataGridColumns._init();
                 dataGridColumns._updateButtonText();
                 observer.disconnect();
@@ -97,9 +97,9 @@ define([
                 characterData: false
             });
 
-            var filterRow = $('table.data-grid thead tr.data-grid-filters', dataGridColumns.dataGrid);
+            const filterRow = $('table.data-grid thead tr.data-grid-filters', dataGridColumns.dataGrid);
 
-            var hasFilters = false;
+            let hasFilters = false;
             $('input.admin__control-text, select.admin__control-select', filterRow).each(function () {
                 if (! _.isEmpty($(this).val())) {
                     hasFilters = true;
@@ -115,18 +115,18 @@ define([
             });
 
             this.dataGridColumnsCheckboxes.each(function () {
-                var columnCheckbox = $(this);
-                var columnId = columnCheckbox.attr('id');
+                const columnCheckbox = $(this);
+                const columnId = columnCheckbox.attr('id');
 
                 if (columnId) {
-                    var fieldName = columnId.replace('data-grid-column-', '');
-                    var columnClassName = 'col-' + fieldName;
+                    const fieldName = columnId.replace('data-grid-column-', '');
+                    const columnClassName = 'col-' + fieldName;
 
-                    var columnHeader = $('th.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
+                    const columnHeader = $('th.' + columnClassName, $('table.data-grid', dataGridColumns.dataGrid));
 
                     if (columnHeader.length) {
                         if ($.inArray(fieldName, dataGridColumns.options.groupByFieldList) !== -1) {
-                            var groupedByIcon = $('<i>');
+                            const groupedByIcon = $('<i>');
                             groupedByIcon.data('group_by', fieldName);
                             groupedByIcon.addClass('group_by-' + fieldName);
                             if ($.inArray(fieldName, dataGridColumns.options.activeGroupByFieldList) !== -1) {
@@ -136,8 +136,8 @@ define([
                             columnHeader.append(groupedByIcon);
 
                             groupedByIcon.on('click', function () {
-                                var groupBy = $(this).data('group_by');
-                                var index = $.inArray(groupBy, dataGridColumns.options.activeGroupByFieldList);
+                                const groupBy = $(this).data('group_by');
+                                const index = $.inArray(groupBy, dataGridColumns.options.activeGroupByFieldList);
 
                                 if (index === -1) {
                                     dataGridColumns.options.activeGroupByFieldList.push(groupBy);
@@ -145,7 +145,7 @@ define([
                                     dataGridColumns.options.activeGroupByFieldList.splice(index, 1);
                                 }
 
-                                var grid = window[dataGridColumns.options.jsObjectName];
+                                const grid = window[dataGridColumns.options.jsObjectName];
                                 grid.reload(grid.addVarToUrl('group_by',
                                     Base64.encode(dataGridColumns.options.activeGroupByFieldList.join(','))));
                                 return false;
@@ -157,11 +157,11 @@ define([
         },
 
         _updateButtonText: function () {
-            var dataGridColumnsButton = $('.action-columns', this.dataGrid);
-            var dataGridColumnsButtonText = $('span', dataGridColumnsButton);
+            const dataGridColumnsButton = $('.action-columns', this.dataGrid);
+            const dataGridColumnsButtonText = $('span', dataGridColumnsButton);
 
-            var checkedDataGridColumnsCheckboxes = $('.data-grid-column-checkbox:checked', this.dataGridColumnsList);
-            var hiddenCount = this.dataGridColumnsCheckboxes.length - checkedDataGridColumnsCheckboxes.length;
+            const checkedDataGridColumnsCheckboxes = $('.data-grid-column-checkbox:checked', this.dataGridColumnsList);
+            const hiddenCount = this.dataGridColumnsCheckboxes.length - checkedDataGridColumnsCheckboxes.length;
             if (hiddenCount > 0) {
                 dataGridColumnsButtonText.text(this.dataGridColumnsButtonTextValue +
                     ' (' + hiddenCount + ' ' + $.mage.__('hidden') + ')');
@@ -171,19 +171,19 @@ define([
         },
 
         _saveSelection: function () {
-            var hiddenFieldList = [];
-            var uncheckedDataGridColumnsCheckboxes =
+            const hiddenFieldList = [];
+            const uncheckedDataGridColumnsCheckboxes =
                 $('.data-grid-column-checkbox:not(:checked)', this.dataGridColumnsList);
             uncheckedDataGridColumnsCheckboxes.each(function () {
-                var columnCheckbox = $(this);
-                var columnId = columnCheckbox.attr('id');
+                const columnCheckbox = $(this);
+                const columnId = columnCheckbox.attr('id');
                 if (columnId) {
-                    var fieldName = columnId.replace('data-grid-column-', '');
+                    const fieldName = columnId.replace('data-grid-column-', '');
                     hiddenFieldList.push(fieldName);
                 }
             });
 
-            var data = {
+            const data = {
                 data_grid_id: this.options.dataGridId,
                 form_key: this.options.formKey,
                 hidden_field_list: hiddenFieldList

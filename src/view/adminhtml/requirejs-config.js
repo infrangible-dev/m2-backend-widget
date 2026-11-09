@@ -4,7 +4,7 @@
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 
-var config = {
+const config = {
     paths: {
         'infrangible/data-grid-fields': 'Infrangible_BackendWidget/js/data-grid-fields'
     }

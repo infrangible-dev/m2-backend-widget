@@ -7,16 +7,16 @@
  */
 function updateEavAttributeFormElement(targetElementUrl, sourceElementId, targetElementId, multiSelect) {
     require(['jquery'], function ($) {
-        var sourceElement = $('#' + sourceElementId).get(0);
-        var sourceElementValue = sourceElement.options[sourceElement.selectedIndex].value;
+        const sourceElement = $('#' + sourceElementId).get(0);
+        const sourceElementValue = sourceElement.options[sourceElement.selectedIndex].value;
         $.get({
             url: decodeURIComponent(targetElementUrl) + 'attribute_id/' + sourceElementValue,
             success: function (json) {
                 if (json.success && json.success === false) {
                     throw json.error;
                 }
-                var targetElement = $('#' + targetElementId).get(0);
-                var replaceTargetElement;
+                let targetElement = $('#' + targetElementId).get(0);
+                let replaceTargetElement;
                 if (json.options) {
                     if (targetElement.type === 'text') {
                         replaceTargetElement = document.createElement('select');
@@ -34,13 +34,13 @@ function updateEavAttributeFormElement(targetElementUrl, sourceElementId, target
                         targetElement.replaceWith(replaceTargetElement);
                         targetElement = replaceTargetElement;
                     } else {
-                        var optionNumber;
+                        let optionNumber;
                         for (optionNumber = targetElement.options.length - 1; optionNumber >= 0; optionNumber--) {
                             targetElement.remove(optionNumber);
                         }
                     }
                     $.each(json.options, function (index, attributeOption) {
-                        var option = document.createElement('option');
+                        const option = document.createElement('option');
                         option.value = attributeOption.value;
                         option.text = attributeOption.label;
                         targetElement.appendChild(option);
