@@ -225,6 +225,7 @@ abstract class Base extends Json
                     return $value;
                 }
 
+                /** @var string|string[] $escapedValue Magento before 2.4.9 declares string|array */
                 $escapedValue = $this->escaper->escapeHtml($value);
 
                 return is_string($escapedValue) ? $escapedValue : '';

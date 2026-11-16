@@ -11,9 +11,10 @@ declare(strict_types=1);
 // phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
 namespace Infrangible\BackendWidget\Controller\Backend\Object\Tab;
 
-use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\App\Response\Http;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\BlockInterface;
 
 abstract class Edit extends \Infrangible\BackendWidget\Controller\Backend\Object\Edit
 {
@@ -32,11 +33,12 @@ abstract class Edit extends \Infrangible\BackendWidget\Controller\Backend\Object
 
         $blockClassName = $this->getFormContentBlockType();
 
-        if (! class_exists($blockClassName)) {
+        if (! is_a($blockClassName, BlockInterface::class, true)) {
             throw new \LogicException(
                 sprintf(
-                    'Could not find block class: %s',
-                    $blockClassName
+                    'Could not find block class %s that implements %s',
+                    $blockClassName,
+                    BlockInterface::class
                 )
             );
         }

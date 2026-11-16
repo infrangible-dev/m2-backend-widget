@@ -194,7 +194,7 @@ abstract class MassExport extends Edit
     protected function getExportFields(): array
     {
         /** @noinspection PhpDeprecationInspection */
-        $item = $this->getObjectInstance()->getCollection()->fetchItem();
+        $item = $this->getObjectInstance()->getResourceCollection()->fetchItem();
 
         $data = $item instanceof DataObject ? $item->getData() : [];
 

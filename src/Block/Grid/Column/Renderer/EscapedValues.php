@@ -37,6 +37,7 @@ trait EscapedValues
      */
     protected function escapeValue(mixed $value): string
     {
+        /** @var string|string[] $escapedValue Magento before 2.4.9 declares string|array */
         $escapedValue = $this->_escaper->escapeHtml(is_scalar($value) ? (string)$value : '');
 
         return is_string($escapedValue) ? $escapedValue : '';

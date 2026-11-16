@@ -97,6 +97,7 @@ class Number extends AbstractElement
         if ($this->getData('prefix')) {
             $htmlId = $this->getHtmlId();
             $prefix = $this->getData('prefix');
+            /** @var string|string[] $prefix Magento before 2.4.9 declares string|array */
             $prefix = $this->_escaper->escapeHtml(
                 is_scalar($prefix) || $prefix instanceof \Stringable ? (string)$prefix : ''
             );

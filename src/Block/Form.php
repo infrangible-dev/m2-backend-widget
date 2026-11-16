@@ -140,7 +140,7 @@ abstract class Form extends Generic
             $object = $this->registryHelper->registry($this->objectRegistryKey);
 
             if (! $object instanceof AbstractModel) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'No object registered with key: %s',
                         $this->objectRegistryKey

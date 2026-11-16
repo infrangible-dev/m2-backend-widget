@@ -17,6 +17,7 @@ use Magento\Backend\Block\Widget\Context;
 use Magento\Backend\Block\Widget\Grid;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\BlockInterface;
 
 class Container extends Grid\Container
 {
@@ -179,11 +180,12 @@ class Container extends Grid\Container
      */
     protected function _prepareLayout(): \Magento\Backend\Block\Widget\Container
     {
-        if (! class_exists($this->gridContentBlockClassName)) {
+        if (! is_a($this->gridContentBlockClassName, BlockInterface::class, true)) {
             throw new \LogicException(
                 sprintf(
-                    'Could not find grid content block class: %s',
-                    $this->gridContentBlockClassName
+                    'Could not find block class %s that implements %s',
+                    $this->gridContentBlockClassName,
+                    BlockInterface::class
                 )
             );
         }

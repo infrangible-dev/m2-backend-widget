@@ -22,6 +22,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\BlockInterface;
 
 abstract class Edit extends Base
 {
@@ -55,9 +56,21 @@ abstract class Edit extends Base
 
         $this->initAction();
 
+        $blockClassName = $this->getFormBlockType();
+
+        if (! is_a($blockClassName, BlockInterface::class, true)) {
+            throw new \LogicException(
+                sprintf(
+                    'Could not find block class %s that implements %s',
+                    $blockClassName,
+                    BlockInterface::class
+                )
+            );
+        }
+
         /** @var AbstractBlock $block */
         $block = $this->_view->getLayout()->createBlock(
-            $this->getFormBlockType(),
+            $blockClassName,
             '',
             [
                 'data' => [

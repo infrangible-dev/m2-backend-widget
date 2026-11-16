@@ -450,7 +450,7 @@ abstract class Grid extends Extended
                 );
             }
 
-            $collection = $model->getCollection();
+            $collection = $model->getResourceCollection();
         }
 
         if (! $collection instanceof Collection) {
@@ -2105,7 +2105,7 @@ abstract class Grid extends Extended
             $object = $this->registryHelper->registry($this->objectRegistryKey);
 
             if (! $object instanceof AbstractModel) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'No object registered with key: %s',
                         $this->objectRegistryKey
@@ -2341,6 +2341,8 @@ abstract class Grid extends Extended
      *
      * @return void
      * @throws LocalizedException
+     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
+     *               AbstractDb
      */
     public function filterCustomerName(AbstractCollection $collection, Column $column): void
     {
@@ -2398,6 +2400,8 @@ abstract class Grid extends Extended
      *
      * @return void
      * @throws LocalizedException
+     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
+     *               AbstractDb
      */
     public function filterProductName(AbstractCollection $collection, Column $column): void
     {
@@ -2453,6 +2457,8 @@ abstract class Grid extends Extended
      *
      * @return void
      * @throws LocalizedException
+     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
+     *               AbstractDb
      */
     public function filterProductOption(AbstractCollection $collection, Column $column): void
     {
@@ -2508,6 +2514,8 @@ abstract class Grid extends Extended
      *
      * @return void
      * @throws LocalizedException
+     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
+     *               AbstractDb
      */
     public function filterProductOptionValue(AbstractCollection $collection, Column $column): void
     {

@@ -70,7 +70,10 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
                     if (! $websiteShow) {
                         $websiteShow = true;
 
-                        $html .= sprintf('<optgroup label="%s"></optgroup>', $this->escapeHtml($website->getName()));
+                        $html .= sprintf(
+                            '<optgroup label="%s"></optgroup>',
+                            $this->escapeHtml((string)$website->getName())
+                        );
                     }
 
                     if (! $groupShow) {
@@ -78,7 +81,7 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
 
                         $html .= sprintf(
                             '<optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;%s">',
-                            $this->escapeHtml($group->getName())
+                            $this->escapeHtml((string)$group->getName())
                         );
                     }
 
@@ -87,7 +90,7 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
                     $selected = $value == $store->getId() ? ' selected="selected"' : '';
 
                     $html .= '<option value="' . $this->escapeHtmlAttr((string)$store->getId()) . '"' . $selected .
-                        '>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->escapeHtml($store->getName()) . '</option>';
+                        '>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->escapeHtml((string)$store->getName()) . '</option>';
                 }
                 if ($groupShow) {
                     $html .= '</optgroup>';

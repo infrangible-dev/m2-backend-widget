@@ -12,8 +12,9 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Magento\Backend\Block\Widget\Grid\Extended;
-use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\App\Response\Http;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\View\Element\BlockInterface;
 
 abstract class Grid extends Table
 {
@@ -28,11 +29,12 @@ abstract class Grid extends Table
 
         $blockClassName = $this->getGridContentBlockClass();
 
-        if (! class_exists($blockClassName)) {
+        if (! is_a($blockClassName, BlockInterface::class, true)) {
             throw new \LogicException(
                 sprintf(
-                    'Could not find block class: %s',
-                    $blockClassName
+                    'Could not find block class %s that implements %s',
+                    $blockClassName,
+                    BlockInterface::class
                 )
             );
         }

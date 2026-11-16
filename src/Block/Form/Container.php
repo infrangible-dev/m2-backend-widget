@@ -18,6 +18,7 @@ use Magento\Backend\Block\Widget\Context;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\BlockInterface;
 use RuntimeException;
 
 class Container extends \Magento\Backend\Block\Widget\Form\Container
@@ -231,7 +232,7 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
             $object = $this->registryHelper->registry($this->objectRegistryKey);
 
             if (! $object instanceof AbstractModel) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'No object registered with key: %s',
                         $this->objectRegistryKey
@@ -292,11 +293,12 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
             throw new \LogicException('No block class defined');
         }
 
-        if (! class_exists($this->formContentBlockType)) {
+        if (! is_a($this->formContentBlockType, BlockInterface::class, true)) {
             throw new \LogicException(
                 sprintf(
-                    'Could not find block class: %s',
-                    $this->formContentBlockType
+                    'Could not find block class %s that implements %s',
+                    $this->formContentBlockType,
+                    BlockInterface::class
                 )
             );
         }

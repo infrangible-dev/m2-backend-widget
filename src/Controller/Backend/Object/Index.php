@@ -13,6 +13,7 @@ namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Infrangible\BackendWidget\Block\Grid\Container;
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\BlockInterface;
 use Magento\Framework\View\Result\Page;
 
 abstract class Index extends Table
@@ -46,9 +47,21 @@ abstract class Index extends Table
      */
     protected function createBlock(): AbstractBlock
     {
+        $blockClassName = $this->getGridBlockType();
+
+        if (! is_a($blockClassName, BlockInterface::class, true)) {
+            throw new \LogicException(
+                sprintf(
+                    'Could not find block class %s that implements %s',
+                    $blockClassName,
+                    BlockInterface::class
+                )
+            );
+        }
+
         /** @var AbstractBlock $block */
         $block = $this->_view->getLayout()->createBlock(
-            $this->getGridBlockType(),
+            $blockClassName,
             '',
             [
                 'data' => $this->getGridBlockData()

@@ -95,6 +95,8 @@ abstract class Tab extends Grid
      *
      * @return void
      * @throws LocalizedException
+     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
+     *               AbstractDb
      */
     protected function followUpCollection(AbstractDb $collection): void
     {
