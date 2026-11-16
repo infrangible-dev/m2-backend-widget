@@ -2,39 +2,39 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid;
 
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DB\Select;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class MassAction
-    extends \Magento\Backend\Block\Widget\Grid\Massaction\Extended
+class MassAction extends \Magento\Backend\Block\Widget\Grid\Massaction\Extended
 {
     /**
      * Get grid ids in JSON format
      *
      * @return string
      */
-    public function getGridIdsJson()
+    public function getGridIdsJson(): string
     {
         $parentBlock = $this->getParentBlock();
 
         if ($parentBlock instanceof \Infrangible\BackendWidget\Block\Grid) {
-            if ( ! $this->getUseSelectAll()) {
+            if (! $this->getUseSelectAll()) {
                 return '';
             }
 
             $allIdsCollection = clone $parentBlock->getCollection();
 
-            if ($this->getMassactionIdField()) {
-                $massActionIdField = $this->getMassactionIdField();
-            } else {
-                $massActionIdField = $parentBlock->getMassactionIdField();
+            $massActionIdField = $this->getData('massaction_id_field');
+
+            if (! is_string($massActionIdField) || $massActionIdField === '') {
+                $massActionIdField = (string)$parentBlock->getMassactionIdField();
             }
 
             if ($allIdsCollection instanceof AbstractDb) {

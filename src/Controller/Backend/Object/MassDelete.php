@@ -2,40 +2,49 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
-use Magento\Backend\App\Action\Context;
-use Magento\Framework\Model\AbstractModel;
-use Psr\Log\LoggerInterface;
 use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Instances;
 use Infrangible\Core\Helper\Registry;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Model\AbstractModel;
+use Psr\Log\LoggerInterface;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-abstract class MassDelete
-    extends Edit
+abstract class MassDelete extends Edit
 {
-    /** @var LoggerInterface */
-    protected $logging;
-
+    /**
+     * @param Registry $registryHelper
+     * @param Instances $instanceHelper
+     * @param Context $context
+     * @param LoggerInterface $logging
+     * @param Session $session
+     */
     public function __construct(
         Registry $registryHelper,
         Instances $instanceHelper,
         Context $context,
-        LoggerInterface $logging,
-        Session $session)
-    {
+        protected LoggerInterface $logging,
+        Session $session
+    ) {
         parent::__construct($registryHelper, $instanceHelper, $context, $session);
-
-        $this->logging = $logging;
     }
 
-    public function execute(): void
+    /**
+     * Executes the action.
+     *
+     * @return ResponseInterface
+     */
+    public function execute(): ResponseInterface
     {
         $paramName = $this->getObjectField();
 
@@ -45,7 +54,7 @@ abstract class MassDelete
 
         $ids = $this->getRequest()->getParam($paramName);
 
-        if ( ! is_array($ids) && $ids !== null && $ids !== '') {
+        if (is_string($ids) && $ids !== '') {
             $ids = explode(',', $ids);
         }
 
@@ -87,18 +96,38 @@ abstract class MassDelete
         }
 
         $this->redirect($this->getIndexUrlRoute(), $this->getIndexUrlParams());
+
+        return $this->getResponse();
     }
 
-    protected function beforeDelete(AbstractModel $object)
+    /**
+     * Hook that runs before the object is deleted.
+     *
+     * @param AbstractModel $object
+     *
+     * @return void
+     */
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function beforeDelete(AbstractModel $object): void
     {
     }
 
     /**
-     * @throws Exception
+     * Hook that runs after the object was deleted.
+     *
+     * @param AbstractModel $object
+     *
+     * @return void
      */
-    protected function afterDelete(AbstractModel $object)
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function afterDelete(AbstractModel $object): void
     {
     }
 
+    /**
+     * Returns the objects deleted message.
+     *
+     * @return string
+     */
     abstract protected function getObjectsDeletedMessage(): string;
 }

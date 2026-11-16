@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Config\Form;
 
 use Magento\Backend\Block\Widget\Button;
@@ -15,25 +21,10 @@ use Magento\Framework\View\Element\Context;
 use Magento\Framework\View\LayoutInterface;
 use Infrangible\Core\Helper\Url;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Wysiwyg
-    extends Text
+class Wysiwyg extends Text
 {
-    /** @var Url */
-    protected $urlHelper;
-
-    /** @var Manager */
-    protected $moduleManager;
-
-    /** @var Config */
-    protected $config;
-
     /** @var LayoutInterface */
-    protected $layout;
+    protected LayoutInterface $layout;
 
     /**
      * @param Factory           $factoryElement
@@ -44,32 +35,32 @@ class Wysiwyg
      * @param Config            $config
      * @param Context           $context
      * @param array             $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
      */
     public function __construct(
         Factory $factoryElement,
         CollectionFactory $factoryCollection,
         Escaper $escaper,
-        Url $urlHelper,
-        Manager $moduleManager,
-        Config $config,
+        protected Url $urlHelper,
+        protected Manager $moduleManager,
+        protected Config $config,
         Context $context,
-        array $data = [])
-    {
+        array $data = []
+    ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
-
-        $this->urlHelper = $urlHelper;
-
-        $this->moduleManager = $moduleManager;
-        $this->config = $config;
         $this->layout = $context->getLayout();
     }
 
     /**
+     * Returns the after element html.
+     *
      * @return string|null
      */
     public function getAfterElementHtml(): ?string
     {
         $html = parent::getAfterElementHtml();
+        $html = is_string($html) ? $html : '';
 
         if ($this->getIsWysiwygEnabled()) {
             $disabled = $this->getData('disabled') || $this->getReadonly();
@@ -82,9 +73,13 @@ class Wysiwyg
                     'type'     => 'button',
                     'disabled' => $disabled,
                     'class'    => 'add-image plugin',
-                    'onclick'  => sprintf('MediabrowserUtility.openDialog(\'%s\')',
-                        $this->urlHelper->getBackendUrl('infrangible_backendwidget/wysiwyg_images/index',
-                            ['target_element_id' => $this->getHtmlId()]))
+                    'onclick'  => sprintf(
+                        'MediabrowserUtility.openDialog(\'%s\')',
+                        $this->urlHelper->getBackendUrl(
+                            'infrangible_backendwidget/wysiwyg_images/index',
+                            ['target_element_id' => $this->getHtmlId()]
+                        )
+                    )
                 ]
             ]);
 
@@ -109,6 +104,8 @@ class Wysiwyg
     }
 
     /**
+     * Returns the html attributes.
+     *
      * @return string[]
      */
     public function getHtmlAttributes(): array

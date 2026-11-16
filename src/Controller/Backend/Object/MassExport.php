@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
@@ -9,31 +16,31 @@ use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Instances;
 use Infrangible\Core\Helper\Registry;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Controller\Result\RawFactory;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Psr\Log\LoggerInterface;
 
-/**
- * @author      Philipp Adler
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 abstract class MassExport extends Edit
 {
-    /** @var LoggerInterface */
-    protected $logging;
-
-    /** @var RawFactory */
-    protected $rawFactory;
-
+    /**
+     * @param Registry $registryHelper
+     * @param Instances $instanceHelper
+     * @param Context $context
+     * @param Session $session
+     * @param LoggerInterface $logging
+     * @param RawFactory $rawFactory
+     */
     public function __construct(
         Registry $registryHelper,
         Instances $instanceHelper,
         Context $context,
         Session $session,
-        LoggerInterface $logging,
-        RawFactory $rawFactory
+        protected LoggerInterface $logging,
+        protected RawFactory $rawFactory
     ) {
         parent::__construct(
             $registryHelper,
@@ -41,16 +48,15 @@ abstract class MassExport extends Edit
             $context,
             $session
         );
-
-        $this->logging = $logging;
-        $this->rawFactory = $rawFactory;
     }
 
     /**
-     * @return Raw|void
-     * @throws Exception
+     * Executes the action.
+     *
+     * @return Raw|ResponseInterface
+     * @throws LocalizedException
      */
-    public function execute()
+    public function execute(): Raw|ResponseInterface
     {
         $paramName = $this->getObjectField();
 
@@ -63,13 +69,19 @@ abstract class MassExport extends Edit
         if (is_array($ids)) {
             $ids = array_unique($ids);
 
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction -- in-memory stream, not a file
             $dataSink = fopen(
                 'php://temp',
                 'w+'
             );
 
+            if ($dataSink === false) {
+                throw new \RuntimeException('Could not open temporary stream for the export');
+            }
+
             $header = $this->getExportHeader();
             if (count($header) > 0) {
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction -- in-memory stream, not a file
                 fputcsv(
                     $dataSink,
                     $header
@@ -101,8 +113,11 @@ abstract class MassExport extends Edit
 
                         $data = [];
                         foreach ($fields as $key) {
-                            $data[] = $object->getData($key);
+                            $value = $object->getData($key);
+
+                            $data[] = $value === null || is_scalar($value) ? $value : (string)json_encode($value);
                         }
+                        // phpcs:ignore Magento2.Functions.DiscouragedFunction -- in-memory stream, not a file
                         fputcsv(
                             $dataSink,
                             $data
@@ -115,12 +130,14 @@ abstract class MassExport extends Edit
                 // transfer data
                 $rawData = $this->rawFactory->create();
                 rewind($dataSink);
-                $rawData->setContents(stream_get_contents($dataSink));
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction -- in-memory stream, not a file
+                $rawData->setContents((string)stream_get_contents($dataSink));
                 $rawData->setHeader(
                     'Content-Type:',
                     'text/csv; charset=UTF-8',
                     true
                 );
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction -- in-memory stream, not a file
                 fclose($dataSink);
 
                 return $rawData;
@@ -136,39 +153,60 @@ abstract class MassExport extends Edit
             $this->getIndexUrlRoute(),
             $this->getIndexUrlParams()
         );
+
+        return $this->getResponse();
     }
 
     /**
-     * modify object fields/data before export
-     */
-    protected function beforeExport(AbstractModel $object)
-    {
-    }
-
-    /**
-     * modify object after export (ie set export status)
-     * if object was changed in beforeExport() it should be restored (ie $object->setData($object->getOrigData()))
-     */
-    protected function afterExport(AbstractModel $object)
-    {
-    }
-
-    /**
-     * list of export fields, used to get data via getData
+     * Hook to change the data of the object before it is exported.
      *
-     * @throws Exception
+     * @param AbstractModel $object
+     *
+     * @return void
+     */
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function beforeExport(AbstractModel $object): void
+    {
+    }
+
+    /**
+     * Hook to change the object after it was exported, for example to set an export status.
+     *
+     * If the object was changed in beforeExport(), it should be restored, for example with
+     * $object->setData($object->getOrigData()).
+     *
+     * @param AbstractModel $object
+     *
+     * @return void
+     */
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function afterExport(AbstractModel $object): void
+    {
+    }
+
+    /**
+     * Returns the fields to export, by default all fields of the database table.
+     *
+     * @return array
+     * @throws LocalizedException
+     * @phpstan-return array<int, string>
      */
     protected function getExportFields(): array
     {
-        // base implementation: raw database fields
         /** @noinspection PhpDeprecationInspection */
-        return array_keys($this->getObjectInstance()->getCollection()->fetchItem()->getData());
+        $item = $this->getObjectInstance()->getCollection()->fetchItem();
+
+        $data = $item instanceof DataObject ? $item->getData() : [];
+
+        return is_array($data) ? array_map('strval', array_keys($data)) : [];
     }
 
     /**
-     * list of header fields (should match export fields, can be used for translations)
+     * Returns the header of the export, which should match the export fields and can be translated.
      *
-     * @throws Exception
+     * @return array
+     * @throws LocalizedException
+     * @phpstan-return array<int, string>
      */
     protected function getExportHeader(): array
     {

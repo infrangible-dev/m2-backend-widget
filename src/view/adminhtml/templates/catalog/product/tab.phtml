@@ -3,23 +3,31 @@
 declare(strict_types=1);
 
 use Infrangible\BackendWidget\Block\Adminhtml\Product\Tab;
+use Magento\Framework\Escaper;
+
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
 
 /** @var Tab $block */
+/** @var Escaper $escaper */
 ?>
 
-<div id="<?= $block->getTabId(); ?>"></div>
+<div id="<?= $escaper->escapeHtmlAttr($block->getTabId()) ?>"></div>
 
-<script type="text/javascript">
+<script>
     require(['jquery'], function ($) {
-        var productTab = $('#<?= $block->getTabId(); ?>');
+        const productTab = $('#<?= $escaper->escapeJs($block->getTabId()) ?>');
         $.ajax({
-            url: '<?= $block->getTabUrl(); ?>',
+            url: '<?= $escaper->escapeJs($block->getTabUrl()) ?>',
             method: 'get',
             dataType: 'html',
             showLoader: true,
             context: productTab[0],
             success: function (data) {
-                var targetNode = productTab;
+                const targetNode = productTab;
                 targetNode.html(data);
                 targetNode.trigger('contentUpdated');
             }

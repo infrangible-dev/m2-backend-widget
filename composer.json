@@ -2,7 +2,7 @@
     "name": "infrangible/m2-backend-widget",
     "description": "Infrangible Magento 2 Backend Widget",
     "type": "magento2-module",
-    "version": "3.7.1",
+    "version": "4.0.0",
     "license": "MIT",
     "keywords": [
         "Magento"
@@ -17,10 +17,27 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "magento/framework": "~101.0.0|~102.0.0|~103.0.0",
-        "infrangible/m2-core": "~2.15.1||~3.14.1",
-        "infrangible/m2-foundation": "~2.2.0"
+        "php": ">=8.2",
+        "ext-ctype": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "fewedev/base": "~2.4.0",
+        "infrangible/m2-core": "~5.0.0",
+        "magento/framework": "~103.0.6",
+        "magento/module-backend": "~102.0.0",
+        "magento/module-catalog": "~104.0.0",
+        "magento/module-cms": "~104.0.0",
+        "magento/module-config": "~101.2.0",
+        "magento/module-customer": "~103.0.0",
+        "magento/module-directory": "~100.4.0",
+        "magento/module-eav": "~102.1.0",
+        "magento/module-email": "~101.1.0",
+        "magento/module-store": "~101.1.0",
+        "magento/module-theme": "~101.1.0",
+        "magento/module-ui": "~101.2.0",
+        "magento/zend-db": "~1.16.0",
+        "psr/log": "~1.1.0||~2.0.0||~3.0.0"
     },
     "autoload": {
         "files": [

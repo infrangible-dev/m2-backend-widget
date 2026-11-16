@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid\Column\Renderer;
 
 use FeWeDev\Base\Variables;
@@ -10,67 +16,51 @@ use Magento\Backend\Block\Context;
 use Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer;
 use Magento\Framework\DataObject;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class CustomerGroup extends AbstractRenderer
 {
-    /** @var Variables */
-    protected $variables;
+    use EscapedValues;
 
-    /** @var Customer */
-    protected $customerHelper;
-
+    /**
+     * @param Context $context
+     * @param Variables $variables
+     * @param Customer $customerHelper
+     * @param array $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
+     */
     public function __construct(
         Context $context,
-        Variables $variables,
-        Customer $customerHelper,
+        protected Variables $variables,
+        protected Customer $customerHelper,
         array $data = []
     ) {
         parent::__construct(
             $context,
             $data
         );
-
-        $this->variables = $variables;
-        $this->customerHelper = $customerHelper;
     }
 
     /**
-     * @throws \Exception
+     * Renders.
+     *
+     * @param DataObject $row
+     *
+     * @return string
      */
     public function render(DataObject $row): string
     {
-        $column = $this->_column;
+        $customerGroupCodes = [];
 
-        $customerGroupIds = $row->getData($column->getData('index'));
+        foreach ($this->getIds($row->getData($this->getColumnIndex())) as $customerGroupId) {
+            $customerGroup = $this->customerHelper->loadCustomerGroup($customerGroupId);
 
-        $categoryGroupCodes = [];
-
-        if (! $this->variables->isEmpty($customerGroupIds)) {
-            if (! is_array($customerGroupIds)) {
-                $customerGroupIds = explode(
-                    ',',
-                    $customerGroupIds
-                );
-            }
-
-            foreach ($customerGroupIds as $customerGroupId) {
-                $customerGroup = $this->customerHelper->loadCustomerGroup($this->variables->intValue($customerGroupId));
-
-                if ($customerGroup->getCode()) {
-                    $categoryGroupCodes[] = $customerGroup->getCode();
-                }
+            if ($customerGroup->getCode()) {
+                $customerGroupCodes[] = $customerGroup->getCode();
             }
         }
 
-        natcasesort($categoryGroupCodes);
+        natcasesort($customerGroupCodes);
 
-        return implode(
-            '<br />',
-            $categoryGroupCodes
-        );
+        return $this->escapeValues(array_values($customerGroupCodes));
     }
 }

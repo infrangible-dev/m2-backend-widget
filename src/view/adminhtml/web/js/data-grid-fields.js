@@ -1,7 +1,7 @@
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 
@@ -32,7 +32,7 @@ define([
             this.dataGridColumnsCheckboxes = $('.data-grid-column-checkbox', this.dataGridColumnsList);
 
             if (this.dataGridColumnsList.length > 0) {
-                modal({
+                this.dataGridColumnsModal = modal({
                     type: 'popup',
                     responsive: true,
                     modalClass: 'data-grid-fields-popup',
@@ -82,7 +82,9 @@ define([
             const dataGridColumns = this;
 
             $('.action-columns', this.dataGrid).on('click', function () {
-                dataGridColumns.dataGridColumnsList.modal('openModal');
+                if (dataGridColumns.dataGridColumnsModal) {
+                    dataGridColumns.dataGridColumnsModal.openModal();
+                }
             });
 
             const observer = new MutationObserver(function () {

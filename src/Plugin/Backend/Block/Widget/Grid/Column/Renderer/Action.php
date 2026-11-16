@@ -2,31 +2,46 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Plugin\Backend\Block\Widget\Grid\Column\Renderer;
 
 use FeWeDev\Base\Arrays;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Action
 {
-    /** @var Arrays */
-    protected $arrays;
-
-    public function __construct(Arrays $arrays)
+    /**
+     * @param Arrays $arrays
+     */
+    public function __construct(protected Arrays $arrays)
     {
-        $this->arrays = $arrays;
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
+    /**
+     * Flattens associative arrays in the URL parameters of grid action links.
+     *
+     * @param \Magento\Backend\Block\Widget\Grid\Column\Renderer\Action $subject
+     * @param mixed $route
+     * @param mixed $params
+     *
+     * @noinspection PhpUnusedParameterInspection
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     public function beforeGetUrl(
         \Magento\Backend\Block\Widget\Grid\Column\Renderer\Action $subject,
-        $route = '',
-        $params = []
+        mixed $route = '',
+        mixed $params = []
     ): array {
+        if (! is_array($params)) {
+            return [$route, $params];
+        }
+
         foreach ($params as $key => $value) {
             if (is_array($value) && $this->arrays->isAssociative($value)) {
                 unset($params[ $key ]);

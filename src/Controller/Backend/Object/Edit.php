@@ -2,74 +2,55 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
-use Exception;
 use Infrangible\BackendWidget\Block\Form\Container;
 use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Instances;
 use Infrangible\Core\Helper\Registry;
 use Magento\Backend\App\Action\Context;
 use Magento\Eav\Model\Entity\AbstractEntity;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\View\Element\AbstractBlock;
-use Magento\Framework\View\Result\Page;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 abstract class Edit extends Base
 {
-    /** @var Registry */
-    protected $registryHelper;
-
-    /** @var Instances */
-    protected $instanceHelper;
-
-    /** @var Session */
-    protected $session;
-
+    /**
+     * @param Registry $registryHelper
+     * @param Instances $instanceHelper
+     * @param Context $context
+     * @param Session $session
+     */
     public function __construct(
-        Registry $registryHelper,
-        Instances $instanceHelper,
+        protected Registry $registryHelper,
+        protected Instances $instanceHelper,
         Context $context,
-        Session $session
+        protected Session $session
     ) {
         parent::__construct($context);
-
-        $this->registryHelper = $registryHelper;
-        $this->instanceHelper = $instanceHelper;
-
-        $this->session = $session;
     }
 
     /**
-     * @return Page|void
-     * @throws Exception
+     * Executes the action.
+     *
+     * @return ResultInterface|ResponseInterface
      */
-    public function execute()
+    public function execute(): ResultInterface|ResponseInterface
     {
-        $object = $this->initObject();
+        $object = $this->initEditableObject();
 
-        if (! $object) {
-            $this->redirect(
-                $this->getIndexUrlRoute(),
-                $this->getIndexUrlParams()
-            );
-
-            return;
-        }
-
-        if ($object->getId() && ! $this->allowEdit() && ! $this->allowView()) {
-            $this->redirect(
-                $this->getIndexUrlRoute(),
-                $this->getIndexUrlParams()
-            );
-
-            return;
+        if ($object === null) {
+            return $this->getResponse();
         }
 
         $this->initAction();
@@ -118,16 +99,25 @@ abstract class Edit extends Base
         return $page;
     }
 
+    /**
+     * Returns the form session key.
+     *
+     * @param AbstractModel|null $object
+     *
+     * @return string
+     */
     protected function getFormSessionKey(?AbstractModel $object = null): string
     {
         return sprintf(
             '%s_form_%s',
             $this->getObjectRegistryKey(),
-            $object && $object->getId() ? $object->getId() : 'add'
+            $object && is_scalar($object->getId()) ? (string)$object->getId() : 'add'
         );
     }
 
     /**
+     * Returns the init action layout handles.
+     *
      * @return string[]
      */
     protected function getInitActionLayoutHandles(): array
@@ -140,7 +130,32 @@ abstract class Edit extends Base
     }
 
     /**
-     * @throws Exception
+     * Initializes the object to edit or view, or redirects to the index.
+     *
+     * Redirects if the object was not found or may neither be edited nor viewed.
+     *
+     * @return AbstractModel|null
+     */
+    protected function initEditableObject(): ?AbstractModel
+    {
+        $object = $this->initObject();
+
+        if ($object === null || ($object->getId() && ! $this->allowEdit() && ! $this->allowView())) {
+            $this->redirect(
+                $this->getIndexUrlRoute(),
+                $this->getIndexUrlParams()
+            );
+
+            return null;
+        }
+
+        return $object;
+    }
+
+    /**
+     * Initializes the object.
+     *
+     * @return AbstractModel|null
      */
     protected function initObject(): ?AbstractModel
     {
@@ -172,7 +187,7 @@ abstract class Edit extends Base
             if (! $object->getId()) {
                 $message = sprintf(
                     $this->getObjectNotFoundMessage(),
-                    $id
+                    is_scalar($id) ? (string)$id : ''
                 );
 
                 $this->addErrorMessage($message);
@@ -189,20 +204,27 @@ abstract class Edit extends Base
         return $object;
     }
 
+    /**
+     * Initializes the object, loaded by the given object field.
+     *
+     * @return bool
+     */
     protected function initObjectWithObjectField(): bool
     {
         return true;
     }
 
     /**
-     * @throws Exception
+     * Returns the object instance.
+     *
+     * @return AbstractModel
      */
     protected function getObjectInstance(): AbstractModel
     {
         $modelClass = $this->getModelClass();
 
         if (! class_exists($modelClass)) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
                     'Could not find model class: %s',
                     $modelClass
@@ -213,9 +235,10 @@ abstract class Edit extends Base
         $object = $this->instanceHelper->getInstance($modelClass);
 
         if (! $object instanceof AbstractModel) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
-                    'Class muss be instance of Magento\Framework\Model\AbstractModel: %s',
+                    'Class must be instance of %s: %s',
+                    AbstractModel::class,
                     $modelClass
                 )
             );
@@ -225,15 +248,16 @@ abstract class Edit extends Base
     }
 
     /**
+     * Returns the object resource instance.
+     *
      * @return AbstractDb|AbstractEntity
-     * @throws Exception
      */
-    protected function getObjectResourceInstance()
+    protected function getObjectResourceInstance(): AbstractDb|AbstractEntity
     {
         $modelResourceClass = $this->getModelResourceClass();
 
         if (! class_exists($modelResourceClass)) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
                     'Could not find model resource class: %s',
                     $modelResourceClass
@@ -244,9 +268,11 @@ abstract class Edit extends Base
         $objectResource = $this->instanceHelper->getInstance($modelResourceClass);
 
         if (! $objectResource instanceof AbstractDb && ! $objectResource instanceof AbstractEntity) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
-                    'Class muss be instance of Magento\Framework\Model\ResourceModel\Db\AbstractModel or Magento\Eav\Model\Entity\AbstractEntity: %s',
+                    'Class must be instance of %s or %s: %s',
+                    AbstractDb::class,
+                    AbstractEntity::class,
                     $modelResourceClass
                 )
             );
@@ -255,14 +281,29 @@ abstract class Edit extends Base
         return $objectResource;
     }
 
+    /**
+     * Returns the object not found message.
+     *
+     * @return string
+     */
     abstract protected function getObjectNotFoundMessage(): string;
 
+    /**
+     * Returns the form block type.
+     *
+     * @return string
+     */
     protected function getFormBlockType(): string
     {
         return Container::class;
     }
 
-    protected function getFormContentBlockType(): ?string
+    /**
+     * Returns the form content block type.
+     *
+     * @return string
+     */
+    protected function getFormContentBlockType(): string
     {
         return sprintf(
             '%s\Block\Adminhtml\%s\%s',
@@ -280,49 +321,112 @@ abstract class Edit extends Base
         );
     }
 
+    /**
+     * Returns the form type.
+     *
+     * @return string
+     */
     protected function getFormType(): string
     {
         return $this->allowEdit() ? 'Form' : 'View';
     }
 
+    /**
+     * Allows the add.
+     *
+     * @return bool
+     */
     abstract protected function allowAdd(): bool;
 
+    /**
+     * Allows the edit.
+     *
+     * @return bool
+     */
     abstract protected function allowEdit(): bool;
 
+    /**
+     * Allows the view.
+     *
+     * @return bool
+     */
     abstract protected function allowView(): bool;
 
+    /**
+     * Allows the delete.
+     *
+     * @return bool
+     */
     abstract protected function allowDelete(): bool;
 
+    /**
+     * Allows the export.
+     *
+     * @return bool
+     */
     protected function allowExport(): bool
     {
         return false;
     }
 
+    /**
+     * Returns the grid url route.
+     *
+     * @return string
+     */
     protected function getGridUrlRoute(): string
     {
         return '*/*/grid';
     }
 
+    /**
+     * Returns the grid url params.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getGridUrlParams(): array
     {
         return [];
     }
 
+    /**
+     * Returns the save url route.
+     *
+     * @return string
+     */
     protected function getSaveUrlRoute(): string
     {
         return '*/*/save';
     }
 
+    /**
+     * Returns the save url params.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getSaveUrlParams(): array
     {
         return [];
     }
 
+    /**
+     * Returns the index url route.
+     *
+     * @return string
+     */
     protected function getIndexUrlRoute(): string
     {
         return '*/*/index';
     }
 
+    /**
+     * Returns the index url params.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getIndexUrlParams(): array
     {
         return [];

@@ -2,36 +2,39 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Form;
 
 use Magento\Backend\Block\Template;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Json\Helper\Data;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Back extends Template
 {
-    /** @var string */
-    private $buttonId;
-
-    /** @var string */
-    private $buttonUrl;
-
-    /** @var string */
-    private $formId;
-
+    /**
+     * @param Template\Context $context
+     * @param array $data
+     * @param Data|null $jsonHelper
+     * @param DirectoryHelper|null $directoryHelper
+     * @param string|null $buttonId
+     * @param string|null $buttonUrl
+     * @param string|null $formId
+     *
+     * @phpstan-param array<int|string, mixed> $data
+     */
     public function __construct(
         Template\Context $context,
         array $data = [],
         ?Data $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null,
-        ?string $buttonId = null,
-        ?string $buttonUrl = null,
-        ?string $formId = null
+        private ?string $buttonId = null,
+        private ?string $buttonUrl = null,
+        private ?string $formId = null
     ) {
         parent::__construct(
             $context,
@@ -39,12 +42,13 @@ class Back extends Template
             $jsonHelper,
             $directoryHelper
         );
-
-        $this->buttonId = $buttonId;
-        $this->buttonUrl = $buttonUrl;
-        $this->formId = $formId;
     }
 
+    /**
+     * Constructor.
+     *
+     * @return void
+     */
     protected function _construct(): void
     {
         $this->setTemplate('Infrangible_BackendWidget::form/back.phtml');
@@ -52,31 +56,67 @@ class Back extends Template
         parent::_construct();
     }
 
+    /**
+     * Returns the button id.
+     *
+     * @return string
+     */
     public function getButtonId(): string
     {
-        return $this->buttonId;
+        return $this->buttonId ?? '';
     }
 
+    /**
+     * Sets the button id.
+     *
+     * @param string $buttonId
+     *
+     * @return void
+     */
     public function setButtonId(string $buttonId): void
     {
         $this->buttonId = $buttonId;
     }
 
+    /**
+     * Returns the button url.
+     *
+     * @return string
+     */
     public function getButtonUrl(): string
     {
-        return $this->buttonUrl;
+        return $this->buttonUrl ?? '';
     }
 
+    /**
+     * Sets the button url.
+     *
+     * @param string $buttonUrl
+     *
+     * @return void
+     */
     public function setButtonUrl(string $buttonUrl): void
     {
         $this->buttonUrl = $buttonUrl;
     }
 
+    /**
+     * Returns the form id.
+     *
+     * @return string
+     */
     public function getFormId(): string
     {
-        return $this->formId;
+        return $this->formId ?? '';
     }
 
+    /**
+     * Sets the form id.
+     *
+     * @param string $formId
+     *
+     * @return void
+     */
     public function setFormId(string $formId): void
     {
         $this->formId = $formId;

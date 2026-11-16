@@ -2,26 +2,30 @@
 
 declare(strict_types=1);
 
-use Magento\Framework\View\TemplateEngine\Php;
 use Infrangible\BackendWidget\Block\Grid\Fields;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\TemplateEngine\Php;
 
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
 ?>
 
 <?php /** @var Php $this */ ?>
 <?php /** @var Fields $block */ ?>
+<?php /** @var Escaper $escaper */ ?>
 
 <div class="data-grid-columns form-inline">
     <div class="modal-body-content">
         <?php foreach ($block->getFieldList() as $name => $label): ?>
             <div class="data-grid-column admin__field-checkbox">
                 <div class="admin__field-control">
-                    <input type="checkbox" id="data-grid-column-<?php echo $name; ?>" name="columns[]" value="<?php echo $name; ?>" class="data-grid-column-checkbox">
-                    <label for="data-grid-column-<?php echo $name; ?>" class="data-grid-column-label"><?php echo $label; ?></label>
+                    <input type="checkbox" id="data-grid-column-<?= $escaper->escapeHtmlAttr($name) ?>" name="columns[]"
+                           value="<?= $escaper->escapeHtmlAttr($name) ?>" class="data-grid-column-checkbox">
+                    <label for="data-grid-column-<?= $escaper->escapeHtmlAttr($name) ?>"
+                           class="data-grid-column-label"><?= $escaper->escapeHtml($label) ?></label>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -32,13 +36,13 @@ use Infrangible\BackendWidget\Block\Grid\Fields;
     {
         "table.data-grid": {
             "infrangible/data-grid-fields": {
-                "formKey": "<?= $block->getFormKey(); ?>",
-                "ajaxUrl": "<?= $block->getAjaxUrl(); ?>",
-                "dataGridId": "<?= $block->getDataGridId(); ?>",
-                "jsObjectName": "<?= $block->getJsObjectName(); ?>",
-                "fieldList": <?= json_encode(array_keys($block->getFieldList())); ?>,
-                "groupByFieldList": <?= json_encode(array_keys($block->getGroupByFieldList())); ?>,
-                "activeGroupByFieldList": <?= json_encode($block->getActiveGroupByFieldList()); ?>
+                "formKey": "<?= $escaper->escapeJs($block->getFormKey()) ?>",
+                "ajaxUrl": "<?= $escaper->escapeJs($block->getAjaxUrl()) ?>",
+                "dataGridId": "<?= $escaper->escapeJs($block->getDataGridId()) ?>",
+                "jsObjectName": "<?= $escaper->escapeJs($block->getJsObjectName()) ?>",
+                "fieldList": <?= /* @noEscape */ json_encode(array_keys($block->getFieldList())) ?>,
+                "groupByFieldList": <?= /* @noEscape */ json_encode(array_keys($block->getGroupByFieldList())) ?>,
+                "activeGroupByFieldList": <?= /* @noEscape */ json_encode($block->getActiveGroupByFieldList()) ?>
             }
         }
     }

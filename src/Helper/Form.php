@@ -2,9 +2,14 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Helper;
 
-use Exception;
 use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Variables;
 use Infrangible\BackendWidget\Block\Config\Form\DateIso;
@@ -59,216 +64,108 @@ use Magento\Framework\View\LayoutInterface;
 use Magento\Store\Model\System\Store;
 use Magento\Theme\Model\Theme\Source\Theme;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Form
 {
-    /** @var Variables */
-    protected $variables;
-
-    /** @var Arrays */
-    protected $arrays;
-
-    /** @var Template */
-    protected $templateHelper;
-
-    /** @var Url */
-    protected $urlHelper;
-
-    /** @var Customer */
-    protected $customerHelper;
-
-    /** @var \Infrangible\Core\Helper\Attribute */
-    protected $attributeHelper;
-
-    /** @var Instances */
-    protected $instanceHelper;
-
-    /** @var Session */
-    protected $adminhtmlSession;
-
-    /** @var FormFactory */
-    protected $formFactory;
-
-    /** @var Yesno */
-    protected $sourceYesNo;
-
-    /** @var Website */
-    protected $sourceWebsite;
-
-    /** @var Store */
-    protected $sourceStore;
-
-    /** @var \Infrangible\BackendWidget\Model\Store\System\Store */
-    protected $sourceStoreWithAdmin;
-
-    /** @var CmsBlock */
-    protected $sourceCmsBlock;
-
-    /** @var CmsPage */
-    protected $sourceCmsPage;
-
-    /** @var TypeId */
-    protected $sourceTypeIds;
-
-    /** @var Categories */
-    protected $sourceCategories;
-
-    /** @var Operator */
-    protected $sourceOperator;
-
-    /** @var Country */
-    protected $sourceCountry;
-
-    /** @var Region */
-    protected $sourceRegion;
-
-    /** @var RegionAny */
-    protected $sourceRegionAny;
-
-    /** @var ActiveMethods */
-    protected $sourcePaymentActiveMethods;
-
-    /** @var Attribute */
-    protected $sourceAttributes;
-
-    /** @var AttributeSet */
-    protected $sourceAttributeSets;
-
-    /** @var EntityType */
-    protected $sourceEntityTypes;
-
-    /** @var ProductAttributeCode */
-    protected $sourceProductAttributeCode;
-
-    /** @var CustomerAttributeCode */
-    protected $sourceCustomerAttributeCode;
-
-    /** @var AddressAttributeCode */
-    protected $sourceAddressAttributeCode;
-
-    /** @var SortBy */
-    protected $sourceAttributeSortBy;
-
-    /** @var Theme */
-    protected $sourceThemes;
-
-    /** @var Attribute\Product */
-    protected $sourceAttributeProduct;
-
-    /** @var Filterable */
-    protected $sourceAttributeProductFilterable;
-
     /** @var Collection */
-    protected $customerGroupCollection;
-
-    /** @var TimezoneInterface */
-    protected $localeDate;
+    protected Collection $customerGroupCollection;
 
     /** @var string */
-    protected $dateFormatIso;
+    protected string $dateFormatIso;
 
-    /** @var Type */
-    protected $productType;
-
-    /** @var Config */
-    protected $wysiwygConfig;
-
-    /** @var Escaper */
-    protected $escaper;
-
-    /** @var ProductOption */
-    protected $productOptionHelper;
-
-    /** @var FilterConditionType */
-    protected $sourceFilterConditionType;
-
+    /**
+     * @param Variables $variables
+     * @param Arrays $arrays
+     * @param Template $templateHelper
+     * @param Url $urlHelper
+     * @param Customer $customerHelper
+     * @param \Infrangible\Core\Helper\Attribute $attributeHelper
+     * @param Instances $instanceHelper
+     * @param Session $adminhtmlSession
+     * @param FormFactory $formFactory
+     * @param Yesno $sourceYesNo
+     * @param Website $sourceWebsite
+     * @param Store $sourceStore
+     * @param \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin
+     * @param CmsBlock $sourceCmsBlock
+     * @param CmsPage $sourceCmsPage
+     * @param TypeId $sourceTypeIds
+     * @param Categories $sourceCategories
+     * @param Operator $sourceOperator
+     * @param Country $sourceCountry
+     * @param Region $sourceRegion
+     * @param RegionAny $sourceRegionAny
+     * @param ActiveMethods $sourcePaymentActiveMethods
+     * @param Attribute $sourceAttributes
+     * @param AttributeSet $sourceAttributeSets
+     * @param EntityType $sourceEntityTypes
+     * @param ProductAttributeCode $sourceProductAttributeCode
+     * @param CustomerAttributeCode $sourceCustomerAttributeCode
+     * @param AddressAttributeCode $sourceAddressAttributeCode
+     * @param SortBy $sourceAttributeSortBy
+     * @param Theme $sourceThemes
+     * @param Attribute\Product $sourceAttributeProduct
+     * @param Filterable $sourceAttributeProductFilterable
+     * @param TimezoneInterface $localeDate
+     * @param Type $productType
+     * @param Config $wysiwygConfig
+     * @param Escaper $escaper
+     * @param ProductOption $productOptionHelper
+     * @param FilterConditionType $sourceFilterConditionType
+     */
     public function __construct(
-        Variables $variables,
-        Arrays $arrays,
-        Template $templateHelper,
-        Url $urlHelper,
-        Customer $customerHelper,
-        \Infrangible\Core\Helper\Attribute $attributeHelper,
-        Instances $instanceHelper,
-        Session $adminhtmlSession,
-        FormFactory $formFactory,
-        Yesno $sourceYesNo,
-        Website $sourceWebsite,
-        Store $sourceStore,
-        \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin,
-        CmsBlock $sourceCmsBlock,
-        CmsPage $sourceCmsPage,
-        TypeId $sourceTypeIds,
-        Categories $sourceCategories,
-        Operator $sourceOperator,
-        Country $sourceCountry,
-        Region $sourceRegion,
-        RegionAny $sourceRegionAny,
-        ActiveMethods $sourcePaymentActiveMethods,
-        Attribute $sourceAttributes,
-        AttributeSet $sourceAttributeSets,
-        EntityType $sourceEntityTypes,
-        ProductAttributeCode $sourceProductAttributeCode,
-        CustomerAttributeCode $sourceCustomerAttributeCode,
-        AddressAttributeCode $sourceAddressAttributeCode,
-        SortBy $sourceAttributeSortBy,
-        Theme $sourceThemes,
-        Attribute\Product $sourceAttributeProduct,
-        Filterable $sourceAttributeProductFilterable,
-        TimezoneInterface $localeDate,
-        Type $productType,
-        Config $wysiwygConfig,
-        Escaper $escaper,
-        ProductOption $productOptionHelper,
-        FilterConditionType $sourceFilterConditionType
+        protected Variables $variables,
+        protected Arrays $arrays,
+        protected Template $templateHelper,
+        protected Url $urlHelper,
+        protected Customer $customerHelper,
+        protected \Infrangible\Core\Helper\Attribute $attributeHelper,
+        protected Instances $instanceHelper,
+        protected Session $adminhtmlSession,
+        protected FormFactory $formFactory,
+        protected Yesno $sourceYesNo,
+        protected Website $sourceWebsite,
+        protected Store $sourceStore,
+        protected \Infrangible\BackendWidget\Model\Store\System\Store $sourceStoreWithAdmin,
+        protected CmsBlock $sourceCmsBlock,
+        protected CmsPage $sourceCmsPage,
+        protected TypeId $sourceTypeIds,
+        protected Categories $sourceCategories,
+        protected Operator $sourceOperator,
+        protected Country $sourceCountry,
+        protected Region $sourceRegion,
+        protected RegionAny $sourceRegionAny,
+        protected ActiveMethods $sourcePaymentActiveMethods,
+        protected Attribute $sourceAttributes,
+        protected AttributeSet $sourceAttributeSets,
+        protected EntityType $sourceEntityTypes,
+        protected ProductAttributeCode $sourceProductAttributeCode,
+        protected CustomerAttributeCode $sourceCustomerAttributeCode,
+        protected AddressAttributeCode $sourceAddressAttributeCode,
+        protected SortBy $sourceAttributeSortBy,
+        protected Theme $sourceThemes,
+        protected Attribute\Product $sourceAttributeProduct,
+        protected Filterable $sourceAttributeProductFilterable,
+        protected TimezoneInterface $localeDate,
+        protected Type $productType,
+        protected Config $wysiwygConfig,
+        protected Escaper $escaper,
+        protected ProductOption $productOptionHelper,
+        protected FilterConditionType $sourceFilterConditionType
     ) {
-        $this->variables = $variables;
-        $this->arrays = $arrays;
-        $this->templateHelper = $templateHelper;
-        $this->urlHelper = $urlHelper;
-        $this->customerHelper = $customerHelper;
-        $this->attributeHelper = $attributeHelper;
-        $this->instanceHelper = $instanceHelper;
-        $this->adminhtmlSession = $adminhtmlSession;
-        $this->formFactory = $formFactory;
-        $this->sourceYesNo = $sourceYesNo;
-        $this->sourceWebsite = $sourceWebsite;
-        $this->sourceStore = $sourceStore;
-        $this->sourceStoreWithAdmin = $sourceStoreWithAdmin;
-        $this->sourceCmsBlock = $sourceCmsBlock;
-        $this->sourceCmsPage = $sourceCmsPage;
-        $this->sourceTypeIds = $sourceTypeIds;
-        $this->sourceCategories = $sourceCategories;
-        $this->sourceOperator = $sourceOperator;
-        $this->sourceCountry = $sourceCountry;
-        $this->sourceRegion = $sourceRegion;
-        $this->sourceRegionAny = $sourceRegionAny;
-        $this->sourcePaymentActiveMethods = $sourcePaymentActiveMethods;
-        $this->sourceAttributes = $sourceAttributes;
-        $this->sourceAttributeSets = $sourceAttributeSets;
-        $this->sourceEntityTypes = $sourceEntityTypes;
-        $this->sourceProductAttributeCode = $sourceProductAttributeCode;
-        $this->sourceCustomerAttributeCode = $sourceCustomerAttributeCode;
-        $this->sourceAddressAttributeCode = $sourceAddressAttributeCode;
-        $this->sourceAttributeSortBy = $sourceAttributeSortBy;
-        $this->sourceThemes = $sourceThemes;
-        $this->sourceAttributeProduct = $sourceAttributeProduct;
-        $this->sourceAttributeProductFilterable = $sourceAttributeProductFilterable;
         $this->customerGroupCollection = $this->customerHelper->getCustomerGroupCollection();
-        $this->localeDate = $localeDate;
-        $this->dateFormatIso = $localeDate->getDateTimeFormat(IntlDateFormatter::MEDIUM);
-        $this->productType = $productType;
-        $this->wysiwygConfig = $wysiwygConfig;
-        $this->escaper = $escaper;
-        $this->productOptionHelper = $productOptionHelper;
-        $this->sourceFilterConditionType = $sourceFilterConditionType;
+        /** @noinspection PhpParamsInspection Magento passes the type to IntlDateFormatter, which expects an integer */
+        // @phpstan-ignore argument.type (Magento passes the type to IntlDateFormatter, which expects an integer)
+        $this->dateFormatIso = $this->localeDate->getDateTimeFormat(IntlDateFormatter::MEDIUM);
     }
 
     /**
+     * Creates the simple form.
+     *
+     * @param string $formId
+     * @param string|null $action
+     * @param string $method
+     *
+     * @return \Magento\Framework\Data\Form
      * @throws LocalizedException
      */
     public function createSimpleForm(
@@ -282,6 +179,19 @@ class Form
     }
 
     /**
+     * Creates the post form.
+     *
+     * @param string $saveUrlRoute
+     * @param array $saveUrlParams
+     * @param bool $isUpload
+     * @param string $formId
+     * @param string|null $htmlIdPrefix
+     * @param AbstractModel|null $object
+     * @param string|null $objectField
+     *
+     * @phpstan-param array<int|string, mixed> $saveUrlParams
+     *
+     * @return \Magento\Framework\Data\Form
      * @throws LocalizedException
      */
     public function createPostForm(
@@ -334,29 +244,40 @@ class Form
         return $form;
     }
 
+    /**
+     * Returns the field value.
+     *
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param string|null $splitObjectValueSeparator
+     *
+     * @return mixed
+     */
     public function getFieldValue(
         string $objectRegistryKey,
         string $objectFieldName,
-        $defaultValue = null,
+        mixed $defaultValue = null,
         ?AbstractModel $object = null,
         ?string $splitObjectValueSeparator = null
-    ) {
+    ): mixed {
         $formData = $this->adminhtmlSession->getData(
             sprintf(
                 '%s_form_%s',
                 $objectRegistryKey,
-                $object && $object->getId() ? $object->getId() : 'add'
+                $object && $object->getId() ? $this->variables->stringValue($object->getId()) : 'add'
             )
         );
 
         if (is_object($formData) && method_exists(
-                $formData,
-                'toArray'
-            )) {
+            $formData,
+            'toArray'
+        )) {
             $formData = $formData->toArray();
         }
 
-        if ($this->variables->isEmpty($formData)) {
+        if (! is_array($formData)) {
             $formData = [];
         }
 
@@ -376,7 +297,7 @@ class Form
             if (! $this->variables->isEmpty($splitObjectValueSeparator)) {
                 $objectValue = explode(
                     ',',
-                    $objectValue
+                    $this->variables->stringValue($objectValue)
                 );
             }
 
@@ -387,7 +308,19 @@ class Form
     }
 
     /**
+     * Adds the text field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addTextField(
         Fieldset $fieldSet,
@@ -398,7 +331,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleTextFieldWithValue(
             $fieldSet,
@@ -418,7 +351,17 @@ class Form
     }
 
     /**
+     * Adds the simple text field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleTextField(
         Fieldset $fieldSet,
@@ -427,7 +370,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleTextFieldWithValueAndNoteAndClass(
             $fieldSet,
@@ -444,17 +387,28 @@ class Form
     }
 
     /**
+     * Adds the simple text field with value.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleTextFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleTextFieldWithValueAndNoteAndClass(
             $fieldSet,
@@ -471,18 +425,30 @@ class Form
     }
 
     /**
+     * Adds the simple text field with value and note.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param string|null $note
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleTextFieldWithValueAndNote(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         ?string $note = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleTextFieldWithValueAndNoteAndClass(
             $fieldSet,
@@ -499,7 +465,19 @@ class Form
     }
 
     /**
+     * Adds the simple text field with note and class.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string|null $note
+     * @param string|null $class
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleTextFieldWithNoteAndClass(
         Fieldset $fieldSet,
@@ -510,7 +488,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleTextFieldWithValueAndNoteAndClass(
             $fieldSet,
@@ -527,19 +505,32 @@ class Form
     }
 
     /**
+     * Adds the simple text field with value and note and class.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param string|null $note
+     * @param string|null $class
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleTextFieldWithValueAndNoteAndClass(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value = null,
+        mixed $value = null,
         ?string $note = null,
         ?string $class = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $config = [
             'name'     => $objectFieldName,
@@ -560,38 +551,35 @@ class Form
             $config[ 'class' ] = $class;
         }
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
             'text',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
+    /**
+     * Adds the text field after.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $after
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addTextFieldAfter(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -616,6 +604,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the textarea field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addTextareaField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -642,11 +644,24 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple textarea field with value.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addSimpleTextareaFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -662,29 +677,11 @@ class Form
             $config[ 'value' ] = $value;
         }
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
@@ -693,6 +690,21 @@ class Form
         );
     }
 
+    /**
+     * Adds the textarea with comment field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $comment
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addTextareaWithCommentField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -720,29 +732,11 @@ class Form
             )
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
@@ -752,7 +746,24 @@ class Form
     }
 
     /**
+     * Adds the options field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $options
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     * @param mixed $onChange
+     *
+     * @phpstan-param array<int|string, mixed> $options
+     *
+     * @return void
      */
     public function addOptionsField(
         Fieldset $fieldSet,
@@ -760,13 +771,13 @@ class Form
         string $objectFieldName,
         string $label,
         array $options,
-        $defaultValue,
+        mixed $defaultValue,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false,
-        $onChange = null
+        bool|string|null $after = false,
+        mixed $onChange = null
     ): void {
         $config = [
             'name'     => $objectFieldName,
@@ -782,29 +793,11 @@ class Form
             'required' => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         if (! $this->variables->isEmpty($onChange)) {
             $config[ 'onchange' ] = $onChange;
@@ -814,12 +807,25 @@ class Form
             $objectFieldName,
             'select',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
     /**
+     * Adds the simple options field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $options
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @phpstan-param array<int|string, mixed> $options
+     *
+     * @return void
      */
     public function addSimpleOptionsField(
         Fieldset $fieldSet,
@@ -829,7 +835,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $config = [
             'name'     => $objectFieldName,
@@ -839,40 +845,36 @@ class Form
             'required' => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
             'select',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
     /**
+     * Adds the simple options field with note.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $options
+     * @param string|null $note
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @phpstan-param array<int|string, mixed> $options
+     *
+     * @return void
      */
     public function addSimpleOptionsFieldWithNote(
         Fieldset $fieldSet,
@@ -883,7 +885,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $config = [
             'name'     => $objectFieldName,
@@ -897,42 +899,36 @@ class Form
             $config[ 'note' ] = $note;
         }
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
             'select',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
     /**
+     * Adds the options class field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $className
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
      * @param bool|string|null $after
      *
-     * @throws Exception
+     * @return void
      */
     public function addOptionsClassField(
         Fieldset $fieldSet,
@@ -940,12 +936,12 @@ class Form
         string $objectFieldName,
         string $label,
         string $className,
-        $defaultValue,
+        mixed $defaultValue,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         /** @var OptionSourceInterface $optionsClass */
         $optionsClass = $this->instanceHelper->getSingleton($className);
@@ -956,7 +952,7 @@ class Form
         )) {
             $options = $optionsClass->toOptionArray();
         } else {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
                     'Options class: %s does not implement method: toOptions',
                     $className
@@ -979,13 +975,31 @@ class Form
         );
     }
 
+    /**
+     * Adds the options multi select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $options
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @phpstan-param array<int|string, mixed> $options
+     *
+     * @return void
+     */
     public function addOptionsMultiSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
         array $options,
-        $defaultValue,
+        mixed $defaultValue,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
@@ -1008,12 +1022,28 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple options multi select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $options
+     * @param mixed $value
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @phpstan-param array<int|string, mixed> $options
+     *
+     * @return void
+     */
     public function addSimpleOptionsMultiSelectField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
         array $options,
-        $value = null,
+        mixed $value = null,
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false
@@ -1027,29 +1057,11 @@ class Form
             'required' => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
@@ -1058,6 +1070,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the yes no field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addYesNoField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1082,6 +1108,21 @@ class Form
         );
     }
 
+    /**
+     * Adds the yes no default field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param int $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addYesNoDefaultField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1107,6 +1148,19 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple yes no field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     * @param bool|string|null $after
+     *
+     * @return void
+     */
     public function addSimpleYesNoField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -1114,7 +1168,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleOptionsField(
             $fieldSet,
@@ -1128,6 +1182,21 @@ class Form
         );
     }
 
+    /**
+     * Adds the yes no field after.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $after
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addYesNoFieldAfter(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1154,12 +1223,27 @@ class Form
         );
     }
 
+    /**
+     * Adds the yes no with default field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addYesNoWithDefaultField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        $defaultValue,
+        mixed $defaultValue,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
@@ -1179,11 +1263,24 @@ class Form
         );
     }
 
+    /**
+     * Adds the website select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addWebsiteSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
+        ?string $label = null,
         ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
@@ -1205,29 +1302,11 @@ class Form
             'required' => true
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             'website_id',
@@ -1236,11 +1315,24 @@ class Form
         );
     }
 
+    /**
+     * Adds the website multiselect field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addWebsiteMultiselectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
-        string $label = null,
+        ?string $label = null,
         ?AbstractModel $object = null,
         bool $readOnly = false,
         bool $disabled = false
@@ -1260,10 +1352,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the website multiselect field with value.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param mixed $value
+     * @param string|null $label
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addWebsiteMultiselectFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
-        $value = null,
+        mixed $value = null,
         ?string $label = null,
         bool $readOnly = false,
         bool $disabled = false
@@ -1280,29 +1384,11 @@ class Form
             'required' => true
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             'website_id',
@@ -1311,6 +1397,21 @@ class Form
         );
     }
 
+    /**
+     * Adds the store select field.
+     *
+     * @param LayoutInterface $layout
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $readOnly
+     * @param bool $disabled
+     * @param bool $all
+     *
+     * @return void
+     */
     public function addStoreSelectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
@@ -1343,29 +1444,11 @@ class Form
             'required' => true
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $field = $fieldSet->addField(
             $objectFieldName,
@@ -1376,11 +1459,23 @@ class Form
         /** @var Element $renderer */
         $renderer = $layout->createBlock(Element::class);
 
-        if ($renderer) {
-            $field->setRenderer($renderer);
-        }
+        $field->setRenderer($renderer);
     }
 
+    /**
+     * Adds the store multiselect field.
+     *
+     * @param LayoutInterface $layout
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addStoreMultiselectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
@@ -1407,12 +1502,25 @@ class Form
         );
     }
 
+    /**
+     * Adds the store multiselect field with value.
+     *
+     * @param LayoutInterface $layout
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param mixed $value
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addStoreMultiselectFieldWithValue(
         LayoutInterface $layout,
         Fieldset $fieldSet,
         string $objectFieldName,
         ?string $label = null,
-        $value = null,
+        mixed $value = null,
         bool $readOnly = false,
         bool $disabled = false
     ): void {
@@ -1435,29 +1543,11 @@ class Form
             'required' => true
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $field = $fieldSet->addField(
             $objectFieldName,
@@ -1468,11 +1558,24 @@ class Form
         /** @var Element $renderer */
         $renderer = $layout->createBlock(Element::class);
 
-        if ($renderer) {
-            $field->setRenderer($renderer);
-        }
+        $field->setRenderer($renderer);
     }
 
+    /**
+     * Adds the store with admin select field.
+     *
+     * @param LayoutInterface $layout
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addStoreWithAdminSelectField(
         LayoutInterface $layout,
         Fieldset $fieldSet,
@@ -1502,29 +1605,11 @@ class Form
             'required' => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $field = $fieldSet->addField(
             $objectFieldName,
@@ -1533,19 +1618,32 @@ class Form
         );
 
         /** @var Element $renderer */
-        $renderer = $layout->createBlock('Magento\Backend\Block\Store\Switcher\Form\Renderer\Fieldset\Element');
+        $renderer = $layout->createBlock(Element::class);
 
-        if ($renderer) {
-            $field->setRenderer($renderer);
-        }
+        $field->setRenderer($renderer);
     }
 
+    /**
+     * Adds the cms block select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCmsBlockSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         ?string $label = null,
-        $defaultValue = null,
+        mixed $defaultValue = null,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
@@ -1569,12 +1667,27 @@ class Form
         );
     }
 
+    /**
+     * Adds the cms page select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCmsPageSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         ?string $label = null,
-        $defaultValue = null,
+        mixed $defaultValue = null,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
@@ -1598,12 +1711,27 @@ class Form
         );
     }
 
+    /**
+     * Adds the type id field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $defaultValue
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addTypeIdField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        $defaultValue = null,
+        mixed $defaultValue = null,
         ?AbstractModel $object = null,
         bool $required = false,
         bool $readOnly = false,
@@ -1623,6 +1751,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the template field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addTemplateField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1647,6 +1789,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the categories field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCategoriesField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1671,6 +1827,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the operator field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addOperatorField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1695,6 +1865,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the date iso field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addDateIsoField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1723,29 +1907,11 @@ class Form
             'required' => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
@@ -1754,6 +1920,16 @@ class Form
         );
     }
 
+    /**
+     * Adds the file field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addFileField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -1773,6 +1949,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the country field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCountryField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1797,6 +1987,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the region field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addRegionField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1821,6 +2025,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the region any field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addRegionAnyField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1845,6 +2063,17 @@ class Form
         );
     }
 
+    /**
+     * Adds the image field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addImageField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -1864,6 +2093,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the customer group field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCustomerGroupField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1878,15 +2121,7 @@ class Form
             $label = __('Customer Group')->render();
         }
 
-        $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
-        $this->customerGroupCollection->loadData();
-
-        $customerGroups = [['value' => '', 'label' => __('--Please Select--')->render()]];
-
-        /** @var Group $customerGroup */
-        foreach ($this->customerGroupCollection as $customerGroup) {
-            $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => $customerGroup->getCode()];
-        }
+        $customerGroups = $this->getCustomerGroupOptions();
 
         $this->addOptionsField(
             $fieldSet,
@@ -1902,6 +2137,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the customer group multi select field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addCustomerGroupMultiSelectField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -1916,15 +2165,7 @@ class Form
             $label = __('Customer Group')->render();
         }
 
-        $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
-        $this->customerGroupCollection->loadData();
-
-        $customerGroups = [['value' => '', 'label' => __('--Please Select--')->render()]];
-
-        /** @var Group $customerGroup */
-        foreach ($this->customerGroupCollection as $customerGroup) {
-            $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => $customerGroup->getCode()];
-        }
+        $customerGroups = $this->getCustomerGroupOptions();
 
         $this->addOptionsMultiSelectField(
             $fieldSet,
@@ -1941,7 +2182,20 @@ class Form
     }
 
     /**
-     * @throws LocalizedException
+     * Adds the payment active methods field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     * @param bool $allStores
+     * @param bool $withDefault
+     *
+     * @return void
      */
     public function addPaymentActiveMethodsField(
         Fieldset $fieldSet,
@@ -1976,6 +2230,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the product type field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string|null $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addProductTypeField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2010,29 +2278,11 @@ class Form
             'required'    => $required
         ];
 
-        if ($readOnly) {
-            $config[ 'readonly' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' read-only';
-            } else {
-                $config[ 'css_class' ] = 'read-only';
-            }
-        }
-
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            $readOnly,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
@@ -2041,6 +2291,17 @@ class Form
         );
     }
 
+    /**
+     * Adds the wysiwyg field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     *
+     * @return void
+     */
     public function addWysiwygField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2069,6 +2330,17 @@ class Form
         );
     }
 
+    /**
+     * Adds the editor field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     *
+     * @return void
+     */
     public function addEditorField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2095,6 +2367,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav attribute field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $customer
+     * @param bool $address
+     * @param bool $category
+     * @param bool $product
+     *
+     * @return void
+     */
     public function addEavAttributeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2130,6 +2418,21 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav attribute multiselect field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $customer
+     * @param bool $address
+     * @param bool $category
+     * @param bool $product
+     *
+     * @return void
+     */
     protected function addEavAttributeMultiselectField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2159,6 +2462,23 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav attribute field with update.
+     *
+     * @param AbstractModel $object
+     * @param string $objectName
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
+     */
     public function addEavAttributeFieldWithUpdate(
         AbstractModel $object,
         string $objectName,
@@ -2170,50 +2490,34 @@ class Form
         bool $required = false,
         bool $multiSelect = false
     ): void {
-        $onChangeFieldId = sprintf(
-            '%s_%s',
+        $this->addEavAttributeSelectFieldWithUpdate(
+            $object,
             $objectName,
-            $objectFieldName
-        );
-
-        $onChange = [];
-
-        foreach ($targetFieldNames as $targetFieldName) {
-            $targetFieldId = sprintf(
-                '%s_%s',
-                $objectName,
-                $targetFieldName
-            );
-
-            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
-                $onChangeFieldId,
-                $targetFieldId,
-                $multiSelect
-            );
-        }
-
-        $fieldSet->addField(
+            $fieldSet,
+            $objectRegistryKey,
             $objectFieldName,
-            'select',
-            [
-                'name'     => $objectFieldName,
-                'label'    => $label,
-                'value'    => $this->getFieldValue(
-                    $objectRegistryKey,
-                    $objectFieldName,
-                    null,
-                    $object
-                ),
-                'values'   => $this->sourceAttributes->toOptionArray(),
-                'required' => $required,
-                'onchange' => implode(
-                    ';',
-                    $onChange
-                )
-            ]
+            $label,
+            $targetFieldNames,
+            $this->sourceAttributes->toOptionArray(),
+            $required,
+            $multiSelect
         );
     }
 
+    /**
+     * Adds the eav attribute product field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addEavAttributeProductField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2238,6 +2542,23 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav attribute product field with update.
+     *
+     * @param AbstractModel $object
+     * @param string $objectName
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
+     */
     public function addEavAttributeProductFieldWithUpdate(
         AbstractModel $object,
         string $objectName,
@@ -2249,50 +2570,34 @@ class Form
         bool $required = false,
         bool $multiSelect = false
     ): void {
-        $onChangeFieldId = sprintf(
-            '%s_%s',
+        $this->addEavAttributeSelectFieldWithUpdate(
+            $object,
             $objectName,
-            $objectFieldName
-        );
-
-        $onChange = [];
-
-        foreach ($targetFieldNames as $targetFieldName) {
-            $targetFieldId = sprintf(
-                '%s_%s',
-                $objectName,
-                $targetFieldName
-            );
-
-            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
-                $onChangeFieldId,
-                $targetFieldId,
-                $multiSelect
-            );
-        }
-
-        $fieldSet->addField(
+            $fieldSet,
+            $objectRegistryKey,
             $objectFieldName,
-            'select',
-            [
-                'name'     => $objectFieldName,
-                'label'    => $label,
-                'value'    => $this->getFieldValue(
-                    $objectRegistryKey,
-                    $objectFieldName,
-                    null,
-                    $object
-                ),
-                'values'   => $this->sourceAttributeProduct->toOptionArray(),
-                'required' => $required,
-                'onchange' => implode(
-                    ';',
-                    $onChange
-                )
-            ]
+            $label,
+            $targetFieldNames,
+            $this->sourceAttributeProduct->toOptionArray(),
+            $required,
+            $multiSelect
         );
     }
 
+    /**
+     * Adds the eav attribute product filterable field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addEavAttributeProductFilterableField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2317,6 +2622,23 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav attribute product filterable field with update.
+     *
+     * @param AbstractModel $object
+     * @param string $objectName
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
+     */
     public function addEavAttributeProductFilterableFieldWithUpdate(
         AbstractModel $object,
         string $objectName,
@@ -2328,52 +2650,34 @@ class Form
         bool $required = false,
         bool $multiSelect = false
     ): void {
-        $onChangeFieldId = sprintf(
-            '%s_%s',
+        $this->addEavAttributeSelectFieldWithUpdate(
+            $object,
             $objectName,
-            $objectFieldName
-        );
-
-        $onChange = [];
-
-        foreach ($targetFieldNames as $targetFieldName) {
-            $targetFieldId = sprintf(
-                '%s_%s',
-                $objectName,
-                $targetFieldName
-            );
-
-            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
-                $onChangeFieldId,
-                $targetFieldId,
-                $multiSelect
-            );
-        }
-
-        $fieldSet->addField(
+            $fieldSet,
+            $objectRegistryKey,
             $objectFieldName,
-            'select',
-            [
-                'name'     => $objectFieldName,
-                'label'    => $label,
-                'value'    => $this->getFieldValue(
-                    $objectRegistryKey,
-                    $objectFieldName,
-                    null,
-                    $object
-                ),
-                'values'   => $this->sourceAttributeProductFilterable->toOptionArray(),
-                'required' => $required,
-                'onchange' => implode(
-                    ';',
-                    $onChange
-                )
-            ]
+            $label,
+            $targetFieldNames,
+            $this->sourceAttributeProductFilterable->toOptionArray(),
+            $required,
+            $multiSelect
         );
     }
 
     /**
-     * @throws Exception
+     * Adds the eav attribute value field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectAttributeFieldName
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @return void
+     * @throws LocalizedException
      */
     public function addEavAttributeValueField(
         AbstractModel $object,
@@ -2393,7 +2697,7 @@ class Form
             if ($attributeId) {
                 $attribute = $this->attributeHelper->getAttribute(
                     Product::ENTITY,
-                    $attributeId
+                    $this->variables->stringValue($attributeId)
                 );
 
                 $valueOptions = $attribute->getSource()->getAllOptions();
@@ -2436,6 +2740,22 @@ class Form
         }
     }
 
+    /**
+     * Adds the eav attribute set field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $customer
+     * @param bool $address
+     * @param bool $category
+     * @param bool $product
+     *
+     * @return void
+     */
     public function addEavAttributeSetField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2471,6 +2791,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the eav entity type field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $customer
+     * @param bool $address
+     * @param bool $category
+     * @param bool $product
+     *
+     * @return void
+     */
     public function addEavEntityTypeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2506,6 +2842,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the product attribute code field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addProductAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2532,6 +2880,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the customer attribute code field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addCustomerAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2558,6 +2918,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the address attribute code field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addAddressAttributeCodeField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2584,6 +2956,19 @@ class Form
         );
     }
 
+    /**
+     * Adds the attribute sort by field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @return void
+     */
     public function addAttributeSortByField(
         AbstractModel $object,
         Fieldset $fieldSet,
@@ -2611,6 +2996,15 @@ class Form
         );
     }
 
+    /**
+     * Returns the update eav attribute form element JavaScript.
+     *
+     * @param string $sourceElementId
+     * @param string $targetElementId
+     * @param bool $multiSelect
+     *
+     * @return string
+     */
     protected function getUpdateEavAttributeFormElementJs(
         string $sourceElementId,
         string $targetElementId,
@@ -2629,17 +3023,28 @@ class Form
     }
 
     /**
+     * Adds the checkbox field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param AbstractModel|null $object
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addCheckboxField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         ?AbstractModel $object = null,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $fieldValue = $this->getFieldValue(
             $objectRegistryKey,
@@ -2657,37 +3062,41 @@ class Form
             'css_class' => 'admin__field-checkbox'
         ];
 
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            false,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
             'checkbox',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
     /**
+     * Adds the simple checkbox field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $checked
+     * @param bool $disabled
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addSimpleCheckboxField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         bool $checked = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $config = [
             'name'      => $objectFieldName,
@@ -2698,28 +3107,31 @@ class Form
             'css_class' => 'admin__field-checkbox'
         ];
 
-        if ($disabled) {
-            $config[ 'disabled' ] = true;
-            if (array_key_exists(
-                'css_class',
-                $config
-            )) {
-                $config[ 'css_class' ] .= ' disabled';
-            } else {
-                $config[ 'css_class' ] = 'disabled';
-            }
-        }
+        $config = $this->addReadOnlyAndDisabled(
+            $config,
+            false,
+            $disabled
+        );
 
         $fieldSet->addField(
             $objectFieldName,
             'checkbox',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
     /**
+     * Adds the value field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
      * @param bool|string|null $after
+     *
+     * @return void
      */
     public function addValueField(
         Fieldset $fieldSet,
@@ -2727,7 +3139,7 @@ class Form
         string $objectFieldName,
         string $label,
         ?AbstractModel $object = null,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $fieldSet->addType(
             'value',
@@ -2750,17 +3162,29 @@ class Form
             $objectFieldName,
             'value',
             $config,
-            $after
+            $after // @phpstan-ignore argument.type (Magento also accepts the id of the field to add it after)
         );
     }
 
+    /**
+     * Adds the button field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $value
+     * @param mixed $onClick
+     * @param mixed $dataMageInit
+     *
+     * @return void
+     */
     public function addButtonField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
         string $value,
-        $onClick = null,
-        $dataMageInit = null
+        mixed $onClick = null,
+        mixed $dataMageInit = null
     ): void {
         $config = [
             'name'      => $objectFieldName,
@@ -2784,6 +3208,23 @@ class Form
         );
     }
 
+    /**
+     * Adds the iframe button field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectName
+     * @param string $objectField
+     * @param string $objectFieldName
+     * @param string $label
+     * @param string $value
+     * @param string $urlPath
+     * @param array $urlParameters
+     * @param AbstractModel|null $object
+     *
+     * @phpstan-param array<int|string, mixed> $urlParameters
+     *
+     * @return void
+     */
     public function addIframeButtonField(
         Fieldset $fieldSet,
         string $objectName,
@@ -2804,7 +3245,7 @@ class Form
         }
 
         $dataMageInit = $this->escaper->escapeHtml(
-            json_encode(
+            (string)json_encode(
                 [
                     'infrangible/iframe-button' => [
                         'buttonId' => sprintf(
@@ -2832,6 +3273,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the theme field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addThemeField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2856,6 +3311,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the customer name field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addCustomerNameField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2890,6 +3357,19 @@ class Form
         );
     }
 
+    /**
+     * Adds the product name field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param string|null $onChange
+     *
+     * @return void
+     */
     public function addProductNameField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2934,6 +3414,23 @@ class Form
         );
     }
 
+    /**
+     * Adds the product name field with product options.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param string $objectName
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $includeWithValues
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
+     */
     public function addProductNameFieldWithProductOptions(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -2981,6 +3478,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the product name field with product option values.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param string $objectName
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
+     */
     public function addProductNameFieldWithProductOptionValues(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3026,6 +3539,25 @@ class Form
         );
     }
 
+    /**
+     * Adds the product name field with product options and values.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $optionTargetFieldNames
+     * @param array $optionValueTargetFieldNames
+     * @param string $objectName
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $includeWithValues
+     *
+     * @phpstan-param array<int, string> $optionTargetFieldNames
+     * @phpstan-param array<int, string> $optionValueTargetFieldNames
+     *
+     * @return void
+     */
     public function addProductNameFieldWithProductOptionsAndValues(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3087,6 +3619,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the price field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addPriceField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3112,6 +3656,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the discount field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addDiscountField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3137,6 +3693,18 @@ class Form
         );
     }
 
+    /**
+     * Adds the integer field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addIntegerField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3159,11 +3727,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple integer field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addSimpleIntegerField(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value = null,
+        mixed $value = null,
         bool $required = false
     ): void {
         $fieldSet->addField(
@@ -3178,6 +3757,15 @@ class Form
         );
     }
 
+    /**
+     * Returns the update product options form element JavaScript.
+     *
+     * @param string $sourceElementId
+     * @param string $targetElementId
+     * @param bool $includeWithValues
+     *
+     * @return string
+     */
     protected function getUpdateProductOptionsFormElementJs(
         string $sourceElementId,
         string $targetElementId,
@@ -3196,6 +3784,14 @@ class Form
         );
     }
 
+    /**
+     * Returns the update product option values form element JavaScript.
+     *
+     * @param string $sourceElementId
+     * @param string $targetElementId
+     *
+     * @return string
+     */
     protected function getUpdateProductOptionValuesFormElementJs(
         string $sourceElementId,
         string $targetElementId
@@ -3209,13 +3805,27 @@ class Form
     }
 
     /**
-     * @throws Exception
+     * Adds the product option field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param mixed $parentObjectValue
+     * @param string $objectProductIdFieldName
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $includeWithValues
+     * @param bool $excludeWithoutValues
+     * @param string|null $onChange
+     *
+     * @return void
      */
     public function addProductOptionField(
         AbstractModel $object,
         Fieldset $fieldSet,
         string $objectRegistryKey,
-        $parentObjectValue,
+        mixed $parentObjectValue,
         string $objectProductIdFieldName,
         string $objectFieldName,
         string $label,
@@ -3259,13 +3869,28 @@ class Form
     }
 
     /**
-     * @throws Exception
+     * Adds the product option field with type values.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param mixed $parentObjectValue
+     * @param string $objectProductIdFieldName
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param string $objectName
+     * @param bool $required
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     *
+     * @return void
      */
     public function addProductOptionFieldWithTypeValues(
         AbstractModel $object,
         Fieldset $fieldSet,
         string $objectRegistryKey,
-        $parentObjectValue,
+        mixed $parentObjectValue,
         string $objectProductIdFieldName,
         string $objectFieldName,
         string $label,
@@ -3312,6 +3937,14 @@ class Form
         );
     }
 
+    /**
+     * Returns the update product option type values form element JavaScript.
+     *
+     * @param string $sourceElementId
+     * @param string $targetElementId
+     *
+     * @return string
+     */
     protected function getUpdateProductOptionTypeValuesFormElementJs(
         string $sourceElementId,
         string $targetElementId
@@ -3325,7 +3958,17 @@ class Form
     }
 
     /**
-     * @throws Exception
+     * Adds the product option value field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectProductIdFieldName
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
      */
     public function addProductOptionValueField(
         AbstractModel $object,
@@ -3360,7 +4003,17 @@ class Form
     }
 
     /**
-     * @throws Exception
+     * Adds the product option type value field.
+     *
+     * @param AbstractModel $object
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectOptionIdFieldName
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     *
+     * @return void
      */
     public function addProductOptionTypeValueField(
         AbstractModel $object,
@@ -3394,11 +4047,22 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple date field with value.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addSimpleDateFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         bool $required = false
     ): void {
         $dateFormat = $this->localeDate->getDateFormat();
@@ -3422,14 +4086,27 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple date time field with value.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param mixed $value
+     * @param bool $required
+     *
+     * @return void
+     */
     public function addSimpleDateTimeFieldWithValue(
         Fieldset $fieldSet,
         string $objectFieldName,
         string $label,
-        $value,
+        mixed $value,
         bool $required = false
     ): void {
         $dateFormat = $this->localeDate->getDateFormat();
+        /** @noinspection PhpParamsInspection Magento passes the type to IntlDateFormatter, which expects an integer */
+        // @phpstan-ignore argument.type (Magento passes the type to IntlDateFormatter, which expects an integer)
         $timeFormat = $this->localeDate->getTimeFormat(IntlDateFormatter::SHORT);
 
         $config = [
@@ -3452,6 +4129,20 @@ class Form
         );
     }
 
+    /**
+     * Adds the filter condition type field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param AbstractModel|null $object
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @return void
+     */
     public function addFilterConditionTypeField(
         Fieldset $fieldSet,
         string $objectRegistryKey,
@@ -3476,6 +4167,19 @@ class Form
         );
     }
 
+    /**
+     * Adds the simple filter condition type field.
+     *
+     * @param Fieldset $fieldSet
+     * @param string $objectFieldName
+     * @param string $label
+     * @param bool $required
+     * @param bool $readOnly
+     * @param bool $disabled
+     * @param bool|string|null $after
+     *
+     * @return void
+     */
     public function addSimpleFilterConditionTypeField(
         Fieldset $fieldSet,
         string $objectFieldName,
@@ -3483,7 +4187,7 @@ class Form
         bool $required = false,
         bool $readOnly = false,
         bool $disabled = false,
-        $after = false
+        bool|string|null $after = false
     ): void {
         $this->addSimpleOptionsField(
             $fieldSet,
@@ -3495,5 +4199,144 @@ class Form
             $disabled,
             $after
         );
+    }
+
+    /**
+     * Returns the configuration of a field with the settings for read-only and disabled fields added.
+     *
+     * @param array $config
+     * @param bool $readOnly
+     * @param bool $disabled
+     *
+     * @phpstan-param array<string, mixed> $config
+     *
+     * @return array
+     * @phpstan-return array<string, mixed>
+     */
+    private function addReadOnlyAndDisabled(array $config, bool $readOnly, bool $disabled): array
+    {
+        $cssClasses = [];
+
+        if (array_key_exists(
+            'css_class',
+            $config
+        ) && is_string($config[ 'css_class' ]) && $config[ 'css_class' ] !== '') {
+            $cssClasses[] = $config[ 'css_class' ];
+        }
+
+        if ($readOnly) {
+            $config[ 'readonly' ] = true;
+            $cssClasses[] = 'read-only';
+        }
+
+        if ($disabled) {
+            $config[ 'disabled' ] = true;
+            $cssClasses[] = 'disabled';
+        }
+
+        if (count($cssClasses) > 0) {
+            $config[ 'css_class' ] = implode(
+                ' ',
+                $cssClasses
+            );
+        }
+
+        return $config;
+    }
+
+    /**
+     * Adds a select field of attributes that updates the options of the target fields when it is changed.
+     *
+     * @param AbstractModel $object
+     * @param string $objectName
+     * @param Fieldset $fieldSet
+     * @param string $objectRegistryKey
+     * @param string $objectFieldName
+     * @param string $label
+     * @param array $targetFieldNames
+     * @param array $values
+     * @param bool $required
+     * @param bool $multiSelect
+     *
+     * @phpstan-param array<int, string> $targetFieldNames
+     * @phpstan-param array<int|string, mixed> $values
+     *
+     * @return void
+     */
+    private function addEavAttributeSelectFieldWithUpdate(
+        AbstractModel $object,
+        string $objectName,
+        Fieldset $fieldSet,
+        string $objectRegistryKey,
+        string $objectFieldName,
+        string $label,
+        array $targetFieldNames,
+        array $values,
+        bool $required,
+        bool $multiSelect
+    ): void {
+        $onChangeFieldId = sprintf(
+            '%s_%s',
+            $objectName,
+            $objectFieldName
+        );
+
+        $onChange = [];
+
+        foreach ($targetFieldNames as $targetFieldName) {
+            $targetFieldId = sprintf(
+                '%s_%s',
+                $objectName,
+                $targetFieldName
+            );
+
+            $onChange[] = $this->getUpdateEavAttributeFormElementJs(
+                $onChangeFieldId,
+                $targetFieldId,
+                $multiSelect
+            );
+        }
+
+        $fieldSet->addField(
+            $objectFieldName,
+            'select',
+            [
+                'name'     => $objectFieldName,
+                'label'    => $label,
+                'value'    => $this->getFieldValue(
+                    $objectRegistryKey,
+                    $objectFieldName,
+                    null,
+                    $object
+                ),
+                'values'   => $values,
+                'required' => $required,
+                'onchange' => implode(
+                    ';',
+                    $onChange
+                )
+            ]
+        );
+    }
+
+    /**
+     * Returns the customer groups as options, sorted by code.
+     *
+     * @return array
+     * @phpstan-return array<int, array{value: mixed, label: string}>
+     */
+    private function getCustomerGroupOptions(): array
+    {
+        $this->customerGroupCollection->getSelect()->order('customer_group_code ASC');
+        $this->customerGroupCollection->loadData();
+
+        $customerGroups = [['value' => '', 'label' => __('--Please Select--')->render()]];
+
+        /** @var Group $customerGroup */
+        foreach ($this->customerGroupCollection as $customerGroup) {
+            $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => (string)$customerGroup->getCode()];
+        }
+
+        return $customerGroups;
     }
 }

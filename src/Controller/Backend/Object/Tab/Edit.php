@@ -2,43 +2,38 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\BackendWidget\Controller\Backend\Object\Tab;
-
-use Magento\Framework\View\Element\AbstractBlock;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
+namespace Infrangible\BackendWidget\Controller\Backend\Object\Tab;
+
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\App\Response\Http;
+use Magento\Framework\View\Element\AbstractBlock;
+
 abstract class Edit extends \Infrangible\BackendWidget\Controller\Backend\Object\Edit
 {
-    public function execute(): void
+    /**
+     * Executes the action.
+     *
+     * @return ResponseInterface
+     */
+    public function execute(): ResponseInterface
     {
-        $object = $this->initObject();
+        $object = $this->initEditableObject();
 
-        if (! $object) {
-            $this->redirect(
-                $this->getIndexUrlRoute(),
-                $this->getIndexUrlParams()
-            );
-
-            return;
-        }
-
-        if ($object->getId() && ! $this->allowEdit() && ! $this->allowView()) {
-            $this->redirect(
-                $this->getIndexUrlRoute(),
-                $this->getIndexUrlParams()
-            );
-
-            return;
+        if ($object === null) {
+            return $this->getResponse();
         }
 
         $blockClassName = $this->getFormContentBlockType();
 
         if (! class_exists($blockClassName)) {
-            throw new \Exception(
+            throw new \LogicException(
                 sprintf(
                     'Could not find block class: %s',
                     $blockClassName
@@ -71,9 +66,18 @@ abstract class Edit extends \Infrangible\BackendWidget\Controller\Backend\Object
 
         $response = $this->getResponse();
 
-        $response->setBody($block->toHtml());
+        if ($response instanceof Http) {
+            $response->setBody($block->toHtml());
+        }
+
+        return $this->getResponse();
     }
 
+    /**
+     * Returns the form type.
+     *
+     * @return string
+     */
     protected function getFormType(): string
     {
         return sprintf(
@@ -82,10 +86,26 @@ abstract class Edit extends \Infrangible\BackendWidget\Controller\Backend\Object
         );
     }
 
+    /**
+     * Returns the parent object key.
+     *
+     * @return string
+     */
     abstract protected function getParentObjectKey(): string;
 
+    /**
+     * Returns the parent object value key.
+     *
+     * @return string
+     */
     abstract protected function getParentObjectValueKey(): string;
 
+    /**
+     * Returns the grid url params.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getGridUrlParams(): array
     {
         $gridUrlParams = parent::getGridUrlParams();

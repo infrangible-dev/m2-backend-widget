@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Helper;
 
 use Infrangible\Core\Helper\Product;
@@ -10,27 +16,28 @@ use Magento\Catalog\Model\Product\Option\Value;
 use Magento\Catalog\Model\ResourceModel\Product\Option\Value\CollectionFactory;
 use Magento\Framework\Data\Collection;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class ProductOption
 {
-    /** @var Product */
-    protected $productHelper;
-
-    /** @var CollectionFactory */
-    protected $optionValueCollectionFactory;
-
+    /**
+     * @param Product $productHelper
+     * @param CollectionFactory $optionValueCollectionFactory
+     */
     public function __construct(
-        Product $productHelper,
-        CollectionFactory $optionValueCollectionFactory
+        protected Product $productHelper,
+        protected CollectionFactory $optionValueCollectionFactory
     ) {
-        $this->productHelper = $productHelper;
-        $this->optionValueCollectionFactory = $optionValueCollectionFactory;
     }
 
+    /**
+     * Returns the product options.
+     *
+     * @param int $productId
+     * @param bool $includeWithValues
+     * @param bool $excludeWithoutValues
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     public function getProductOptions(int $productId, bool $includeWithValues, bool $excludeWithoutValues): array
     {
         $product = $this->productHelper->loadProduct($productId);
@@ -58,6 +65,14 @@ class ProductOption
         return $options;
     }
 
+    /**
+     * Returns the product option values.
+     *
+     * @param int $productId
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     public function getProductOptionValues(int $productId): array
     {
         $product = $this->productHelper->loadProduct($productId);
@@ -91,6 +106,14 @@ class ProductOption
         return $options;
     }
 
+    /**
+     * Returns the product option type values.
+     *
+     * @param int $optionId
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     public function getProductOptionTypeValues(int $optionId): array
     {
         $collection = $this->optionValueCollectionFactory->create();

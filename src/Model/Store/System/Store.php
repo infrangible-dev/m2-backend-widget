@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Model\Store\System;
 
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Website;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Store
-    extends \Magento\Store\Model\System\Store
+class Store extends \Magento\Store\Model\System\Store
 {
     /**
      * Load/Reload Website collection
@@ -39,6 +39,10 @@ class Store
         $this->_groupCollection = [];
 
         foreach ($this->_storeManager->getWebsites(true) as $website) {
+            if (! $website instanceof Website) {
+                continue;
+            }
+
             foreach ($website->getGroups() as $group) {
                 $this->_groupCollection[ $group->getId() ] = $group;
             }
@@ -71,10 +75,19 @@ class Store
      * @param array $groupIds
      * @param array $websiteIds
      *
+     * @phpstan-param array<int|string, mixed> $storeIds
+     * @phpstan-param array<int|string, mixed> $groupIds
+     * @phpstan-param array<int|string, mixed> $websiteIds
+     *
      * @return array
+     * @phpstan-return array<int|string, mixed>
      */
-    public function getStoresStructure($isAll = false, $storeIds = [], $groupIds = [], $websiteIds = []): array
-    {
+    public function getStoresStructure(
+        mixed $isAll = false,
+        mixed $storeIds = [],
+        mixed $groupIds = [],
+        mixed $websiteIds = []
+    ): array {
         $out = [];
 
         $websites = $this->getWebsiteCollection();

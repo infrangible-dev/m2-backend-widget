@@ -2,49 +2,48 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid\Column\Renderer;
 
 use Magento\Backend\Block\Context;
 use Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer;
 use Magento\Email\Model\TemplateFactory;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Template
-    extends AbstractRenderer
+class Template extends AbstractRenderer
 {
-    /** @var TemplateFactory */
-    protected $templateFactory;
-
-    /** @var \Magento\Email\Model\ResourceModel\TemplateFactory */
-    protected $templateResourceFactory;
+    use EscapedValues;
 
     /**
      * @param Context                                            $context
      * @param TemplateFactory                                    $templateFactory
      * @param \Magento\Email\Model\ResourceModel\TemplateFactory $templateResourceFactory
      * @param array                                              $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
      */
     public function __construct(
         Context $context,
-        TemplateFactory $templateFactory,
-        \Magento\Email\Model\ResourceModel\TemplateFactory $templateResourceFactory,
-        array $data = [])
-    {
+        protected TemplateFactory $templateFactory,
+        protected \Magento\Email\Model\ResourceModel\TemplateFactory $templateResourceFactory,
+        array $data = []
+    ) {
         parent::__construct($context, $data);
-
-        $this->templateFactory = $templateFactory;
-        $this->templateResourceFactory = $templateResourceFactory;
     }
 
     /**
+     * Renders.
+     *
      * @param DataObject $row
      *
      * @return string
+     * @throws LocalizedException
      */
     public function render(DataObject $row): string
     {
@@ -54,6 +53,6 @@ class Template
 
         $this->templateResourceFactory->create()->load($mailTemplate, $templateId);
 
-        return $mailTemplate->getId() ? $mailTemplate->getTemplateCode() : '';
+        return $mailTemplate->getId() ? $this->escapeValue($mailTemplate->getTemplateCode()) : '';
     }
 }

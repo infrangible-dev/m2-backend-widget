@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid;
 
 use FeWeDev\Base\Arrays;
@@ -14,21 +20,32 @@ use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Helper\Data;
 use Magento\Eav\Model\Config;
 use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Validator\UniversalFactory;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 abstract class Tab extends Grid
 {
     /** @var string */
-    protected $parentObjectKey;
+    protected string $parentObjectKey;
 
     /** @var string */
-    protected $parentObjectValue;
+    protected string $parentObjectValue;
 
+    /**
+     * @param Context $context
+     * @param Data $backendHelper
+     * @param Database $databaseHelper
+     * @param Arrays $arrays
+     * @param Variables $variables
+     * @param Registry $registryHelper
+     * @param \Infrangible\BackendWidget\Helper\Grid $gridHelper
+     * @param Session $sessionHelper
+     * @param UniversalFactory $universalFactory
+     * @param Config $eavConfig
+     * @param array $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
+     */
     public function __construct(
         Context $context,
         Data $backendHelper,
@@ -56,21 +73,29 @@ abstract class Tab extends Grid
             $data
         );
 
-        $this->parentObjectKey = $arrays->getValue(
-            $data,
-            'parent_object_key'
-        );
-        $this->parentObjectValue = $arrays->getValue(
-            $data,
-            'parent_object_value'
-        );
+        $this->parentObjectKey = $this->stringArgument($data, 'parent_object_key');
+        $this->parentObjectValue = $this->stringArgument($data, 'parent_object_value');
     }
 
+    /**
+     * Returns the hidden field names.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getHiddenFieldNames(): array
     {
         return [];
     }
 
+    /**
+     * Hook to change the collection after it was prepared.
+     *
+     * @param AbstractDb $collection
+     *
+     * @return void
+     * @throws LocalizedException
+     */
     protected function followUpCollection(AbstractDb $collection): void
     {
         parent::followUpCollection($collection);
@@ -81,16 +106,19 @@ abstract class Tab extends Grid
         );
     }
 
+    /**
+     * Renders the block as HTML.
+     *
+     * @return string
+     * @throws LocalizedException
+     */
     public function toHtml(): string
     {
         $this->setRowClickCallback(
             "function(grid, event) {
-                console.debug(event);
                 event.preventDefault();
                 require(['jquery'], function ($) {
-                    console.debug(event.target);
                     var tab = $('#tab_" . $this->objectName . "');
-                    console.debug(tab);
                     tab.notification({
                         templates: {
                             global: '<div data-role=\"messages\" id=\"messages\">' +
@@ -100,7 +128,6 @@ abstract class Tab extends Grid
                         }
                     });
                     var grid = $('#" . $this->getGridId() . "');
-                    console.debug(grid);
                     var gridParent = grid.parent();
                     if (event.target.tagName === 'A') {
                         var url = $(event.target).attr('href');
@@ -110,11 +137,9 @@ abstract class Tab extends Grid
                             showLoader: true,
                             dataType: 'json',
                             success: function(response) {
-                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.debug(response.responseJSON);
                                 tab.notification('clear');
                                 if (response.responseJSON.message) {
                                     tab.notification('add', {
@@ -124,11 +149,9 @@ abstract class Tab extends Grid
                                 }
                             },
                             error: function(response) {
-                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.debug(response.responseJSON);
                                 tab.notification('clear');
                                 if (response.status === 302) {
                                     if (response.responseJSON.message) {
@@ -163,11 +186,9 @@ abstract class Tab extends Grid
                                 });
                             },
                             complete: function(response) {
-                                console.debug(response);
                                 if (! response.responseJSON) {
                                     response.responseJSON = response;
                                 }
-                                console.debug(response.responseJSON);
                                 if (response.responseJSON.ajaxExpired === 1) {
                                     window.location.href = response.responseJSON.ajaxRedirect;
                                 }
@@ -175,7 +196,6 @@ abstract class Tab extends Grid
                         });
                     } else {
                         var url = $(event.target.parentNode).attr('title');
-                        console.debug(url);
                         $.ajax({
                             url: url,
                             method: 'get',

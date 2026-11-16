@@ -2,39 +2,36 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid\Column\Filter;
 
 use Magento\Backend\Block\Context;
 use Magento\Framework\DB\Helper;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Store
-    extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
+class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
 {
-    /** @var \Infrangible\BackendWidget\Model\Store\System\Store */
-    protected $infrangibleSystemStore;
-
     /**
      * @param Context                                             $context
      * @param Helper                                              $resourceHelper
      * @param \Magento\Store\Model\System\Store                   $systemStore
      * @param \Infrangible\BackendWidget\Model\Store\System\Store $infrangibleSystemStore
      * @param array                                               $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
      */
     public function __construct(
         Context $context,
         Helper $resourceHelper,
         \Magento\Store\Model\System\Store $systemStore,
-        \Infrangible\BackendWidget\Model\Store\System\Store $infrangibleSystemStore,
-        array $data = [])
-    {
+        protected \Infrangible\BackendWidget\Model\Store\System\Store $infrangibleSystemStore,
+        array $data = []
+    ) {
         parent::__construct($context, $resourceHelper, $systemStore, $data);
-
-        $this->infrangibleSystemStore = $infrangibleSystemStore;
     }
 
     /**
@@ -53,7 +50,7 @@ class Store
 
         $value = $this->getColumn()->getData('value');
 
-        $html .= sprintf('<option value="" %s></option>', ! $value ? 'selected="selected"' : '');
+        $html .= '<option value=""' . (! $value ? ' selected="selected"' : '') . '></option>';
 
         foreach ($websiteCollection as $website) {
             $websiteShow = false;
@@ -70,25 +67,27 @@ class Store
                         continue;
                     }
 
-                    if ( ! $websiteShow) {
+                    if (! $websiteShow) {
                         $websiteShow = true;
 
                         $html .= sprintf('<optgroup label="%s"></optgroup>', $this->escapeHtml($website->getName()));
                     }
 
-                    if ( ! $groupShow) {
+                    if (! $groupShow) {
                         $groupShow = true;
 
-                        $html .= sprintf('<optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;%s">',
-                            $this->escapeHtml($group->getName()));
+                        $html .= sprintf(
+                            '<optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;%s">',
+                            $this->escapeHtml($group->getName())
+                        );
                     }
 
                     $value = $this->getData('value');
 
                     $selected = $value == $store->getId() ? ' selected="selected"' : '';
 
-                    $html .= sprintf('<option value="%s" %s>&nbsp;&nbsp;&nbsp;&nbsp;%s</option>', $store->getId(),
-                        $selected, $this->escapeHtml($store->getName()));
+                    $html .= '<option value="' . $this->escapeHtmlAttr((string)$store->getId()) . '"' . $selected .
+                        '>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->escapeHtml($store->getName()) . '</option>';
                 }
                 if ($groupShow) {
                     $html .= '</optgroup>';
@@ -99,7 +98,8 @@ class Store
         if ($this->getColumn()->getData('display_deleted')) {
             $selected = $this->getData('value') == '_deleted_' ? ' selected' : '';
 
-            $html .= sprintf('<option value="_deleted_" %s>%s</option>', $selected, __('[ deleted ]'));
+            $html .= '<option value="_deleted_"' . $selected . '>' . $this->escapeHtml((string)__('[ deleted ]')) .
+                '</option>';
         }
 
         $html .= '</select>';

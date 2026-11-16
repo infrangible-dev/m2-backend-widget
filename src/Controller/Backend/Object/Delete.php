@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
 namespace Infrangible\BackendWidget\Controller\Backend\Object;
 
 use Exception;
@@ -9,24 +16,24 @@ use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Instances;
 use Infrangible\Core\Helper\Registry;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Model\AbstractModel;
 use Psr\Log\LoggerInterface;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 abstract class Delete extends Edit
 {
-    /** @var LoggerInterface */
-    protected $logging;
-
+    /**
+     * @param Registry $registryHelper
+     * @param Context $context
+     * @param Instances $instanceHelper
+     * @param LoggerInterface $logging
+     * @param Session $session
+     */
     public function __construct(
         Registry $registryHelper,
         Context $context,
         Instances $instanceHelper,
-        LoggerInterface $logging,
+        protected LoggerInterface $logging,
         Session $session
     ) {
         parent::__construct(
@@ -35,14 +42,14 @@ abstract class Delete extends Edit
             $context,
             $session
         );
-
-        $this->logging = $logging;
     }
 
     /**
-     * @throws Exception
+     * Executes the action.
+     *
+     * @return ResponseInterface
      */
-    public function execute(): void
+    public function execute(): ResponseInterface
     {
         if (! $this->allowDelete()) {
             $this->redirect(
@@ -52,7 +59,7 @@ abstract class Delete extends Edit
 
             $this->prepareResponse();
 
-            return;
+            return $this->getResponse();
         }
 
         $object = $this->initObject();
@@ -65,7 +72,7 @@ abstract class Delete extends Edit
 
             $this->prepareResponse();
 
-            return;
+            return $this->getResponse();
         }
 
         $objectResource = $this->getObjectResourceInstance();
@@ -90,25 +97,59 @@ abstract class Delete extends Edit
         );
 
         $this->prepareResponse();
+
+        return $this->getResponse();
     }
 
+    /**
+     * Returns the redirect url route.
+     *
+     * @return string
+     */
     protected function getRedirectUrlRoute(): string
     {
         return $this->getIndexUrlRoute();
     }
 
+    /**
+     * Returns the redirect url params.
+     *
+     * @return array
+     * @phpstan-return array<int|string, mixed>
+     */
     protected function getRedirectUrlParams(): array
     {
         return $this->getIndexUrlParams();
     }
 
-    protected function beforeDelete(AbstractModel $object)
+    /**
+     * Hook that runs before the object is deleted.
+     *
+     * @param AbstractModel $object
+     *
+     * @return void
+     */
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function beforeDelete(AbstractModel $object): void
     {
     }
 
-    protected function afterDelete(AbstractModel $object)
+    /**
+     * Hook that runs after the object was deleted.
+     *
+     * @param AbstractModel $object
+     *
+     * @return void
+     */
+    // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock -- hook
+    protected function afterDelete(AbstractModel $object): void
     {
     }
 
+    /**
+     * Returns the object deleted message.
+     *
+     * @return string
+     */
     abstract protected function getObjectDeletedMessage(): string;
 }

@@ -1,0 +1,16 @@
+# Checks the module with several Magento and PHP versions and releases the version from composer.json when the
+# checks pass on main. See https://github.com/infrangible-dev/workflows
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  module:
+    uses: infrangible-dev/workflows/.github/workflows/magento-module.yml@main

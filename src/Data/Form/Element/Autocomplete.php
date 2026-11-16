@@ -2,41 +2,52 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Data\Form\Element;
 
 use FeWeDev\Base\Json;
+use FeWeDev\Base\Variables;
+use Infrangible\BackendWidget\Helper\Search;
 use Infrangible\Core\Helper\Url;
 use Magento\Framework\Data\Form\Element\CollectionFactory;
 use Magento\Framework\Data\Form\Element\Factory;
 use Magento\Framework\Data\Form\Element\Text;
 use Magento\Framework\Escaper;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Autocomplete extends Text
 {
-    /** @var Json */
-    protected $json;
-
-    /** @var Url */
-    protected $urlHelper;
-
     /** @var SecureHtmlRenderer */
-    protected $secureRenderer;
+    protected SecureHtmlRenderer $secureRenderer;
 
+    /**
+     * @param Factory $factoryElement
+     * @param CollectionFactory $factoryCollection
+     * @param Escaper $escaper
+     * @param Json $json
+     * @param Url $urlHelper
+     * @param SecureHtmlRenderer $secureRenderer
+     * @param Search $searchHelper
+     * @param Variables $variables
+     * @param array $data
+     *
+     * @phpstan-param array<string, mixed> $data
+     */
     public function __construct(
         Factory $factoryElement,
         CollectionFactory $factoryCollection,
         Escaper $escaper,
-        Json $json,
-        Url $urlHelper,
+        protected Json $json,
+        protected Url $urlHelper,
         SecureHtmlRenderer $secureRenderer,
-        $data = []
+        protected Search $searchHelper,
+        protected Variables $variables,
+        array $data = []
     ) {
         parent::__construct(
             $factoryElement,
@@ -44,50 +55,54 @@ class Autocomplete extends Text
             $escaper,
             $data
         );
-
-        $this->json = $json;
-        $this->urlHelper = $urlHelper;
         $this->secureRenderer = $secureRenderer;
     }
 
+    /**
+     * Returns the html.
+     *
+     * @return string
+     */
     public function getHtml(): string
     {
         $this->addClass('select admin__control-select');
 
-        return parent::getHtml();
+        return $this->variables->stringValue(parent::getHtml());
     }
 
+    /**
+     * Returns the value html id.
+     *
+     * @return string
+     */
     public function getValueHtmlId(): string
     {
-        return $this->_escaper->escapeHtml(
-            $this->getForm()->getData('html_id_prefix') . $this->getData('value_html_id') .
-            $this->getForm()->getData('html_id_suffix')
+        return $this->_escaper->escapeHtmlAttr(
+            $this->getStringValue($this->getForm()->getData('html_id_prefix')) .
+            $this->getStringData('value_html_id') .
+            $this->getStringValue($this->getForm()->getData('html_id_suffix'))
         );
     }
 
     /**
-     * @throws LocalizedException
+     * Returns the element html.
+     *
+     * @return string
      */
     public function getElementHtml(): string
     {
-        $valueHtml = sprintf(
-            '<input type="hidden" id="%s" name="%s" class="%s" value="%s" %s %s/>',
-            $this->getHtmlId(),
-            $this->getName(),
-            $this->getData('required') ? 'required-entry _required' : '',
-            $this->getData('value'),
-            $this->_getUiId(),
-            $this->serialize($this->getHtmlAttributes())
-        );
+        $valueHtml = '<input type="hidden" id="' . $this->getHtmlId() . '" name="' .
+            $this->getStringValue($this->getName()) . '" class="' .
+            ($this->getData('required') ? 'required-entry _required' : '') . '" value="' .
+            $this->_escaper->escapeHtmlAttr($this->getStringData('value')) . '" ' . $this->_getUiId() . ' ' .
+            $this->serialize($this->getHtmlAttributes()) . '/>';
 
         $events = array_filter(
             $this->getHtmlAttributes(),
-            function (string $attribute): bool {
-                return mb_strpos(
-                        $attribute,
-                        'on'
-                    ) === 0;
-            }
+            fn(string $attribute): bool => mb_strpos(
+                $attribute,
+                'on'
+            ) === 0
         );
 
         foreach ($events as $event) {
@@ -102,7 +117,10 @@ class Autocomplete extends Text
                 $valueHtml .= $this->secureRenderer->renderEventListenerAsTag(
                     $event,
                     $eventListener,
-                    "*[formelementhookid='{$this->getData('formelementhookid')}']"
+                    sprintf(
+                        "*[formelementhookid='%s']",
+                        $this->getStringData('formelementhookid')
+                    )
                 );
             }
         }
@@ -129,7 +147,7 @@ class Autocomplete extends Text
             false
         );
 
-        $class = $this->getData('class');
+        $class = $this->getStringData('class');
 
         $class = str_replace(
             'required-entry',
@@ -153,47 +171,87 @@ class Autocomplete extends Text
         return parent::getElementHtml() . $valueHtml;
     }
 
-    public function getAfterElementHtml()
+    /**
+     * Returns the value of the data key as string.
+     *
+     * @param string $key
+     *
+     * @return string
+     */
+    private function getStringData(string $key): string
+    {
+        return $this->getStringValue($this->getData($key));
+    }
+
+    /**
+     * Returns the value as string, an empty string for null.
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    private function getStringValue(mixed $value): string
+    {
+        return $value === null ? '' : $this->variables->stringValue($value);
+    }
+
+    /**
+     * Returns the script of the autocomplete as HTML after the element.
+     *
+     * @return string
+     */
+    public function getAfterElementHtml(): string
     {
         $htmlId = $this->getHtmlId();
         $valueHtmlId = $this->getValueHtmlId();
 
         $searchUrlParams = [
-            'search_collection' => $this->getData('search_collection'),
-            'result_id'         => $this->getData('result_id'),
-            'result_value'      => $this->getData('result_value'),
-            'result_label'      => $this->getData('result_label')
+            'search_collection' => $this->getStringData('search_collection'),
+            'result_id'         => $this->getStringData('result_id'),
+            'result_value'      => $this->getStringData('result_value'),
+            'result_label'      => $this->getStringData('result_label')
         ];
 
-        if ($this->getData('search_fields')) {
+        $searchFields = $this->getData('search_fields');
+
+        if (is_array($searchFields) && count($searchFields) > 0) {
             $searchUrlParams[ 'search_fields' ] = implode(
                 ',',
-                $this->getData('search_fields')
+                array_map(
+                    $this->variables->stringValue(...),
+                    $searchFields
+                )
             );
         }
 
         if ($this->getData('search_expressions')) {
-            $searchUrlParams[ 'search_expressions' ] = $this->json->encode($this->getData('search_expressions'));
+            $searchUrlParams[ 'search_expressions' ] = (string)$this->json->encode(
+                $this->getData('search_expressions')
+            );
         }
 
         if ($this->getData('search_conditions')) {
-            $searchUrlParams[ 'search_conditions' ] = $this->json->encode($this->getData('search_conditions'));
+            $searchUrlParams[ 'search_conditions' ] = (string)$this->json->encode($this->getData('search_conditions'));
+        }
+
+        if ($this->getData('search_limit')) {
+            $searchUrlParams[ 'search_limit' ] = $this->getStringData('search_limit');
         }
 
         $searchUrl = $this->urlHelper->getBackendUrl(
             'infrangible_backendwidget/search/term',
-            $searchUrlParams
+            $this->searchHelper->sign($searchUrlParams)
         );
 
         $valueUrlParams = [
-            'object_id'         => $this->getData('object_id'),
-            'search_collection' => $this->getData('search_collection'),
-            'result_value'      => $this->getData('result_value')
+            'object_id'         => $this->getStringData('object_id'),
+            'search_collection' => $this->getStringData('search_collection'),
+            'result_value'      => $this->getStringData('result_value')
         ];
 
         $valueUrl = $this->urlHelper->getBackendUrl(
             'infrangible_backendwidget/search/value',
-            $valueUrlParams
+            $this->searchHelper->sign($valueUrlParams)
         );
 
         $scriptString = <<<script

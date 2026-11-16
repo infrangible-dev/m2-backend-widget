@@ -2,26 +2,28 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Model\Backend;
 
 use Magento\Framework\Session\Storage;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Session
-    extends \Magento\Backend\Model\Session
+class Session extends \Magento\Backend\Model\Session
 {
     /**
      * Unset data from the object.
      *
      * @param null|string|array $key
      *
+     * @phpstan-param null|string|array<int|string, mixed> $key
+     *
      * @return Session
      */
-    public function unsetData($key = null): Session
+    public function unsetData(mixed $key = null): Session
     {
         if ($this->storage instanceof Storage) {
             $this->storage->unsetData($key);
@@ -41,9 +43,11 @@ class Session
      * @param string|array $key
      * @param mixed        $value
      *
+     * @phpstan-param string|array<int|string, mixed> $key
+     *
      * @return $this
      */
-    public function setData($key, $value = null): Session
+    public function setData(mixed $key, mixed $value = null): Session
     {
         if ($this->storage instanceof Storage) {
             $this->storage->setData($key, $value);

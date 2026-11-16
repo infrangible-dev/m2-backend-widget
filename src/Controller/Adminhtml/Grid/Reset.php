@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Controller\Adminhtml\Grid;
 
 use Magento\Backend\App\Action;
@@ -9,36 +15,29 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Infrangible\BackendWidget\Helper\Session;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Reset
-    extends Action
+class Reset extends Action
 {
-    /** @var Session */
-    protected $sessionHelper;
-
     /**
      * @param Context $context
      * @param Session $sessionHelper
      */
-    public function __construct(Context $context, Session $sessionHelper)
-    {
+    public function __construct(
+        Context $context,
+        protected Session $sessionHelper
+    ) {
         parent::__construct($context);
-
-        $this->sessionHelper = $sessionHelper;
     }
 
     /**
+     * Executes the action.
+     *
      * @return ResponseInterface
      */
     public function execute(): ResponseInterface
     {
         $this->sessionHelper->resetHiddenFieldList();
 
-        $this->messageManager->addSuccessMessage(__('Successfully reset all columns selections.'));
+        $this->messageManager->addSuccessMessage(__('Successfully reset all columns selections.')->render());
 
         return $this->_redirect('adminhtml/system_account/index');
     }

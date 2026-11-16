@@ -2,29 +2,34 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\BackendWidget\Controller\Backend\Object;
-
-use Exception;
-use Magento\Backend\Block\Widget\Grid\Extended;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
+
+// phpcs:ignore Magento2.NamingConvention.ReservedWords -- kept for the modules that extend these controllers
+namespace Infrangible\BackendWidget\Controller\Backend\Object;
+
+use Magento\Backend\Block\Widget\Grid\Extended;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\App\Response\Http;
+
 abstract class Grid extends Table
 {
     /**
-     * @throws Exception
+     * Executes the action.
+     *
+     * @return ResponseInterface
      */
-    public function execute(): void
+    public function execute(): ResponseInterface
     {
         $this->initAction();
 
         $blockClassName = $this->getGridContentBlockClass();
 
         if (! class_exists($blockClassName)) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
                     'Could not find block class: %s',
                     $blockClassName
@@ -43,26 +48,47 @@ abstract class Grid extends Table
 
         $response = $this->getResponse();
 
-        $response->setBody($this->renderBlock($block));
+        if ($response instanceof Http) {
+            $response->setBody($this->renderBlock($block));
+        }
+
+        return $this->getResponse();
     }
 
+    /**
+     * Renders the block.
+     *
+     * @param Extended $block
+     *
+     * @return string
+     */
     protected function renderBlock(Extended $block): string
     {
         return $block->toHtml();
     }
 
+    /**
+     * Returns the block name.
+     *
+     * @return string
+     */
     protected function getBlockName(): string
     {
         return sprintf(
-                'adminhtml_%s',
-                preg_replace(
-                    '~[^a-z0-9_]*~i',
-                    '',
-                    $this->getObjectName()
-                )
-            ) . '.grid';
+            'adminhtml_%s',
+            preg_replace(
+                '~[^a-z0-9_]*~i',
+                '',
+                $this->getObjectName()
+            )
+        ) . '.grid';
     }
 
+    /**
+     * Checks whether it is tab.
+     *
+     * @return bool
+     */
     protected function isTab(): bool
     {
         return false;

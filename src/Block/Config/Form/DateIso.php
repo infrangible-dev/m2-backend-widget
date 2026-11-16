@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Config\Form;
 
 use DateTime;
@@ -11,13 +17,7 @@ use Exception;
 use IntlDateFormatter;
 use Magento\Framework\Data\Form\Element\Date;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class DateIso
-    extends Date
+class DateIso extends Date
 {
     /**
      * Set date value
@@ -25,31 +25,33 @@ class DateIso
      * @param mixed $value
      *
      * @return $this
-     * @throws Exception
      */
-    public function setValue($value): DateIso
+    public function setValue(mixed $value): DateIso
     {
         if (empty($value)) {
+            // @phpstan-ignore assign.propertyType (Magento's date element uses an empty string for no value)
             $this->_value = '';
 
             return $this;
         }
 
         if ($value instanceof DateTimeInterface) {
-            $this->_value = $value;
+            $this->_value = DateTime::createFromInterface($value);
 
             return $this;
         }
 
         try {
-            if (preg_match('/^[0-9]+$/', $value)) {
-                $this->_value = (new DateTime())->setTimestamp($this->_toTimestamp($value));
-            } else if (is_string($value) && $this->isDate($value)) {
+            if (is_int($value) || (is_string($value) && ctype_digit($value))) {
+                $this->_value = (new DateTime())->setTimestamp($this->_toTimestamp((int)$value));
+            } elseif (is_string($value) && $this->isDate($value)) {
                 $this->_value = new DateTime($value, new DateTimeZone('UTC'));
             } else {
+                // @phpstan-ignore assign.propertyType (Magento's date element uses an empty string for no value)
                 $this->_value = '';
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
+            // @phpstan-ignore assign.propertyType (Magento's date element uses an empty string for no value)
             $this->_value = '';
         }
 
@@ -71,23 +73,25 @@ class DateIso
     }
 
     /**
-     * Get date value as string.
-     * Format can be specified, or it will be taken from $this->getFormat()
+     * Returns the date value as string.
+     *
+     * The format can be given, otherwise the format of the element is used.
      *
      * @param string $format (compatible with Zend_Date)
      *
      * @return string
      */
-    public function getValue($format = null): string
+    public function getValue(mixed $format = null): string
     {
-        if (empty($this->_value)) {
+        if (! $this->_value instanceof DateTimeInterface) {
             return '';
         }
 
-        if (null === $format) {
-            $format = $this->getData('format');
-        }
+        $format ??= $this->getData('format');
 
-        return IntlDateFormatter::formatObject($this->localeDate->date($this->_value), $format);
+        return (string)IntlDateFormatter::formatObject(
+            $this->localeDate->date($this->_value),
+            is_string($format) || is_int($format) ? $format : null
+        );
     }
 }

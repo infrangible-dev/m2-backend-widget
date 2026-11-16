@@ -2,198 +2,138 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Form;
 
-use Exception;
 use FeWeDev\Base\Arrays;
+use Infrangible\BackendWidget\Block\LayoutArguments;
 use Infrangible\BackendWidget\Model\Backend\Session;
 use Infrangible\Core\Helper\Registry;
 use Magento\Backend\Block\Widget\Context;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\View\Element\AbstractBlock;
+use RuntimeException;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Container extends \Magento\Backend\Block\Widget\Form\Container
 {
-    /** @var Arrays */
-    protected $arrays;
-
-    /** @var Registry */
-    protected $registryHelper;
-
-    /** @var Session */
-    protected $session;
+    use LayoutArguments;
 
     /** @var string */
-    protected $moduleKey;
+    protected string $moduleKey;
 
     /** @var string */
-    protected $objectName;
+    protected string $objectName;
 
     /** @var string */
-    protected $objectField;
+    protected string $objectField;
 
     /** @var string */
-    protected $objectTitle;
+    protected string $objectTitle;
 
     /** @var string */
-    protected $objectRegistryKey;
+    protected string $objectRegistryKey;
 
     /** @var bool */
-    protected $allowAdd = true;
+    protected bool $allowAdd = true;
 
     /** @var bool */
-    protected $allowEdit = true;
+    protected bool $allowEdit = true;
 
     /** @var bool */
-    protected $allowView = false;
+    protected bool $allowView = false;
 
     /** @var bool */
-    protected $allowDelete = true;
+    protected bool $allowDelete = true;
 
     /** @var bool */
-    protected $allowExport = true;
+    protected bool $allowExport = true;
 
     /** @var string */
-    protected $gridUrlRoute;
+    protected string $gridUrlRoute;
 
-    /** @var array */
-    protected $gridUrlParams;
-
-    /** @var string */
-    protected $saveUrlRoute;
-
-    /** @var array */
-    protected $saveUrlParams;
+    /**
+     * @var array
+     * @phpstan-var array<int|string, mixed>
+     */
+    protected array $gridUrlParams;
 
     /** @var string */
-    protected $deleteUrlRoute;
+    protected string $saveUrlRoute;
 
-    /** @var array */
-    protected $deleteUrlParams;
-
-    /** @var string */
-    protected $indexUrlRoute;
-
-    /** @var array */
-    protected $indexUrlParams;
+    /**
+     * @var array
+     * @phpstan-var array<int|string, mixed>
+     */
+    protected array $saveUrlParams;
 
     /** @var string */
-    protected $formContentBlockType;
+    protected string $deleteUrlRoute;
 
-    /** @var AbstractModel */
-    private $object;
+    /**
+     * @var array
+     * @phpstan-var array<int|string, mixed>
+     */
+    protected array $deleteUrlParams;
 
     /** @var string */
-    private $editFormId;
+    protected string $indexUrlRoute;
 
+    /**
+     * @var array
+     * @phpstan-var array<int|string, mixed>
+     */
+    protected array $indexUrlParams;
+
+    /** @var string */
+    protected string $formContentBlockType;
+
+    /** @var AbstractModel|null */
+    private ?AbstractModel $object = null;
+
+    /** @var string */
+    private string $editFormId;
+
+    /**
+     * @param Context $context
+     * @param Arrays $arrays
+     * @param Registry $registryHelper
+     * @param Session $session
+     * @param array $data
+     *
+     * @phpstan-param array<int|string, mixed> $data
+     */
     public function __construct(
         Context $context,
-        Arrays $arrays,
-        Registry $registryHelper,
-        Session $session,
+        protected Arrays $arrays,
+        protected Registry $registryHelper,
+        protected Session $session,
         array $data = []
     ) {
-        $this->arrays = $arrays;
-        $this->registryHelper = $registryHelper;
-        $this->session = $session;
-
-        $this->moduleKey = $arrays->getValue(
-            $data,
-            'module_key',
-            'adminhtml'
-        );
-        $this->objectName = $arrays->getValue(
-            $data,
-            'object_name',
-            'empty'
-        );
-        $this->objectField = $arrays->getValue(
-            $data,
-            'object_field',
-            'id'
-        );
-        $this->objectRegistryKey = $arrays->getValue(
-            $data,
-            'object_registry_key'
-        );
-        $this->objectTitle = $arrays->getValue(
-            $data,
-            'title',
-            'Container Widget Header'
-        );
-        $this->allowAdd = $arrays->getValue(
-            $data,
-            'allow_add',
-            true
-        );
-        $this->allowEdit = $arrays->getValue(
-            $data,
-            'allow_edit',
-            true
-        );
-        $this->allowView = $arrays->getValue(
-            $data,
-            'allow_view',
-            false
-        );
-        $this->allowDelete = $arrays->getValue(
-            $data,
-            'allow_delete',
-            true
-        );
-        $this->allowExport = $arrays->getValue(
-            $data,
-            'allow_export',
-            true
-        );
-        $this->gridUrlRoute = $arrays->getValue(
-            $data,
-            'grid_url_route',
-            '*/*/grid'
-        );
-        $this->gridUrlParams = $arrays->getValue(
-            $data,
-            'grid_url_params',
-            []
-        );
-        $this->saveUrlRoute = $arrays->getValue(
-            $data,
-            'save_url_route',
-            '*/*/save'
-        );
-        $this->saveUrlParams = $arrays->getValue(
-            $data,
-            'save_url_params',
-            []
-        );
-        $this->deleteUrlRoute = $arrays->getValue(
-            $data,
-            'delete_url_route',
-            '*/*/delete'
-        );
-        $this->deleteUrlParams = $arrays->getValue(
-            $data,
-            'delete_url_params',
-            []
-        );
-        $this->indexUrlRoute = $arrays->getValue(
-            $data,
-            'index_url_route'
-        );
-        $this->indexUrlParams = $arrays->getValue(
-            $data,
-            'index_url_params',
-            []
-        );
-        $this->formContentBlockType = $arrays->getValue(
-            $data,
-            'form_content_block_type'
-        );
+        $this->moduleKey = $this->stringArgument($data, 'module_key', 'adminhtml');
+        $this->objectName = $this->stringArgument($data, 'object_name', 'empty');
+        $this->objectField = $this->stringArgument($data, 'object_field', 'id');
+        $this->objectRegistryKey = $this->stringArgument($data, 'object_registry_key');
+        $this->objectTitle = $this->stringArgument($data, 'title', 'Container Widget Header');
+        $this->allowAdd = $this->boolArgument($data, 'allow_add', true);
+        $this->allowEdit = $this->boolArgument($data, 'allow_edit', true);
+        $this->allowView = $this->boolArgument($data, 'allow_view');
+        $this->allowDelete = $this->boolArgument($data, 'allow_delete', true);
+        $this->allowExport = $this->boolArgument($data, 'allow_export', true);
+        $this->gridUrlRoute = $this->stringArgument($data, 'grid_url_route', '*/*/grid');
+        $this->gridUrlParams = $this->arrayArgument($data, 'grid_url_params');
+        $this->saveUrlRoute = $this->stringArgument($data, 'save_url_route', '*/*/save');
+        $this->saveUrlParams = $this->arrayArgument($data, 'save_url_params');
+        $this->deleteUrlRoute = $this->stringArgument($data, 'delete_url_route', '*/*/delete');
+        $this->deleteUrlParams = $this->arrayArgument($data, 'delete_url_params');
+        $this->indexUrlRoute = $this->stringArgument($data, 'index_url_route');
+        $this->indexUrlParams = $this->arrayArgument($data, 'index_url_params');
+        $this->formContentBlockType = $this->stringArgument($data, 'form_content_block_type');
 
         $this->editFormId = $this->getFormId();
 
@@ -204,9 +144,11 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
     }
 
     /**
+     * Constructor.
+     *
      * @return void
      */
-    protected function _construct()
+    protected function _construct(): void
     {
         if ($this->objectField) {
             $this->_objectId = $this->objectField;
@@ -267,26 +209,51 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
         }
     }
 
+    /**
+     * Returns the form id.
+     *
+     * @return string
+     */
     protected function getFormId(): string
     {
         return 'edit_form';
     }
 
+    /**
+     * Returns the object.
+     *
+     * @return AbstractModel
+     * @throws RuntimeException
+     */
     protected function getObject(): AbstractModel
     {
         if ($this->object === null) {
-            $this->object = $this->registryHelper->registry($this->objectRegistryKey);
+            $object = $this->registryHelper->registry($this->objectRegistryKey);
+
+            if (! $object instanceof AbstractModel) {
+                throw new \RuntimeException(
+                    sprintf(
+                        'No object registered with key: %s',
+                        $this->objectRegistryKey
+                    )
+                );
+            }
+
+            $this->object = $object;
         }
 
         return $this->object;
     }
 
     /**
-     * @throws Exception
+     * Prepares the layout.
+     *
+     * @return AbstractBlock
+     * @throws LocalizedException
      */
     protected function _prepareLayout(): AbstractBlock
     {
-        if ($this->formContentBlockType === null && $this->_blockGroup && $this->_controller) {
+        if ($this->formContentBlockType === '' && $this->_blockGroup && $this->_controller) {
             $this->formContentBlockType = sprintf(
                 '%s\Block\%s\%s\%s',
                 str_replace(
@@ -321,12 +288,12 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
             }
         }
 
-        if ($this->formContentBlockType === null) {
-            throw new Exception('No block class defined');
+        if ($this->formContentBlockType === '') {
+            throw new \LogicException('No block class defined');
         }
 
         if (! class_exists($this->formContentBlockType)) {
-            throw new Exception(
+            throw new \LogicException(
                 sprintf(
                     'Could not find block class: %s',
                     $this->formContentBlockType
@@ -365,13 +332,17 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
     }
 
     /**
-     * @throws Exception
+     * Returns the delete url.
+     *
+     * @return string
      */
     public function getDeleteUrl(): string
     {
         $deleteUrlParams = $this->deleteUrlParams;
 
-        $deleteUrlParams[ $this->_objectId ] = (int)$this->getRequest()->getParam($this->_objectId);
+        $objectId = $this->getRequest()->getParam($this->_objectId);
+
+        $deleteUrlParams[ $this->_objectId ] = is_scalar($objectId) ? (int)$objectId : 0;
 
         return $this->getUrl(
             $this->deleteUrlRoute,
@@ -379,6 +350,11 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
         );
     }
 
+    /**
+     * Returns the back url.
+     *
+     * @return string
+     */
     public function getBackUrl(): string
     {
         return $this->getUrl(
@@ -387,6 +363,11 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
         );
     }
 
+    /**
+     * Returns the form html.
+     *
+     * @return string
+     */
     public function getFormHtml(): string
     {
         $formHtml = parent::getFormHtml();
@@ -396,12 +377,19 @@ class Container extends \Magento\Backend\Block\Widget\Form\Container
         return $formHtml;
     }
 
+    /**
+     * Returns the form session key.
+     *
+     * @param AbstractModel|null $object
+     *
+     * @return string
+     */
     protected function getFormSessionKey(?AbstractModel $object = null): string
     {
         return sprintf(
             '%s_form_%s',
             $this->objectRegistryKey,
-            $object && $object->getId() ? $object->getId() : 'add'
+            $object && is_scalar($object->getId()) ? (string)$object->getId() : 'add'
         );
     }
 }

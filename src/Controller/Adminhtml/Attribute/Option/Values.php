@@ -2,32 +2,37 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Controller\Adminhtml\Attribute\Option;
 
-use Exception;
 use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Json;
 use Infrangible\Core\Controller\Adminhtml\Ajax;
 use Infrangible\Core\Helper\Attribute;
+use Magento\Backend\App\Action\Context;
 use Magento\Catalog\Model\Product;
-use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
 class Values extends Ajax
 {
-    /** @var Attribute */
-    protected $eavAttributeHelper;
-
+    /**
+     * @param Arrays $arrays
+     * @param Json $json
+     * @param Attribute $eavAttributeHelper
+     * @param Context $context
+     * @param LoggerInterface $logging
+     */
     public function __construct(
         Arrays $arrays,
         Json $json,
-        Attribute $eavAttributeHelper,
+        protected Attribute $eavAttributeHelper,
         Context $context,
         LoggerInterface $logging
     ) {
@@ -37,12 +42,13 @@ class Values extends Ajax
             $context,
             $logging
         );
-
-        $this->eavAttributeHelper = $eavAttributeHelper;
     }
 
     /**
-     * @throws Exception
+     * Executes the action.
+     *
+     * @return ResponseInterface
+     * @throws LocalizedException
      */
     public function execute(): ResponseInterface
     {
@@ -50,7 +56,7 @@ class Values extends Ajax
 
         $attribute = $this->eavAttributeHelper->getAttribute(
             Product::ENTITY,
-            $attributeId
+            is_scalar($attributeId) ? (string)$attributeId : ''
         );
 
         if ($attribute->usesSource()) {

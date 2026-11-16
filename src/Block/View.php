@@ -2,20 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\BackendWidget\Block;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-abstract class View
-    extends Form
+
+namespace Infrangible\BackendWidget\Block;
+
+abstract class View extends Form
 {
     /**
+     * Constructor.
+     *
      * @return void
      */
-    protected function _construct()
+    protected function _construct(): void
     {
         parent::_construct();
 

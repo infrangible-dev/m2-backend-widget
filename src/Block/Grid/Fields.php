@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\BackendWidget\Block\Grid;
 
 use Magento\Backend\Block\Template;
 use Magento\Framework\App\Request\Http;
 
-/**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- */
-class Fields
-    extends Template
+class Fields extends Template
 {
     /** @var string */
     private $dataGridId;
@@ -22,18 +22,20 @@ class Fields
     private $jsObjectName;
 
     /** @var string[] */
-    private $fieldList = [];
+    private array $fieldList = [];
 
     /** @var string[] */
-    private $groupByFieldList = [];
+    private array $groupByFieldList = [];
 
     /** @var string[] */
-    private $activeGroupByFieldList = [];
+    private array $activeGroupByFieldList = [];
 
     /**
+     * Constructor.
+     *
      * @return void
      */
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->setTemplate('Infrangible_BackendWidget::grid/fields.phtml');
 
@@ -41,6 +43,8 @@ class Fields
     }
 
     /**
+     * Returns the data grid id.
+     *
      * @return string
      */
     public function getDataGridId(): string
@@ -49,7 +53,11 @@ class Fields
     }
 
     /**
+     * Sets the data grid id.
+     *
      * @param string $dataGridId
+     *
+     * @return void
      */
     public function setDataGridId(string $dataGridId): void
     {
@@ -57,6 +65,8 @@ class Fields
     }
 
     /**
+     * Returns the JavaScript object name.
+     *
      * @return string
      */
     public function getJsObjectName(): string
@@ -65,7 +75,11 @@ class Fields
     }
 
     /**
+     * Sets the JavaScript object name.
+     *
      * @param string $jsObjectName
+     *
+     * @return void
      */
     public function setJsObjectName(string $jsObjectName): void
     {
@@ -73,6 +87,8 @@ class Fields
     }
 
     /**
+     * Returns the field list.
+     *
      * @return string[]
      */
     public function getFieldList(): array
@@ -81,7 +97,11 @@ class Fields
     }
 
     /**
+     * Sets the field list.
+     *
      * @param string[] $fieldList
+     *
+     * @return void
      */
     public function setFieldList(array $fieldList): void
     {
@@ -89,6 +109,8 @@ class Fields
     }
 
     /**
+     * Returns the group by field list.
+     *
      * @return string[]
      */
     public function getGroupByFieldList(): array
@@ -97,7 +119,11 @@ class Fields
     }
 
     /**
+     * Sets the group by field list.
+     *
      * @param string[] $groupByFieldList
+     *
+     * @return void
      */
     public function setGroupByFieldList(array $groupByFieldList): void
     {
@@ -105,6 +131,8 @@ class Fields
     }
 
     /**
+     * Returns the active group by field list.
+     *
      * @return string[]
      */
     public function getActiveGroupByFieldList(): array
@@ -113,7 +141,11 @@ class Fields
     }
 
     /**
+     * Sets the active group by field list.
+     *
      * @param string[] $activeGroupByFieldList
+     *
+     * @return void
      */
     public function setActiveGroupByFieldList(array $activeGroupByFieldList): void
     {
@@ -121,6 +153,8 @@ class Fields
     }
 
     /**
+     * Returns the ajax url.
+     *
      * @return string
      */
     public function getAjaxUrl(): string
@@ -129,6 +163,8 @@ class Fields
     }
 
     /**
+     * Checks whether it is ajax.
+     *
      * @return bool
      */
     public function isAjax(): bool
@@ -140,6 +176,8 @@ class Fields
     }
 
     /**
+     * Renders the block as HTML.
+     *
      * @return string
      */
     protected function _toHtml(): string
