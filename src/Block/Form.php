@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -20,6 +20,11 @@ use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Registry;
 use RuntimeException;
 
+/**
+ * Base of the forms of the admin, with the fields that the helper of forms adds.
+ *
+ * @noinspection PhpDeprecationInspection The class builds on Magento's legacy form widget.
+ */
 abstract class Form extends Generic
 {
     use LayoutArguments;

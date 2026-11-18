@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -19,6 +19,11 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Element\BlockInterface;
 
+/**
+ * Container of a grid of the admin with its buttons.
+ *
+ * @noinspection PhpDeprecationInspection The class builds on Magento's legacy grid widget.
+ */
 class Container extends Grid\Container
 {
     use LayoutArguments;

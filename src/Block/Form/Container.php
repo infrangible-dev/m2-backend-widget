@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -21,6 +21,11 @@ use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Element\BlockInterface;
 use RuntimeException;
 
+/**
+ * Container of a form of the admin with its buttons.
+ *
+ * @noinspection PhpDeprecationInspection The class builds on Magento's legacy form widget.
+ */
 class Container extends \Magento\Backend\Block\Widget\Form\Container
 {
     use LayoutArguments;

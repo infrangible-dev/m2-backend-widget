@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -45,6 +45,7 @@ abstract class Tab extends Grid
      * @param array $data
      *
      * @phpstan-param array<int|string, mixed> $data
+     * @noinspection PhpDeprecationInspection Magento's legacy grid, the parent class, needs the backend helper.
      */
     public function __construct(
         Context $context,

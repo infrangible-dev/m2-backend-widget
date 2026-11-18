@@ -13,6 +13,11 @@ namespace Infrangible\BackendWidget\Block\Grid;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DB\Select;
 
+/**
+ * Mass actions of the grids of the admin.
+ *
+ * @noinspection PhpDeprecationInspection The class builds on Magento's legacy grid widget.
+ */
 class MassAction extends \Magento\Backend\Block\Widget\Grid\Massaction\Extended
 {
     /**

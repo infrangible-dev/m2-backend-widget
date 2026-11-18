@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -12,6 +12,11 @@ namespace Infrangible\BackendWidget\Block\Grid\Column\Renderer;
 
 use Magento\Backend\Block\Context;
 
+/**
+ * Renders the store of a row in a grid.
+ *
+ * @noinspection PhpDeprecationInspection The class builds on Magento's legacy grid widget.
+ */
 class Store extends \Magento\Backend\Block\Widget\Grid\Column\Renderer\Store
 {
     /**

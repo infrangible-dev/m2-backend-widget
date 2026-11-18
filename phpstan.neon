@@ -2,6 +2,9 @@
 #   cd /var/www/magento && vendor/bin/phpstan analyse -c /var/www/module/phpstan.neon
 # In another Magento installation, set MAGENTO_ROOT, for example:
 #   MAGENTO_ROOT=/path/to/magento /path/to/magento/vendor/bin/phpstan analyse -c phpstan.neon
+includes:
+    # findings that depend on the Magento version
+    - phpstan.versions.php
 parameters:
     level: 9
     paths:

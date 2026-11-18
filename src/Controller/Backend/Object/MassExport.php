@@ -193,7 +193,7 @@ abstract class MassExport extends Edit
      */
     protected function getExportFields(): array
     {
-        /** @noinspection PhpDeprecationInspection */
+        /** @noinspection PhpDeprecationInspection the models of the grids have no repository */
         $item = $this->getObjectInstance()->getResourceCollection()->fetchItem();
 
         $data = $item instanceof DataObject ? $item->getData() : [];

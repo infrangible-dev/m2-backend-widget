@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -11,16 +11,12 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Block\Form;
 
 use Magento\Backend\Block\Template;
-use Magento\Directory\Helper\Data as DirectoryHelper;
-use Magento\Framework\Json\Helper\Data;
 
 class Back extends Template
 {
     /**
      * @param Template\Context $context
      * @param array $data
-     * @param Data|null $jsonHelper
-     * @param DirectoryHelper|null $directoryHelper
      * @param string|null $buttonId
      * @param string|null $buttonUrl
      * @param string|null $formId
@@ -30,18 +26,11 @@ class Back extends Template
     public function __construct(
         Template\Context $context,
         array $data = [],
-        ?Data $jsonHelper = null,
-        ?DirectoryHelper $directoryHelper = null,
         private ?string $buttonId = null,
         private ?string $buttonUrl = null,
         private ?string $formId = null
     ) {
-        parent::__construct(
-            $context,
-            $data,
-            $jsonHelper,
-            $directoryHelper
-        );
+        parent::__construct($context, $data);
     }
 
     /**

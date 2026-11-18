@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -45,7 +45,8 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
         $groupCollection = $this->infrangibleSystemStore->getGroupCollection();
         $storeCollection = $this->infrangibleSystemStore->getStoreCollection();
 
-        $html = '<select class="admin__control-select" name="' . $this->escapeHtml($this->_getHtmlName()) . '" ' .
+        $html = '<select class="admin__control-select" name="' .
+            $this->_escaper->escapeHtml($this->_getHtmlName()) . '" ' .
             $this->getColumn()->getData('validate_class') . $this->getUiId('filter', $this->_getHtmlName()) . '>';
 
         $value = $this->getColumn()->getData('value');
@@ -72,7 +73,7 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
 
                         $html .= sprintf(
                             '<optgroup label="%s"></optgroup>',
-                            $this->escapeHtml((string)$website->getName())
+                            $this->_escaper->escapeHtml((string)$website->getName())
                         );
                     }
 
@@ -81,7 +82,7 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
 
                         $html .= sprintf(
                             '<optgroup label="&nbsp;&nbsp;&nbsp;&nbsp;%s">',
-                            $this->escapeHtml((string)$group->getName())
+                            $this->_escaper->escapeHtml((string)$group->getName())
                         );
                     }
 
@@ -89,8 +90,9 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
 
                     $selected = $value == $store->getId() ? ' selected="selected"' : '';
 
-                    $html .= '<option value="' . $this->escapeHtmlAttr((string)$store->getId()) . '"' . $selected .
-                        '>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->escapeHtml((string)$store->getName()) . '</option>';
+                    $html .= '<option value="' . $this->_escaper->escapeHtmlAttr((string)$store->getId()) . '"' .
+                        $selected . '>&nbsp;&nbsp;&nbsp;&nbsp;' .
+                        $this->_escaper->escapeHtml((string)$store->getName()) . '</option>';
                 }
                 if ($groupShow) {
                     $html .= '</optgroup>';
@@ -101,8 +103,8 @@ class Store extends \Magento\Backend\Block\Widget\Grid\Column\Filter\Store
         if ($this->getColumn()->getData('display_deleted')) {
             $selected = $this->getData('value') == '_deleted_' ? ' selected' : '';
 
-            $html .= '<option value="_deleted_"' . $selected . '>' . $this->escapeHtml((string)__('[ deleted ]')) .
-                '</option>';
+            $html .= '<option value="_deleted_"' . $selected . '>' .
+                $this->_escaper->escapeHtml((string)__('[ deleted ]')) . '</option>';
         }
 
         $html .= '</select>';

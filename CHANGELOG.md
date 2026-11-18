@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.3
+
+### Changed
+
+- The store filter of grids escapes with Magento's escaper instead of the deprecated escape methods of blocks.
+- The back button of forms no longer passes the deprecated JSON helper to its parent block.
+- Every use of Magento's deprecated grid and form widgets is documented with the reason why it is needed.
+
 ## 4.0.2
 
 ### Security

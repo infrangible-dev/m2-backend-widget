@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -32,6 +32,7 @@ class Action
      *
      * @return array
      * @phpstan-return array<int|string, mixed>
+     * @noinspection PhpDeprecationInspection The plugin extends the action column of Magento's legacy grid.
      */
     public function beforeGetUrl(
         \Magento\Backend\Block\Widget\Grid\Column\Renderer\Action $subject,
