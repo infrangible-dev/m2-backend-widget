@@ -22,6 +22,9 @@ use Psr\Log\LoggerInterface;
 
 class Values extends Ajax
 {
+    /** Every admin user may load the option labels of attributes, which forms of all areas show. */
+    public const ADMIN_RESOURCE = 'Magento_Backend::admin';
+
     /**
      * @param Arrays $arrays
      * @param Json $json

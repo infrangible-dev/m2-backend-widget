@@ -9,6 +9,16 @@ parameters:
     bootstrapFiles:
         # generates factories and extension attributes on the fly, as in Magento's own static tests
         - phpstan.bootstrap.php
+    # typed properties have to be set before they are read: a property without default value that is set neither in the
+    # constructor nor in one of the methods that Magento and PHPUnit call like a constructor fails with an Error when it
+    # is read (for example the subject of a mail that was never set)
+    checkUninitializedProperties: true
+    additionalConstructors:
+        - PHPUnit\Framework\TestCase::setUp
+        - Magento\Framework\View\Element\AbstractBlock::_construct
+        - Magento\Framework\Model\AbstractModel::_construct
+        - Magento\Framework\Model\ResourceModel\AbstractResource::_construct
+        - Magento\Framework\Data\Collection\AbstractDb::_construct
     # @throws tags as PhpStorm expects them: every checked exception that a method lets through has to be declared,
     # and not more than that; unchecked are the same exceptions as in the PhpStorm settings of the modules
     exceptions:

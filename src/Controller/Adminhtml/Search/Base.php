@@ -29,6 +29,12 @@ use Psr\Log\LoggerInterface;
 abstract class Base extends Json
 {
     /**
+     * Every admin user may search: the signed parameters limit the search to what a form set up, which checks its own
+     * resource.
+     */
+    public const ADMIN_RESOURCE = 'Magento_Backend::admin';
+
+    /**
      * @param Arrays $arrays
      * @param \FeWeDev\Base\Json $json
      * @param Context $context

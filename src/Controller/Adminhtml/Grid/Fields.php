@@ -20,6 +20,9 @@ use Psr\Log\LoggerInterface;
 
 class Fields extends Ajax
 {
+    /** Every admin user may change the columns of the grids they see; stored in their own session. */
+    public const ADMIN_RESOURCE = 'Magento_Backend::admin';
+
     /**
      * @param Arrays          $arrays
      * @param Json            $json

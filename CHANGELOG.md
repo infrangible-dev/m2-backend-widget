@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.0.2
+
+### Security
+
+- The controllers that return the custom options of products need the resource `Magento_Catalog::products`. Before,
+  every admin user could call them.
+- The other Ajax controllers (grid columns, option labels of attributes, autocomplete search) declare that every admin
+  user may call them, as before.
+
 ## 4.0.1
 
 ### Changed

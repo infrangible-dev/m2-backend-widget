@@ -1,11 +1,12 @@
 # Checks the module with several Magento and PHP versions and releases the version from composer.json when the
-# checks pass on main. See https://github.com/infrangible-dev/workflows
+# checks pass on the default branch (main or master). See https://github.com/infrangible-dev/workflows
 name: CI
 
 on:
   push:
     branches:
       - main
+      - master
   pull_request:
 
 permissions:

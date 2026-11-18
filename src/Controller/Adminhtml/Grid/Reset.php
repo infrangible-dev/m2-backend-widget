@@ -17,6 +17,9 @@ use Infrangible\BackendWidget\Helper\Session;
 
 class Reset extends Action
 {
+    /** Every admin user may reset the columns of the grids they see; stored in their own session. */
+    public const ADMIN_RESOURCE = 'Magento_Backend::admin';
+
     /**
      * @param Context $context
      * @param Session $sessionHelper

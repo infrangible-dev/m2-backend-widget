@@ -22,6 +22,9 @@ use Psr\Log\LoggerInterface;
 
 class Index extends Ajax
 {
+    /** Returns product data, allowed for users who may manage products. */
+    public const ADMIN_RESOURCE = 'Magento_Catalog::products';
+
     /**
      * @param Arrays $arrays
      * @param Json $json
