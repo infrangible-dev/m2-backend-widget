@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection The helper adds the columns of Magento's legacy grid. */
 
 declare(strict_types=1);
 
@@ -44,8 +44,6 @@ use Magento\Store\Model\System\Store;
 
 /**
  * Adds the columns of the grids of the admin.
- *
- * @noinspection PhpDeprecationInspection The helper adds the columns of Magento's legacy grid.
  */
 class Grid
 {

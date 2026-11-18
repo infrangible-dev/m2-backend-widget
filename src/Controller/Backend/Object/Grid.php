@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection The grids of the module are Magento's legacy grids. */
 
 declare(strict_types=1);
 
@@ -63,7 +63,6 @@ abstract class Grid extends Table
      * @param Extended $block
      *
      * @return string
-     * @noinspection PhpDeprecationInspection The grids of the module are Magento's legacy grids.
      */
     protected function renderBlock(Extended $block): string
     {

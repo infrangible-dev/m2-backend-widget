@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection Magento's legacy form, the parent class, needs the registry. */
 
 declare(strict_types=1);
 
@@ -44,7 +44,6 @@ abstract class Tab extends Form
      * @param array $data
      *
      * @phpstan-param array<int|string, mixed> $data
-     * @noinspection PhpDeprecationInspection Magento's legacy form, the parent class, needs the registry.
      */
     public function __construct(
         Context $context,

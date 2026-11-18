@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection Magento's controller, the parent class, needs the registry. */
 
 declare(strict_types=1);
 
@@ -25,7 +25,6 @@ class OnInsert extends \Magento\Cms\Controller\Adminhtml\Wysiwyg\Images\OnInsert
      * @param Context    $context
      * @param Registry   $coreRegistry
      * @param RawFactory $resultRawFactory
-     * @noinspection PhpDeprecationInspection Magento's controller, the parent class, needs the registry.
      */
     public function __construct(
         protected Stores $storeHelper,

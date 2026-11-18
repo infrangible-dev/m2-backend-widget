@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.4
+
+### Changed
+
+- Files that import deprecated classes of Magento's legacy grid and form widgets document the reason for the whole
+  file, which also covers the imports.
+
 ## 4.0.3
 
 ### Changed

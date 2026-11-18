@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection The class builds on Magento's legacy grid widget. */
 
 declare(strict_types=1);
 
@@ -42,8 +42,6 @@ use Zend_Db_Expr;
 
 /**
  * Base class of the admin grids of objects.
- *
- * @noinspection PhpDeprecationInspection Magento's legacy grid, which this class extends, needs the deprecated column.
  *
  * @phpstan-type JoinValue array{
  *     table_name: string,
