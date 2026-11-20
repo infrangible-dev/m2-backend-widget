@@ -24,7 +24,8 @@ use PHPStan\Type\ObjectType;
  *
  * PHPStan inherits the @throws tag of the parent method (for example of the constructor of Magento's models), PhpStorm
  * does not: it reports "PHPDoc comment doesn't contain all the necessary @throws tags" for the method. Exceptions that
- * are not declared at all are reported by PHPStan itself (exceptions.check.missingCheckedExceptionInThrows).
+ * are not declared at all are reported by PHPStan itself (exceptions.check.missingCheckedExceptionInThrows). Like in
+ * PhpStorm, only exceptions that the called methods declare themselves count, not inherited ones.
  *
  * @implements Rule<MethodReturnStatementsNode>
  */
@@ -74,7 +75,9 @@ class OwnThrowsRule implements Rule
         $reported = [];
 
         foreach ($node->getStatementResult()->getThrowPoints() as $throwPoint) {
-            if (! $throwPoint->isExplicit()) {
+            if (! $throwPoint->isExplicit() ||
+                ! $this->isDeclaredByCall($throwPoint->getNode(), $throwPoint->getScope())) {
+
                 continue;
             }
 
@@ -111,5 +114,57 @@ class OwnThrowsRule implements Rule
         }
 
         return $errors;
+    }
+
+    /**
+     * Checks if the exceptions of the throw point are declared by the called method itself; PHPStan also inherits the
+     * @throws tag of a parent method for the called method, PhpStorm does not.
+     *
+     * @param Node $node
+     * @param Scope $scope
+     *
+     * @return bool
+     */
+    private function isDeclaredByCall(Node $node, Scope $scope): bool
+    {
+        if ($node instanceof Node\Stmt\Expression) {
+            $node = $node->expr;
+        }
+
+        $method = null;
+
+        if ($node instanceof Node\Expr\MethodCall || $node instanceof Node\Expr\NullsafeMethodCall ||
+            $node instanceof Node\Expr\StaticCall) {
+
+            if (! $node->name instanceof Node\Identifier) {
+                return true;
+            }
+
+            $type = $node instanceof Node\Expr\StaticCall ?
+                ($node->class instanceof Node\Name ? $scope->resolveTypeByName($node->class) : null) :
+                $scope->getType($node->var);
+
+            if ($type === null || ! $type->hasMethod($node->name->toString())->yes()) {
+                return true;
+            }
+
+            $method = $type->getMethod($node->name->toString(), $scope);
+        } elseif ($node instanceof Node\Expr\New_ && $node->class instanceof Node\Name) {
+            $type = $scope->resolveTypeByName($node->class);
+
+            if (! $type->hasMethod('__construct')->yes()) {
+                return true;
+            }
+
+            $method = $type->getMethod('__construct', $scope);
+        }
+
+        if ($method === null) {
+            return true;
+        }
+
+        $docComment = $method->getDocComment();
+
+        return $docComment !== null && str_contains($docComment, '@throws');
     }
 }
