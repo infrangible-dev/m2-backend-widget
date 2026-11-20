@@ -5,6 +5,8 @@
 includes:
     # findings that depend on the Magento version
     - phpstan.versions.php
+    # rules for conventions of PhpStorm that PHPStan does not check itself
+    - phpstan.rules.php
 parameters:
     level: 9
     paths:
@@ -23,7 +25,9 @@ parameters:
         - Magento\Framework\Model\ResourceModel\AbstractResource::_construct
         - Magento\Framework\Data\Collection\AbstractDb::_construct
     # @throws tags as PhpStorm expects them: every checked exception that a method lets through has to be declared,
-    # and not more than that; unchecked are the same exceptions as in the PhpStorm settings of the modules
+    # and not more than that; unchecked are the same exceptions as in the PhpStorm settings of the modules. The rules
+    # of phpstan.rules.php add what PhpStorm checks beyond that: @throws of the method itself, not only of a parent,
+    # and catches of exceptions that no call of the try block declares
     exceptions:
         check:
             missingCheckedExceptionInThrows: true
@@ -41,4 +45,10 @@ parameters:
         # 12.5+), which older versions ignore; Magento 2.4.6 comes with PHPUnit 9
         -
             message: '#^Attribute class PHPUnit\\Framework\\Attributes\\(DataProvider|AllowMockObjectsWithoutExpectations) does not exist\.$#'
+            reportUnmatched: false
+        # tests that use reflection on classes they name themselves: PhpStorm requires the ReflectionException in
+        # @throws, PHPStan knows that it cannot be thrown for an existing class; production code stays strict
+        -
+            message: '#^Method .+ has ReflectionException in PHPDoc @throws tag but it''s not thrown\.$#'
+            path: src/Test/*
             reportUnmatched: false

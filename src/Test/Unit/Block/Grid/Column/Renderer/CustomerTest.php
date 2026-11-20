@@ -117,6 +117,6 @@ class CustomerTest extends TestCase
 
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('&lt;/textarea&gt;&lt;script&gt;', $html);
-        $this->assertSame('', $renderer->render(new DataObject([])));
+        $this->assertSame('', $renderer->render(new DataObject()));
     }
 }
