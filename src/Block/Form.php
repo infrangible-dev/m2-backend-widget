@@ -519,7 +519,7 @@ abstract class Form extends Generic
      * @param string $label
      * @param array $options
      * @param mixed $defaultValue
-     * @param AbstractModel|null $object
+     * @param AbstractModel|null $object the object of the form if null
      * @param bool $required
      * @param bool $readOnly
      * @param bool $disabled
@@ -546,7 +546,7 @@ abstract class Form extends Generic
             $label,
             $options,
             $defaultValue,
-            $this->getObject(),
+            $object ?? $this->getObject(),
             $required,
             $this->isReadOnlyAll() ? true : $readOnly,
             $this->isDisableAll() ? true : $disabled
@@ -1215,7 +1215,7 @@ abstract class Form extends Generic
      * @param Fieldset $fieldSet
      * @param string $objectFieldName
      * @param string $label
-     * @param AbstractModel|null $object
+     * @param AbstractModel|null $object the object of the form if null
      * @param bool $required
      *
      * @return void
@@ -1231,7 +1231,7 @@ abstract class Form extends Generic
             $fieldSet,
             $objectFieldName,
             $label,
-            $this->getObject(),
+            $object ?? $this->getObject(),
             $required
         );
     }

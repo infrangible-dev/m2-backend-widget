@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Infrangible\BackendWidget\Helper;
 
 use Infrangible\Core\Helper\Product;
+use Magento\Catalog\Api\Data\ProductCustomOptionValuesInterface;
 use Magento\Catalog\Model\Product\Option;
 use Magento\Catalog\Model\Product\Option\Value;
 use Magento\Catalog\Model\ResourceModel\Product\Option\Value\CollectionFactory;
@@ -87,18 +88,14 @@ class ProductOption
                 continue;
             }
 
-            $optionValues = [];
-
-            /** @var Value $productOptionValue */
-            foreach ($productOptionValues as $productOptionValue) {
-                $optionValues[] = [
-                    'value' => $productOptionValue->getId(),
-                    'label' => $productOptionValue->getTitle()
-                ];
-            }
-
             $options[] = [
-                'value' => $optionValues,
+                'value' => array_map(
+                    static fn(ProductCustomOptionValuesInterface $productOptionValue): array => [
+                        'value' => $productOptionValue->getOptionTypeId(),
+                        'label' => $productOptionValue->getTitle()
+                    ],
+                    $productOptionValues
+                ),
                 'label' => $productOption->getTitle()
             ];
         }

@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.5
+
+### Fixed
+
+- `Block\Form::addImageField()` and `addOptionsMultiSelectField()` ignored the object that was passed to them and always
+  used the object of the form; the object of the form is now only used if none is passed.
+
+### Changed
+
+- The search terms of the product search and the option values of `Helper\ProductOption` are built with `array_map()`.
+- The checks of the module use the current rules of the workflows (unused parameters, redundant casts and `@var` tags,
+  loops that are `array_map()` calls, and the exceptions of PHP's functions that PhpStorm requires in `@throws` tags).
+
 ## 4.0.4
 
 ### Changed

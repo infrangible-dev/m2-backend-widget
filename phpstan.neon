@@ -11,6 +11,8 @@ parameters:
     level: 9
     paths:
         - src
+        # the rules of phpstan.rules.php, which PhpStorm inspects as part of the module
+        - phpstan-rules
     bootstrapFiles:
         # generates factories and extension attributes on the fly, as in Magento's own static tests
         - phpstan.bootstrap.php

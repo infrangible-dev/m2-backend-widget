@@ -16,6 +16,7 @@ use PhpParser\Node\Name;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ParametersAcceptor;
 use PHPStan\Reflection\ReflectionProvider;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
@@ -27,9 +28,15 @@ use PHPStan\Rules\RuleErrorBuilder;
  *
  * @implements Rule<Expr\CallLike>
  */
-class DefaultArgumentRule implements Rule
+readonly class DefaultArgumentRule implements Rule
 {
-    public function __construct(private readonly ReflectionProvider $reflectionProvider)
+    /**
+     * Node types of number literals: LNumber and DNumber of php-parser 4 (PHPStan 1), Int_ and Float_ of php-parser 5
+     * (PHPStan 2), where the old classes are deprecated and the new ones do not exist in php-parser 4.
+     */
+    private const NUMBERS = ['Scalar_LNumber', 'Scalar_DNumber', 'Scalar_Int', 'Scalar_Float'];
+
+    public function __construct(private ReflectionProvider $reflectionProvider)
     {
     }
 
@@ -40,8 +47,9 @@ class DefaultArgumentRule implements Rule
 
     /**
      * @param Expr\CallLike $node
+     * @param Scope $scope
      *
-     * @return list<\PHPStan\Rules\IdentifierRuleError>
+     * @return list<IdentifierRuleError>
      */
     public function processNode(Node $node, Scope $scope): array
     {
@@ -103,14 +111,12 @@ class DefaultArgumentRule implements Rule
      */
     private function isLiteral(Expr $expression): bool
     {
-        if ($expression instanceof Node\Scalar\LNumber || $expression instanceof Node\Scalar\DNumber ||
-            ($expression instanceof Node\Scalar\String_)) {
-
+        if ($expression instanceof Node\Scalar\String_ || in_array($expression->getType(), self::NUMBERS, true)) {
             return true;
         }
 
         if ($expression instanceof Expr\UnaryMinus) {
-            return $expression->expr instanceof Node\Scalar\LNumber || $expression->expr instanceof Node\Scalar\DNumber;
+            return in_array($expression->expr->getType(), self::NUMBERS, true);
         }
 
         if ($expression instanceof Expr\ConstFetch) {
@@ -150,13 +156,16 @@ class DefaultArgumentRule implements Rule
         } elseif ($node instanceof Expr\MethodCall || $node instanceof Expr\NullsafeMethodCall ||
             $node instanceof Expr\StaticCall) {
 
-            if ($node->name instanceof Node\Identifier) {
+            $name = $node->name;
+            $class = $node instanceof Expr\StaticCall ? $node->class : null;
+
+            if ($name instanceof Node\Identifier) {
                 $type = $node instanceof Expr\StaticCall ?
-                    ($node->class instanceof Name ? $scope->resolveTypeByName($node->class) : null) :
+                    ($class instanceof Name ? $scope->resolveTypeByName($class) : null) :
                     $scope->getType($node->var);
 
-                if ($type !== null && $type->hasMethod($node->name->toString())->yes()) {
-                    $variants = $type->getMethod($node->name->toString(), $scope)->getVariants();
+                if ($type !== null && $type->hasMethod($name->toString())->yes()) {
+                    $variants = $type->getMethod($name->toString(), $scope)->getVariants();
                 }
             }
         }

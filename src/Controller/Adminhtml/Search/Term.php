@@ -73,19 +73,15 @@ class Term extends Base
             }
 
             if (count($searchFields) > 0) {
-                $filterAttributeConditions = [];
-
-                foreach ($searchFields as $searchField) {
-                    $filterAttributeConditions[] = [
-                        'attribute' => $searchField,
-                        'like'      => sprintf(
-                            '%%%s%%',
-                            $term
-                        )
-                    ];
-                }
-
-                $collection->addAttributeToFilter($filterAttributeConditions);
+                $collection->addAttributeToFilter(
+                    array_map(
+                        static fn(string $searchField): array => [
+                            'attribute' => $searchField,
+                            'like'      => sprintf('%%%s%%', $term)
+                        ],
+                        $searchFields
+                    )
+                );
             }
 
             foreach ($searchConditions as $attributeCode => $condition) {

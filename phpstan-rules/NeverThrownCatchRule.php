@@ -18,29 +18,30 @@ use PhpParser\NodeFinder;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Exceptions\DefaultExceptionTypeResolver;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
 /**
- * A catch of a checked exception that none of the calls in the try block declares in @throws is dead.
+ * A catch of a checked exception that none of the calls in the try block declares in throws is dead.
  *
  * PhpStorm reports it as "Exception is never thrown in the corresponding try block"; PHPStan does not, because it
- * assumes that calls without @throws can throw anything. The rule is conservative: it only reports a catch if every
+ * assumes that calls without throws can throw anything. The rule is conservative: it only reports a catch if every
  * call of the try block can be resolved, and never catches of Exception or Throwable, which PhpStorm accepts as well.
  * Like in PhpStorm, "@noinspection PhpRedundantCatchClauseInspection" on the try or the method suppresses it.
  *
  * @implements Rule<TryCatch>
  */
-class NeverThrownCatchRule implements Rule
+readonly class NeverThrownCatchRule implements Rule
 {
     /** Exceptions that may be caught without a declaration. */
     private const GENERIC = ['exception', 'throwable'];
 
     public function __construct(
-        private readonly ReflectionProvider $reflectionProvider,
-        private readonly DefaultExceptionTypeResolver $exceptionTypeResolver
+        private ReflectionProvider $reflectionProvider,
+        private DefaultExceptionTypeResolver $exceptionTypeResolver
     ) {
     }
 
@@ -51,8 +52,9 @@ class NeverThrownCatchRule implements Rule
 
     /**
      * @param TryCatch $node
+     * @param Scope $scope
      *
-     * @return list<\PHPStan\Rules\IdentifierRuleError>
+     * @return list<IdentifierRuleError>
      */
     public function processNode(Node $node, Scope $scope): array
     {
@@ -147,6 +149,7 @@ class NeverThrownCatchRule implements Rule
      * be resolved.
      *
      * @param Node[] $statements
+     * @param Scope $scope
      *
      * @return list<Type>|null
      */
@@ -157,7 +160,8 @@ class NeverThrownCatchRule implements Rule
 
         $nodes = $nodeFinder->find(
             $statements,
-            static fn(Node $node): bool => $node instanceof Expr\MethodCall || $node instanceof Expr\NullsafeMethodCall ||
+            static fn(Node $node): bool => $node instanceof Expr\MethodCall ||
+                $node instanceof Expr\NullsafeMethodCall ||
                 $node instanceof Expr\StaticCall || $node instanceof Expr\New_ || $node instanceof Expr\FuncCall ||
                 $node instanceof Expr\Throw_ || $node instanceof Node\Stmt\Throw_ ||
                 $node instanceof Expr\Closure || $node instanceof Expr\ArrowFunction
@@ -222,8 +226,10 @@ class NeverThrownCatchRule implements Rule
     private function getThrowType(Node $node, Scope $scope): Type|null|false
     {
         if ($node instanceof Expr\Throw_ || $node instanceof Node\Stmt\Throw_) {
-            return $node->expr instanceof Expr\New_ && $node->expr->class instanceof Name ?
-                new ObjectType($scope->resolveName($node->expr->class)) : false;
+            $thrown = $node->expr;
+            $thrownClass = $thrown instanceof Expr\New_ ? $thrown->class : null;
+
+            return $thrownClass instanceof Name ? new ObjectType($scope->resolveName($thrownClass)) : false;
         }
 
         if ($node instanceof Expr\New_) {
@@ -256,28 +262,33 @@ class NeverThrownCatchRule implements Rule
             return false;
         }
 
-        if (! $node->name instanceof Node\Identifier) {
+        $name = $node->name;
+
+        if (! $name instanceof Node\Identifier) {
             return false;
         }
 
         if ($node instanceof Expr\StaticCall) {
-            if (! $node->class instanceof Name) {
+            $class = $node->class;
+
+            if (! $class instanceof Name) {
                 return false;
             }
 
-            $type = $scope->resolveTypeByName($node->class);
+            $type = $scope->resolveTypeByName($class);
         } else {
-            // variables that are assigned in the try block are unknown here
-            if ($node->var instanceof Expr\Variable && is_string($node->var->name) &&
-                ! $scope->hasVariableType($node->var->name)->yes()) {
+            $variable = $node->var;
+            $variableName = $variable instanceof Expr\Variable ? $variable->name : null;
 
+            // variables that are assigned in the try block are unknown here
+            if (is_string($variableName) && ! $scope->hasVariableType($variableName)->yes()) {
                 return false;
             }
 
-            $type = $scope->getType($node->var);
+            $type = $scope->getType($variable);
         }
 
-        $methodName = $node->name->toString();
+        $methodName = $name->toString();
 
         if (! $type->hasMethod($methodName)->yes()) {
             return false;
