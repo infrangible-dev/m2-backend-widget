@@ -2338,9 +2338,6 @@ abstract class Grid extends Extended
      * @param Column $column
      *
      * @return void
-     * @throws LocalizedException
-     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
-     *               AbstractDb
      */
     public function filterCustomerName(AbstractCollection $collection, Column $column): void
     {
@@ -2397,9 +2394,6 @@ abstract class Grid extends Extended
      * @param Column $column
      *
      * @return void
-     * @throws LocalizedException
-     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
-     *               AbstractDb
      */
     public function filterProductName(AbstractCollection $collection, Column $column): void
     {
@@ -2454,9 +2448,6 @@ abstract class Grid extends Extended
      * @param Column $column
      *
      * @return void
-     * @throws LocalizedException
-     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
-     *               AbstractDb
      */
     public function filterProductOption(AbstractCollection $collection, Column $column): void
     {
@@ -2511,9 +2502,6 @@ abstract class Grid extends Extended
      * @param Column $column
      *
      * @return void
-     * @throws LocalizedException
-     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
-     *               AbstractDb
      */
     public function filterProductOptionValue(AbstractCollection $collection, Column $column): void
     {

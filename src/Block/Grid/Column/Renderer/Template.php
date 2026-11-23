@@ -14,7 +14,6 @@ use Magento\Backend\Block\Context;
 use Magento\Backend\Block\Widget\Grid\Column\Renderer\AbstractRenderer;
 use Magento\Email\Model\TemplateFactory;
 use Magento\Framework\DataObject;
-use Magento\Framework\Exception\LocalizedException;
 
 class Template extends AbstractRenderer
 {
@@ -43,7 +42,6 @@ class Template extends AbstractRenderer
      * @param DataObject $row
      *
      * @return string
-     * @throws LocalizedException
      */
     public function render(DataObject $row): string
     {

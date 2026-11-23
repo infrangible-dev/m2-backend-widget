@@ -20,7 +20,6 @@ use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Helper\Data;
 use Magento\Eav\Model\Config;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Validator\UniversalFactory;
 
 abstract class Tab extends Grid
@@ -94,9 +93,6 @@ abstract class Tab extends Grid
      * @param AbstractDb $collection
      *
      * @return void
-     * @throws LocalizedException
-     * @noinspection PhpDocRedundantThrowsInspection Magento declares it on Collection::addFieldToFilter(), not again in
-     *               AbstractDb
      */
     protected function followUpCollection(AbstractDb $collection): void
     {
@@ -112,7 +108,6 @@ abstract class Tab extends Grid
      * Renders the block as HTML.
      *
      * @return string
-     * @throws LocalizedException
      */
     public function toHtml(): string
     {

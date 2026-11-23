@@ -40,6 +40,9 @@
         "magento/zend-db": "~1.16.0",
         "psr/log": "~1.1.0||~2.0.0||~3.0.0"
     },
+    "require-dev": {
+        "infrangible/phpstan-magento": "~1.0.0"
+    },
     "autoload": {
         "files": [
             "src/registration.php"
