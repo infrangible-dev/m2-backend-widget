@@ -4334,7 +4334,7 @@ class Form
 
         /** @var Group $customerGroup */
         foreach ($this->customerGroupCollection as $customerGroup) {
-            $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => (string)$customerGroup->getCode()];
+            $customerGroups[] = ['value' => $customerGroup->getId(), 'label' => $customerGroup->getCode()];
         }
 
         return $customerGroups;
