@@ -1,11 +1,14 @@
 {
     "name": "infrangible/m2-backend-widget",
-    "description": "Infrangible Magento 2 Backend Widget",
+    "description": "Shared admin building blocks for Infrangible modules: data grids with selectable columns and CSV export, edit forms, tabs and special input fields.",
     "type": "magento2-module",
     "version": "4.0.5",
     "license": "MIT",
     "keywords": [
-        "Magento"
+        "Magento",
+        "Magento 2",
+        "Adobe Commerce",
+        "Admin tools"
     ],
     "homepage": "https://www.infrangible.dev/modules/backend-widget",
     "authors": [
