@@ -5,27 +5,16 @@
  * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
+
+/**
+ * Loads the values of the option selected in the source element into the target element (updateSelectOptions() is
+ * declared in product-options.js, which the same layout loads).
+ */
 function updateOptionTypesFormElement(targetElementUrl, sourceElementId, targetElementId) {
     require(['jquery'], function ($) {
-        const sourceElement = $('#' + sourceElementId);
-        const sourceElementValue = sourceElement.val();
-        $.get({
-            url: decodeURIComponent(targetElementUrl) + 'option_id/' + sourceElementValue,
-            success: function (json) {
-                if (json.success && json.success === false) {
-                    throw json.error;
-                }
-                const targetElement = $('#' + targetElementId).get(0);
-                targetElement.replaceChildren();
-                if (json.options) {
-                    $.each(json.options, function (index, attributeOption) {
-                        const option = document.createElement('option');
-                        option.value = attributeOption.value;
-                        option.text = attributeOption.label;
-                        targetElement.appendChild(option);
-                    });
-                }
-            }.bind(this)
-        });
+        updateSelectOptions(
+            decodeURIComponent(targetElementUrl) + 'option_id/' + $('#' + sourceElementId).val(),
+            targetElementId
+        );
     });
 }
