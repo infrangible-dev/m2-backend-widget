@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.6
+
+### Changed
+
+- Supports PHP 8.1 again, like Magento 2.4.6: the Adobe Commerce Marketplace requires modules to allow every PHP
+  version of the Magento versions they support.
+- The JavaScript follows the ESLint rules of the Magento coding standard, which the Marketplace checks as well;
+  the behavior is unchanged.
+- The functions of the admin forms (`updateEavAttributeFormElement()`, `updateProductOptionsFormElement()`,
+  `updateOptionTypesFormElement()`, `updateSelectOptions()`) are declared on `window` explicitly, in strict mode.
+- The icons use the admin icon font of the theme (`@icons-admin__font-name`) instead of a fixed `'Admin Icons'`; the
+  compiled CSS is the same.
+
 ## 4.0.5
 
 ### Fixed
