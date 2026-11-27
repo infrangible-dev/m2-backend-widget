@@ -51,6 +51,6 @@ class Template extends AbstractRenderer
 
         $this->templateResourceFactory->create()->load($mailTemplate, $templateId);
 
-        return $mailTemplate->getId() ? $this->escapeValue($mailTemplate->getTemplateCode()) : '';
+        return $mailTemplate->getId() ? $this->escapeValue($mailTemplate->getData('template_code')) : '';
     }
 }

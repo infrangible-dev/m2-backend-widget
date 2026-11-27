@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.7
+
+### Changed
+
+- The template column renderer reads the template code and the grid tab sets its row click callback with `getData()`
+  and `setData()` instead of magic methods.
+
 ## 4.0.6
 
 ### Changed

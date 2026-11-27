@@ -111,7 +111,8 @@ abstract class Tab extends Grid
      */
     public function toHtml(): string
     {
-        $this->setRowClickCallback(
+        $this->setData(
+            'row_click_callback',
             "function(grid, event) {
                 event.preventDefault();
                 require(['jquery'], function ($) {
